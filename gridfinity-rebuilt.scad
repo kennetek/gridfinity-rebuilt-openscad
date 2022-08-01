@@ -1,3 +1,4 @@
+// if F5 preview fails due to too many polygons or it is too slow to be usable, multiply both of these values by 10 and do an F6 render. Return back to normal for the final 3D print render. 
 $fa = 5;
 $fs = 0.25;
 
@@ -7,8 +8,9 @@ $fs = 0.25;
 gridx = 2;      // number of bases along x-axis
 gridy = 2;      // number of bases along y-axis
 gridz = 3;      // unit height along z-axis (2, 3, or 6, but can be anything)
-n_div = 2;      // number of compartments (ideally, coprime w/ gridx)
-                // set n_div to 0 for a solid bin (for custom bins)
+n_divx = 2;     // number of x compartments (ideally, coprime w/ gridx)
+n_divy = 2;     // number of y compartments (ideally, coprime w/ gridy) 
+                // set n_div values to 0 for a solid bin (for custom bins)
 
 length = 42;    // base unit (if you want to go rogue ig)
 
@@ -24,6 +26,7 @@ enable_holeslit = true; // extra cut within holes for better slicing
 // the red plane that is the top of the internal bin is d_height+h_base above z=0
 // the tab cutter object causes serious lag in the preview, I think it has something to do with cutting the same surfaces as other cutting objects, but I cannot seem to fix it, apologies
 // the magnet holes have an extra cut in them to make it easier to print without supports
+// tabs will automatically be disabled when gridz is less than 3
 
 // ===== Dimensions =====
 
@@ -60,14 +63,17 @@ d_height = (gridz-1)*7 + 2;
 r_scoop = length*gridz/12;  // scoop radius
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 
-d_width = (gridx*length-2*d_wall-(n_div-1)*d_div)/n_div; 
+d_pitchx = (gridx*length-2*d_wall-(n_divx-1)*d_div)/n_divx; 
+d_pitchy = (gridy*length-2*d_wall-(n_divy-1)*d_div)/n_divy; 
 b_notab = style_tab == 5 || gridz < 3; 
 
-// magic numbers (cutter parameters)
-v_tab = [r_f2, r_f3, d_height-h_bot-(d_tabh-d_wall)*tan(a_tab), d_tabh-d_wall-r_f3/tan(a_tab/2), d_height-h_bot-r_f3, 179, a_tab, r_f2];
-v_edg = [r_f2, 0, d_height-h_bot-d_wall2, d_wall2-d_wall, d_height-h_bot-d_wall, 90, 45];
-v_slo = [r_scoop, 0, 2*d_height, 0, 0, 30, 10];
+d_planey = d_pitchy/2 - d_div - d_tabh - 0.1;
 
+// magic numbers (cutter parameters)
+v_tab = [r_f2, r_f3, d_height-h_bot-(d_tabh-d_wall)*tan(a_tab), d_tabh-d_wall-r_f3/tan(a_tab/2), d_height-h_bot-r_f3, 179, a_tab, -d_planey];
+v_edg = [r_f2, 0, d_height-h_bot-d_wall2, d_wall2-d_wall, d_height-h_bot-d_wall, 90, 45, -d_planey];
+v_slo = [r_scoop, 0, 2*d_height, 0, 0, 30, 10, d_planey];
+v_clr = [r_f2, 0, 2*d_height-h_bot-d_wall2, d_wall2-d_wall, 2*d_height-h_bot-d_wall, 90, 45, -d_planey];
 
 
 gridfinity();
@@ -197,7 +203,7 @@ module part_line(t=[0,0], rot, d, width, s = 0) {
     profile_cutter(0,width,s);
 }
 
-module cutter_main(arr, width, offset = 0) {
+module cutter_main(arr, width, off_back = 0, off_front = 0) {
     
     r1 = arr[0]; 
     r2 = arr[1];
@@ -207,68 +213,81 @@ module cutter_main(arr, width, offset = 0) {
     p_x4 = arr[3];
     p_y4 = arr[4];
     
-    d_width = width;
-    d_extent = gridy*length/2 - d_wall + 0.1;
+    d_pitchx = width;
+    d_extent = (gridy*length-2*d_wall-(n_divy-1)*d_div)/(2*n_divy)+0.1+off_front;
+
+    assert(p_x4 < d_extent, "IMPOSSIBLE GEOMETRY: COMPARTMENT Y LENGTH IS TOO SMALL, TRY DISABLING TABS. OTHERWISE, DECREASE NUMBER OF Y COMPARTMENTS OR INCREASE Y BASE COUNT.");
+    assert(r1 < d_extent, "IMPOSSIBLE GEOMETRY: COMPARTMENT Y LENGTH IS TOO SMALL, TRY DISABLING SCOOP. OTHERWISE, DECREASE NUMBER OF Y COMPARTMENTS OR INCREASE Y BASE COUNT.");
     
     l_angle = ([p_x4-r1,p_y4-p_y3] * [[cos(a_slo), -sin(a_slo)], [sin(a_slo), cos(a_slo)]])[0];
     
-    translate([0,gridy*length/2-d_wall,h_base+h_bot])
+    difference() {
+    translate([0,d_extent-0.1-off_front,h_base+h_bot])
     rotate([90,0,-90])
     union() 
     copy_mirror([0,0,1])
-    translate([offset,0,-0.1]) {
+    translate([off_back,0,-0.1]) {
         // outside of hull because of its concave geometry
         if (p_x4 != 0 || p_y4 != 0) difference() 
             { 
             union() {
-                render() part_bend([p_x4, p_y4], a_slo+90, a_end-a_slo, -r2, d_width, 2*r_f2);
-                part_line([p_x4, p_y4]+(r_f2+r2)*ta(a_end-90)-0.1*ta(a_end), a_end+90, d_extent, d_width, 2*r_f2);
-                part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo)+l_angle*ta(a_slo), a_slo+90, l_angle, d_width, 2*r_f2);
+                render() part_bend([p_x4, p_y4], a_slo+90, a_end-a_slo, -r2, d_pitchx, 2*r_f2);
+                part_line([p_x4, p_y4]+(r_f2+r2)*ta(a_end-90)-0.1*ta(a_end), a_end+90, d_extent, d_pitchx, 2*r_f2);
+                part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo)+l_angle*ta(a_slo), a_slo+90, l_angle, d_pitchx, 2*r_f2);
             }
-            copy_mirror([0,1,0]) translate([0,-0.1,-0.1]) cube([d_extent+0.1,r_f2,d_width]);
+            copy_mirror([0,1,0]) translate([0,-0.1,-0.1]) cube([d_extent+0.1,r_f2,d_pitchx]);
         }
         hull() 
         {
             // left bottom, angle, and scoop fillets
-            part_bend([r1, r1], -180, 90, r1, d_width);
-            part_bend([r1, p_y3], 90+a_slo, 90-a_slo, r1, d_width);
+            part_bend([r1, r1], -180, 90, r1, d_pitchx);
+            part_bend([r1, p_y3], 90+a_slo, 90-a_slo, r1, d_pitchx);
             
             // bottom, left, right, angle (thin), angle (thicc)
-            part_line([d_extent, r_f2], -90, d_extent - r1, d_width);
-            part_line([r_f2, r1], 180, p_y3 - r1, d_width);
-            part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo), a_slo+90, (d_extent-r1+(r1-r_f2)*cos(a_slo))/cos(a_slo), d_width);
+            part_line([d_extent, r_f2], -90, d_extent - r1, d_pitchx);
+            part_line([r_f2, r1], 180, p_y3 - r1, d_pitchx);
+            part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo), a_slo+90, (d_extent-r1+(r1-r_f2)*cos(a_slo))/cos(a_slo), d_pitchx);
             
         }
     }
+    mirror([0,1,0]) translate([-gridx*length/2, 0.1+off_front, h_base]) cube([2*gridx*length, 2*gridy*length, 10*d_height]); 
+    }
 }
 
-module cutter_tab(s = 1) {
-    d_divw = (gridx*length-2*d_wall-(n_div-1)*d_div)/n_div; 
-    if ((d_divw > d_tabw && s != 0 && d_divw - d_tabw > 4*r_f2 ) || s == 5) {
-        d_w = (d_divw - (s==5?0:length)) / (s==3?2:1);
+module cutter_tab(s = 1, values=v_edg) {
+    if ((d_pitchx > d_tabw && s != 0 && d_pitchx - d_tabw > 4*r_f2 ) || s == 5) {
+        d_w = (d_pitchx - (s==5?0:length)) / (s==3?2:1);
         mirror([s==2?1:0, 0, 0])
         copy_mirror([s==3?1:0, 0, 0])
-        translate([(d_divw-d_w)/2,0,0])
-        cutter_main(v_edg, d_w);
+        translate([(d_pitchx-d_w)/2,0,0])
+        cutter_main(values, d_w, 0, -d_planey);
     }
 }
 
 module block_cutter() {
-    if (n_div > 0) {
-        pattern_linear(n_div, 1, d_width + d_div) 
-        cutter_main(b_notab ? v_edg : v_tab, d_width);
-        if (!b_notab) {
-            for (i = [1:n_div]) 
-            translate([((i-1)-(n_div-1)/2)*(d_width + d_div),0,0])
-            cutter_tab(style_tab==1?(i==1?4:(i==n_div?2:3)):style_tab);
-        }
+    if (n_divx > 0) {
+        for (j = [1:n_divy])
+        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
+        for (i = [1:n_divx]) 
+        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
+        cutter_main(b_notab ? j==n_divy ? v_edg : v_clr : v_tab, d_pitchx, 0, -d_planey);
+        
+        if (!b_notab)
+        for (j = [1:n_divy])
+        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
+        for (i = [1:n_divx]) 
+        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
+        cutter_tab(style_tab==1?(i==1?4:(i==n_divx?2:3)):style_tab, j==n_divy ? v_edg : v_clr);
+        
+        for (j = [1:n_divy])
+        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
+        for (i = [1:n_divx]) 
+        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
         mirror([0,1,0])
-        for (i = [1:n_div]) 
-        translate(((i-1)-(n_div-1)/2)*(d_width + d_div)*[1,0,0])
-        cutter_main(enable_scoop?v_slo:v_edg, d_width, enable_scoop?d_wall2-d_wall : 0);
+        cutter_main(enable_scoop?v_slo:j==1?v_edg:v_clr, d_pitchx, enable_scoop?j==1?d_wall2-d_wall:0:0, d_planey);
+        
     }
 }
-
 
 // ==== Utilities =====
 
