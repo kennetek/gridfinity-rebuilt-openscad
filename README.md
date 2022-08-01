@@ -4,7 +4,7 @@ A ground-up rebuild of the stock gridfinity bins in OpenSCAD. Started because of
 
 Things this script can do: 
 - any size of bin (width, length, height)
-- any number of compartments
+- any number of compartments (along BOTH x and y axis)
 - togglable scoop
 - togglable holes
 - supportless printing hole structures
