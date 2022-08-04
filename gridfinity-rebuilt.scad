@@ -1,96 +1,98 @@
-// if F5 preview fails due to too many polygons or it is too slow to be usable, multiply both of these values by 10 and do an F6 render. Return back to normal for the final 3D print render. 
-$fa = 5;
+$fa = 8;
 $fs = 0.25;
 
+// number of bases along x-axis
+gridx = 5; 
 
-// ===== Parameters =====
+// number of bases along y-axis     
+gridy = 3;      
 
-gridx = 2;      // number of bases along x-axis
-gridy = 2;      // number of bases along y-axis
-gridz = 3;      // unit height along z-axis (2, 3, or 6, but can be anything)
-n_divx = 2;     // number of x compartments (ideally, coprime w/ gridx)
-n_divy = 2;     // number of y compartments (ideally, coprime w/ gridy) 
-                // set n_div values to 0 for a solid bin (for custom bins)
+// unit height along z-axis (2, 3, or 6, but can be any)
+gridz = 6;
 
-length = 42;    // base unit (if you want to go rogue ig)
+// number of x compartments (ideally, coprime w/ gridx)   
+n_divx = 5;     
 
-// type of tab style. alignment only matters if tabs are large enough
-// 0:full, 1:automatic, 2:right, 3:center, 4:left, 5:none
-style_tab = 0; 
+// number of y compartments (ideally, coprime w/ gridy) 
+n_divy = 2;     
+// set n_div values to 0 for a solid bin (for custom bins)                
 
-enable_scoop    = true; // the rounded edge that allows for easy removal
-enable_holes    = true; // holes on the base for magnet / screw
-enable_holeslit = true; // extra cut within holes for better slicing
+// base unit (if you want to go rogue ig)
+length = 42;    
+
+// type of tab. alignment only matters if tabs are large enough
+// tab style. 0:full, 1:automatic, 2:left, 3:center, 4:right, 5:none
+style_tab = 1; 
+
+// the rounded edge that allows for easy removal
+enable_scoop    = true; 
+
+// holes on the base for magnet / screw
+enable_holes    = true; 
+
+// extra cut within holes for better slicing
+enable_hole_slit = true; 
 
 // ===== Info =====
-// the red plane that is the top of the internal bin is d_height+h_base above z=0
-// the tab cutter object causes serious lag in the preview, I think it has something to do with cutting the same surfaces as other cutting objects, but I cannot seem to fix it, apologies
+
+// rendering will be better for analyzing the model if fast-csg is enabled. This feature is only available in the nightly build and not the official release of OpenSCAD, but if makes rendering only take a couple seconds. Enable it in Edit > Preferences > Features > fast-csg
+// the plane that is the top of the internal bin solid is d_height+h_base above z=0
 // the magnet holes have an extra cut in them to make it easier to print without supports
-// tabs will automatically be disabled when gridz is less than 3
+// tabs will automatically be disabled when gridz is less than 3, as the tabs take up too much space
 
 // ===== Dimensions =====
 
-// base
 h_base = 5;     // height of the base
 r_base = 4;     // outside rounded radius of bin
 r_c1 = 0.8;     // lower base chamfer "radius"
 r_c2 = 2.4;     // upper base chamfer "radius"
 h_bot = 2.2;    // bottom thiccness of bin
+r_fo1 = 7.5;    // outside radii
+r_fo2 = 3.2;
+r_fo3 = 1.6; 
 
-// base holes
 r_hole1 = 1.5;  // screw hole radius
 r_hole2 = 3.25; // magnet hole radius
 d_hole = 26;    // center-to-center distance between holes
 h_hole = 2.4;   // magnet hole depth
 
-// fillets
 r_f1 = 0.6;     // top edge fillet radius
-r_f2 = 2.8;     // internal fillet radius
+r_f2 = 1.5;     // internal fillet radius
 r_f3 = 0.6;     // lip fillet radius
 
-// misc
 d_div = 1.2;    // width of divider between compartments
 d_wall = 0.95;   // minimum wall thickness
 d_clear = 0.25; // tolerance fit factor
 
-// tabs
 d_tabh = 15.85;   // height of tab (yaxis, measured from inner wall)
 d_tabw = length; // maximum width of tab
-a_tab = 32; 
+a_tab = 36; 
 
-// calculations
 d_height = (gridz-1)*7 + 2;  
-r_scoop = length*gridz/12;  // scoop radius
+r_scoop = enable_scoop ? length*gridz/12 - r_f2 : 0;  // scoop radius
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
-
-d_pitchx = (gridx*length-2*d_wall-(n_divx-1)*d_div)/n_divx; 
-d_pitchy = (gridy*length-2*d_wall-(n_divy-1)*d_div)/n_divy; 
-b_notab = style_tab == 5 || gridz < 3; 
-
-d_planey = d_pitchy/2 - d_div - d_tabh - 0.1;
-
-// magic numbers (cutter parameters)
-v_tab = [r_f2, r_f3, d_height-h_bot-(d_tabh-d_wall)*tan(a_tab), d_tabh-d_wall-r_f3/tan(a_tab/2), d_height-h_bot-r_f3, 179, a_tab, -d_planey];
-v_edg = [r_f2, 0, d_height-h_bot-d_wall2, d_wall2-d_wall, d_height-h_bot-d_wall, 90, 45, -d_planey];
-v_slo = [r_scoop, 0, 2*d_height, 0, 0, 30, 10, d_planey];
-v_clr = [r_f2, 0, 2*d_height-h_bot-d_wall2, d_wall2-d_wall, 2*d_height-h_bot-d_wall, 90, 45, -d_planey];
+d_pitchx = (gridx*length-0.5-2*d_wall-(n_divx-1)*d_div)/n_divx; 
+d_pitchy = (gridy*length-0.5-2*d_wall-(n_divy-1)*d_div)/n_divy; 
 
 
+
+
+color("tomato")
 gridfinity();
-
 
 // ===== Modules =====
 
 module gridfinity() {
     difference() {
         // solid bin
-        block_bottom(d_height);
+        color("firebrick") block_bottom(d_height);
         
         // subtraction blocks
-        block_cutter();
+        color("sienna") block_cutter();
     }
-    block_base();
-    block_wall();
+    
+    color("orange") block_base();
+    color("royalblue") block_wall();
 }
 
 module profile_base() {
@@ -105,20 +107,37 @@ module profile_base() {
 }
 
 module block_base() {
-    color("orange")
+    translate([0,0,h_base])
+    rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
     pattern_linear(gridx, gridy, length) 
-    render() union() {
-        sweep_rounded(length-2*r_base,length-2*r_base) profile_base();
-        pattern_circular(4) difference() {
-            linear_extrude(h_base) square(length/2-r_base);
-            if (enable_holes)
-            translate([d_hole/2, d_hole/2, 0]) union() {
-                cylinder(h = 3*h_base, r = r_hole1, center=true);
-                cylinder(h = 2*h_hole, r = r_hole2, center=true);
-                if (enable_holeslit) intersection() {
-                    cylinder(h = 2*(h_hole+0.2), r = r_hole2, center=true);
-                    cube([r_hole1*2,r_hole2*3,2*(h_hole+0.4)], center=true);
+    render()
+    difference() {
+        translate([0,0,h_base])
+        mirror([0,0,1])
+        union() {
+            hull() {
+                rounded_square(length-0.5-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                rounded_square(length-0.5-2*r_c2, h_base-r_c1, r_fo2/2);
+            }
+            hull() {
+                rounded_square(length-0.5-2*r_c2, r_c2, r_fo2/2);
+                mirror([0,0,1])
+                rounded_square(length-0.5, h_bot/2, r_fo1/2);
+            }
+        }
+        
+        if (enable_holes)
+        pattern_circular(4) 
+        translate([d_hole/2, d_hole/2, 0]) {
+            union() {
+                difference() {
+                    cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
+                    if (enable_hole_slit)
+                    copy_mirror([0,1,0])
+                    translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
+                    cube([r_hole2*3,r_hole2*3, 0.4]);
                 }
+                cylinder(h = 3*h_base, r = r_hole1, center=true);
             }
         }
     }
@@ -129,15 +148,17 @@ module profile_wall_sub() {
         polygon([
             [0,0],
             [d_wall/2,0],
-            [d_wall/2,d_height-d_wall2-d_wall/2],
-            [d_wall2,d_height-d_wall],
+            [d_wall/2,d_height-1.2-d_wall2+d_wall/2],
+            [d_wall2,d_height-1.2],
             [d_wall2,d_height+h_base],
             [0,d_height+h_base]
         ]);
+        color("red")
         offset(delta = 0.25) 
         translate([r_base,d_height,0]) 
         mirror([1,0,0]) 
         profile_base();
+        square([d_wall,0.1]);
     }
 }
 
@@ -157,145 +178,171 @@ module profile_wall() {
 }
 
 module block_wall() {
-    color("royalblue")
     translate([0,0,h_base]) 
-    sweep_rounded(gridx*length-2*r_base, gridy*length-2*r_base)
+    sweep_rounded(gridx*length-2*r_base-0.5-0.001, gridy*length-2*r_base-0.5-0.001)
     profile_wall();
 }
 
 module block_bottom( h = 2.2 ) {
-    color("firebrick")
-    translate([0,0,h_base])
-    hull()
-    sweep_rounded(gridx*length-2*r_base, gridy*length-2*r_base)
-    translate([r_base-0.1,0,0])
-    mirror([1,0,0])
-    square([d_wall, d_height]);
-}
-
-module profile_cutter(r = 0, width = 1, stretch = 0) {
-    extent = width/2-r_f2+0.1;
-    translate([r-r_f2,0,0]) 
-    union() {
-        difference() {
-            union() {
-                translate([0,extent,0]) circle(r=r_f2);
-                square([r_f2,extent]);
-            }
-            translate([-r_f2,0,0]) square([r_f2,extent+r_f2]);
-        }
-        mirror([1,0,0]) square([stretch,extent+r_f2]);
-    }
-}
-
-module part_bend(t=[0,0], rot, ang, rad, width, s = 0) {
-    translate([t.x,t.y,0]) 
-    rotate([0,0,rot]) 
-    rotate_extrude(angle = ang, convexity = 4) 
-    profile_cutter(rad,width,s);
-}
-
-module part_line(t=[0,0], rot, d, width, s = 0) {
-    translate([t.x,t.y,0])
-    rotate([90,0,rot])
-    translate([r_f2,0,0])
-    linear_extrude(d) 
-    profile_cutter(0,width,s);
-}
-
-module cutter_main(arr, width, off_back = 0, off_front = 0) {
-    
-    r1 = arr[0]; 
-    r2 = arr[1];
-    a_end = arr[5];
-    a_slo = arr[6];
-    p_y3 = arr[2] - r1*tan((90-a_slo)/2);
-    p_x4 = arr[3];
-    p_y4 = arr[4];
-    
-    d_pitchx = width;
-    d_extent = (gridy*length-2*d_wall-(n_divy-1)*d_div)/(2*n_divy)+0.1+off_front;
-
-    assert(p_x4 < d_extent, "IMPOSSIBLE GEOMETRY: COMPARTMENT Y LENGTH IS TOO SMALL, TRY DISABLING TABS. OTHERWISE, DECREASE NUMBER OF Y COMPARTMENTS OR INCREASE Y BASE COUNT.");
-    assert(r1 < d_extent, "IMPOSSIBLE GEOMETRY: COMPARTMENT Y LENGTH IS TOO SMALL, TRY DISABLING SCOOP. OTHERWISE, DECREASE NUMBER OF Y COMPARTMENTS OR INCREASE Y BASE COUNT.");
-    
-    l_angle = ([p_x4-r1,p_y4-p_y3] * [[cos(a_slo), -sin(a_slo)], [sin(a_slo), cos(a_slo)]])[0];
-    
-    difference() {
-    translate([0,d_extent-0.1-off_front,h_base+h_bot])
-    rotate([90,0,-90])
-    union() 
-    copy_mirror([0,0,1])
-    translate([off_back,0,-0.1]) {
-        // outside of hull because of its concave geometry
-        if (p_x4 != 0 || p_y4 != 0) difference() 
-            { 
-            union() {
-                render() part_bend([p_x4, p_y4], a_slo+90, a_end-a_slo, -r2, d_pitchx, 2*r_f2);
-                part_line([p_x4, p_y4]+(r_f2+r2)*ta(a_end-90)-0.1*ta(a_end), a_end+90, d_extent, d_pitchx, 2*r_f2);
-                part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo)+l_angle*ta(a_slo), a_slo+90, l_angle, d_pitchx, 2*r_f2);
-            }
-            copy_mirror([0,1,0]) translate([0,-0.1,-0.1]) cube([d_extent+0.1,r_f2,d_pitchx]);
-        }
-        hull() 
-        {
-            // left bottom, angle, and scoop fillets
-            part_bend([r1, r1], -180, 90, r1, d_pitchx);
-            part_bend([r1, p_y3], 90+a_slo, 90-a_slo, r1, d_pitchx);
-            
-            // bottom, left, right, angle (thin), angle (thicc)
-            part_line([d_extent, r_f2], -90, d_extent - r1, d_pitchx);
-            part_line([r_f2, r1], 180, p_y3 - r1, d_pitchx);
-            part_line([r1, p_y3]+(r1-r_f2)*-ta(-a_slo), a_slo+90, (d_extent-r1+(r1-r_f2)*cos(a_slo))/cos(a_slo), d_pitchx);
-            
-        }
-    }
-    mirror([0,1,0]) translate([-gridx*length/2, 0.1+off_front, h_base]) cube([2*gridx*length, 2*gridy*length, 10*d_height]); 
-    }
-}
-
-module cutter_tab(s = 1, values=v_edg) {
-    if ((d_pitchx > d_tabw && s != 0 && d_pitchx - d_tabw > 4*r_f2 ) || s == 5) {
-        d_w = (d_pitchx - (s==5?0:length)) / (s==3?2:1);
-        mirror([s==2?1:0, 0, 0])
-        copy_mirror([s==3?1:0, 0, 0])
-        translate([(d_pitchx-d_w)/2,0,0])
-        cutter_main(values, d_w, 0, -d_planey);
-    }
+    translate([0,0,h_base+0.1])
+    rounded_rectangle(gridx*length-0.5-d_wall/4, gridy*length-0.5-d_wall/4, d_height-0.1, r_base+0.01);
 }
 
 module block_cutter() {
-    if (n_divx > 0) {
-        for (j = [1:n_divy])
-        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
-        for (i = [1:n_divx]) 
-        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
-        cutter_main(b_notab ? j==n_divy ? v_edg : v_clr : v_tab, d_pitchx, 0, -d_planey);
+    for (j = [1:n_divy])
+    translate(-(j-1)*(d_pitchy + d_div)*[0,1,0])
+    for (i = [1:n_divx]) 
+    translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
+    translate([0,gridy*length/2-0.25-d_wall,h_base+h_bot])
+    rotate([90,0,-90])
+    cutter(i,j);
+}
+
+module cutter(i,j) {
+    
+    v_len_tab = d_tabh;
+    v_len_lip = d_wall2-d_wall+1.2;
+    v_cut_tab = d_tabh - (2*r_f1)/tan(a_tab); 
+    v_cut_lip = d_wall2-d_wall;
+    v_ang_tab = a_tab;
+    v_ang_lip = 45; 
+    
+    enable_tab = style_tab != 5;
+    height = d_height;
+    extent = (enable_scoop && j==n_divy ? d_wall2-d_wall : 0); 
+    tab = ((gridz < 3 || style_tab == 5) && j == 1) ? v_len_lip : v_len_tab; 
+    ang = ((gridz < 3 || style_tab == 5) && j == 1) ? v_ang_lip : v_ang_tab;
+    cut = ((gridz < 3 || style_tab == 5) && j == 1) ? v_cut_lip : v_cut_tab;
+    style = (style_tab > 1 && style_tab < 5) ? style_tab-3 : (i == 1 ? -1 : i == n_divx ? 1 : 0);
+    
+    if (gridz >= 3 && d_pitchx - d_tabw > 4*r_f2) {
+        if (style_tab != 0 && style_tab != 5 && j == 1)
+        fillet_cutter(3,"bisque")
+        transform_tab(style)
+        translate([d_wall2-d_wall,0]) 
+        profile_cutter(height-h_bot, d_pitchy/2);
+
         
-        if (!b_notab)
-        for (j = [1:n_divy])
-        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
-        for (i = [1:n_divx]) 
-        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
-        cutter_tab(style_tab==1?(i==1?4:(i==n_divx?2:3)):style_tab, j==n_divy ? v_edg : v_clr);
-        
-        for (j = [1:n_divy])
-        translate(((j-1)-(n_divy-1)/2)*(d_pitchy + d_div)*[0,1,0])
-        for (i = [1:n_divx]) 
-        translate(((i-1)-(n_divx-1)/2)*(d_pitchx + d_div)*[1,0,0])
-        mirror([0,1,0])
-        cutter_main(enable_scoop?v_slo:j==1?v_edg:v_clr, d_pitchx, enable_scoop?j==1?d_wall2-d_wall:0:0, d_planey);
-        
+        if (style_tab != 0 && style_tab != 5)
+        fillet_cutter(2,"indigo")
+        transform_tab(style)
+        difference() {
+            intersection() {
+                profile_cutter(height-h_bot, d_pitchy-extent);
+                profile_cutter_tab(height-h_bot, v_len_tab, v_ang_tab);
+            }
+            if (j==1) profile_cutter_tab(height-h_bot, v_len_lip, 45);
+        } 
     }
+    
+    if (!(style_tab == 5 && j != 1))
+    fillet_cutter(1,"seagreen")
+    transform_main()
+    translate([cut,0]) 
+    profile_cutter(height-h_bot,d_pitchy/2);
+    
+    fillet_cutter(0,"hotpink")
+    transform_main()
+    difference() {
+        profile_cutter(height-h_bot, d_pitchy-extent);
+        
+        if (!((gridz < 3 || style_tab == 5) && j != 1))
+        profile_cutter_tab(height-h_bot, tab, ang);
+        
+        if (!enable_scoop && j == n_divy)
+        translate([d_pitchy-extent,0,0])
+        mirror([1,0,0])
+        profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+    }
+    
+    if (!enable_scoop && j == n_divy) {
+        fillet_cutter(5,"darkslategray")
+        translate([d_pitchy-(d_wall2-d_wall+2*r_f2)-v_cut_lip,0,0])
+        transform_main()
+        profile_cutter(height-h_bot,d_wall2-d_wall+2*r_f2);
+    }
+}
+
+module transform_main() {
+    translate([0,0,-(d_pitchx-2*r_f2)/2])
+    linear_extrude(d_pitchx-2*r_f2)
+    children();
+}
+
+module transform_tab(type) {
+    mirror([0,0,type==1?1:0])
+    copy_mirror([0,0,-(abs(type)-1)])
+    translate([0,0,-d_pitchx/2])
+    translate([0,0,r_f2])
+    linear_extrude((d_pitchx-length)/(1-(abs(type)-1))-2*r_f2)
+    children();
+}
+
+module fillet_cutter(t = 0, c = "goldenrod") {
+    color(c)
+    minkowski() {
+        children();
+        sphere(r = r_f2-t/1000);
+    }
+}
+
+module profile_cutter(h, length) {
+    translate([r_f2,r_f2])
+    hull() {
+        if (length-r_scoop-2*r_f2 > 0)
+            square(0.1);
+        if (r_scoop < h) {
+            translate([length-2*r_f2,h-r_f2/2]) 
+            mirror([1,1]) 
+            square(0.1);
+            
+            translate([0,h-r_f2/2]) 
+            mirror([0,1]) 
+            square(0.1);
+        }
+        difference() {
+            translate([length-r_scoop-2*r_f2, r_scoop]) 
+            if (r_scoop != 0) {
+                intersection() {
+                    circle(r_scoop);
+                    mirror([0,1]) square(2*r_scoop);
+                }
+            } else mirror([1,0]) square(0.1);
+            translate([length-r_scoop-2*r_f2,-1]) 
+            square([-(length-r_scoop-2*r_f2),2*h]);
+            
+            translate([0,h]) 
+            square([2*length,r_scoop]);
+        }
+    }
+}
+
+module profile_cutter_tab(h, tab, ang) {
+    if (tab > 0)
+        color("blue")
+        offset(delta = r_f2)
+        polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
+    
 }
 
 // ==== Utilities =====
 
-ta = function (a) [cos(a), sin(a)];
+module rounded_rectangle(length, width, height, rad) {
+    linear_extrude(height)
+    offset(rad) 
+    offset(-rad) 
+    square([length,width], center = true);
+}
+
+module rounded_square(length, height, rad) {
+    rounded_rectangle(length, length, height, rad);
+}
 
 module copy_mirror(vec=[0,1,0]) {
     children();
-    mirror(vec) children();
+    if (vec != [0,0,0]) 
+    mirror(vec) 
+    children();
 } 
 
 module pattern_linear(x = 1, y = 1, spacing = 0) {
