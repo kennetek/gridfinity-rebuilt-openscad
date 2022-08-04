@@ -2,19 +2,19 @@ $fa = 8;
 $fs = 0.25;
 
 // number of bases along x-axis
-gridx = 5; 
+gridx = 2; 
 
 // number of bases along y-axis     
-gridy = 3;      
+gridy = 2;      
 
 // unit height along z-axis (2, 3, or 6, but can be any)
 gridz = 6;
 
 // number of x compartments (ideally, coprime w/ gridx)   
-n_divx = 5;     
+n_divx = 2;     
 
 // number of y compartments (ideally, coprime w/ gridy) 
-n_divy = 2;     
+n_divy = 1;     
 // set n_div values to 0 for a solid bin (for custom bins)                
 
 // base unit (if you want to go rogue ig)
@@ -22,7 +22,7 @@ length = 42;
 
 // type of tab. alignment only matters if tabs are large enough
 // tab style. 0:full, 1:automatic, 2:left, 3:center, 4:right, 5:none
-style_tab = 1; 
+style_tab = 0; 
 
 // the rounded edge that allows for easy removal
 enable_scoop    = true; 
@@ -57,7 +57,7 @@ d_hole = 26;    // center-to-center distance between holes
 h_hole = 2.4;   // magnet hole depth
 
 r_f1 = 0.6;     // top edge fillet radius
-r_f2 = 1.5;     // internal fillet radius
+r_f2 = 2.8;     // internal fillet radius
 r_f3 = 0.6;     // lip fillet radius
 
 d_div = 1.2;    // width of divider between compartments
