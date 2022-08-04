@@ -18,6 +18,12 @@ A ground-up port (with a few extra features) of the stock gridfinity bins in Ope
 - togglable tabs, split tabs, and tab alignment
 - togglable holes (with togglable supportless printing hole structures)
 
+[<img src="./images/slicer_holes.png" height="200">]()
+[<img src="./images/slicer_holes_top.png" height="200">]()
+
+The printable holes allow your slicer to bridge the gap (using the technique shown [here](https://www.youtube.com/watch?v=W8FbHTcB05w)) so that supports are not needed.
+
+
 ## Recomendations
 For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the [development snapshots](https://openscad.org/downloads.html). To enable the feature, go to Edit > Preferences > Features > fast-csg. On my computer, this sped up rendering from 10 minutes down to a couple of seconds, even for comically large bins.  
 
