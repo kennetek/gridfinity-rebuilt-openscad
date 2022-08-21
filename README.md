@@ -44,7 +44,7 @@ Parameter | Range | Description
 `enable_lip` | boolean | toggles the lip at the top of the bin that allows for bin stacking
 
 ## Modules  
-Run these functions inside the *Commands* section of *gridfinity.scad*.
+Run these functions inside the *Commands* section of *gridfinity-rebuilt.scad*.
 
 ### `gridfinityEqual(n_divx, n_divy, style_tab, enable_scoop)`  
 Generates the "traditional" bins. It is a utility function that creates evenly distributed compartments. 
