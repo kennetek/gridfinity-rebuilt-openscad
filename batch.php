@@ -6,7 +6,7 @@ for ($h=3;$h<=12;$h+=3) {
             $outfile = "./batchout/gridfinity-lite-{$w}x{$d}x{$h}.stl";
             if (!file_exists($outfile)) {
                 echo $outfile . "\n";
-                exec("openscad gridfinity-rebuilt.scad -o {$outfile} -Dgridz={$w} -Dgridy={$d} -Dgridz={$h}");
+                exec("openscad gridfinity-rebuilt.scad -o {$outfile} -Dgridx={$w} -Dgridy={$d} -Dgridz={$h}");
             }
         }
     }
