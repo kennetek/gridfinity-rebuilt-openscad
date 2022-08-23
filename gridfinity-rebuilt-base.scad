@@ -119,6 +119,30 @@ module block_base() {
     }
 }
 
+module block_base_cutout(){
+    squidge=-2;
+    translate([0,0,h_base-3])
+    //rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
+    pattern_linear(gridx, gridy, length) 
+    
+    render()
+        difference() {
+            translate([0,0,h_base])
+            mirror([0,0,1])
+            union() {
+                hull() {
+                    rounded_square(squidge+length-0.5-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                    rounded_square(squidge+length-0.5-2*r_c2, h_base-r_c1, r_fo2/2);
+                }
+                hull() {
+                    rounded_square(squidge+length-0.5-2*r_c2, r_c2, r_fo2/2);
+                    mirror([0,0,1])
+                    rounded_square(squidge+length-0.5, h_bot/2, r_fo1/2);
+                }
+            }
+        }
+}
+
 module profile_wall_sub() {
     difference() {
         polygon([

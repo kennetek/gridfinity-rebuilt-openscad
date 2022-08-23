@@ -26,12 +26,12 @@ $fs = 0.25;
 // ===== General Settings ===== //
 
 gridx = 1;  // number of bases along x-axis   
-gridy = 1;  // number of bases along y-axis  
-gridz = 6;  // bin height. See bin height information and "gridz_define" below. 
+gridy = 4;  // number of bases along y-axis  
+gridz = 9;  // bin height. See bin height information and "gridz_define" below. 
 length = 42;// base unit (if you want to go rogue ig)
 
-enable_holes = true; // toggle holes on the base for magnet/screw
-enable_hole_slit = true; // extra cut within holes for better slicing
+enable_holes = false; // toggle holes on the base for magnet/screw
+enable_hole_slit = false; // extra cut within holes for better slicing
 enable_zsnap = false; // round up the bin height to match the closest 7mm unit
 enable_lip = true; // toggle the lip on the top of the bin that allows stacking
 
@@ -44,9 +44,11 @@ gridz_define = 0;
 // ===== Commands ===== //
 
 color("tomato")
-gridfinityEqual(n_divx = 2, n_divy = 1, style_tab = 1, enable_scoop = true);
+difference() {
+gridfinityEqual(n_divx = 1, n_divy = 1, style_tab = 5, enable_scoop = false);
+block_base_cutout();
 
-
+}
 
 // ===== Reference Dimensions ===== //
 
