@@ -120,8 +120,8 @@ module block_base() {
 }
 
 module block_base_cutout(){
-    squidge=-2;
-    translate([0,0,h_base-3])
+    squidge=-2.5;
+    translate([0,0,h_base-2.5])
     //rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
     pattern_linear(gridx, gridy, length) 
     
@@ -131,8 +131,8 @@ module block_base_cutout(){
             mirror([0,0,1])
             union() {
                 hull() {
-                    rounded_square(squidge+length-0.5-2*r_c2-2*r_c1, h_base, r_fo3/2);
-                    rounded_square(squidge+length-0.5-2*r_c2, h_base-r_c1, r_fo2/2);
+                    rounded_square(squidge+length-0.5-2*r_c2-2*r_c1, h_base+0.5, r_fo3/2);
+                    rounded_square(squidge+length-0.5-2*r_c2, h_base-r_c1+0.5, r_fo2/2);
                 }
                 hull() {
                     rounded_square(squidge+length-0.5-2*r_c2, r_c2, r_fo2/2);
@@ -228,7 +228,7 @@ module block_cutter(x,y,w,h,t,s) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
     
-    translate([0,ylen/2,h_base+h_bot])
+    translate([0,ylen/2,h_base+h_bot+0.8])
     rotate([90,0,-90]) {
     
     if (!zsmall && xlen - d_tabw > 4*r_f2 && t != 0) {
