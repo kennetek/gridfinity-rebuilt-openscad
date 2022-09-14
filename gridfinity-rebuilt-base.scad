@@ -85,35 +85,42 @@ module profile_base() {
 module block_base() {
     translate([0,0,h_base])
     rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
-    pattern_linear(gridx, gridy, length) 
-    render()
-    difference() {
-        translate([0,0,h_base])
-        mirror([0,0,1])
-        union() {
-            hull() {
-                rounded_square(length-0.5-2*r_c2-2*r_c1, h_base, r_fo3/2);
-                rounded_square(length-0.5-2*r_c2, h_base-r_c1, r_fo2/2);
-            }
-            hull() {
-                rounded_square(length-0.5-2*r_c2, r_c2, r_fo2/2);
-                mirror([0,0,1])
-                rounded_square(length-0.5, h_bot/2, r_fo1/2);
-            }
-        }
-        
-        if (enable_holes)
-        pattern_circular(4) 
-        translate([d_hole/2, d_hole/2, 0]) {
+    
+    
+    // translate([0,0,h_base])
+    intersection(){
+        rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_base+h_bot/2, r_fo1/2+0.001);
+
+        pattern_linear(gridx, gridy, length) 
+        render()
+        difference() {
+            translate([0,0,h_base])
+            mirror([0,0,1])
             union() {
-                difference() {
-                    cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
-                    if (enable_hole_slit)
-                    copy_mirror([0,1,0])
-                    translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
-                    cube([r_hole2*3,r_hole2*3, 0.4]);
+                hull() {
+                    rounded_square(length-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                    rounded_square(length-2*r_c2, h_base-r_c1, r_fo2/2);
                 }
-                cylinder(h = 3*h_base, r = r_hole1, center=true);
+                hull() {
+                    rounded_square(length-2*r_c2, r_c2, r_fo2/2);
+                    mirror([0,0,1])
+                    rounded_square(length, h_bot/2, r_fo1/2);
+                }
+            }
+            
+            if (enable_holes)
+            pattern_circular(4) 
+            translate([d_hole/2, d_hole/2, 0]) {
+                union() {
+                    difference() {
+                        cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
+                        if (enable_hole_slit)
+                        copy_mirror([0,1,0])
+                        translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
+                        cube([r_hole2*3,r_hole2*3, 0.4]);
+                    }
+                    cylinder(h = 3*h_base, r = r_hole1, center=true);
+                }
             }
         }
     }
