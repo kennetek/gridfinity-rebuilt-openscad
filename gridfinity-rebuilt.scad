@@ -64,7 +64,7 @@ r_hole2 = 3.25; // magnet hole radius
 d_hole = 26;    // center-to-center distance between holes
 h_hole = 2.4;   // magnet hole depth
 
-r_f1 = 0.6;     // top edge fillet radius
+r_f1 = 0.3;     // top edge fillet radius
 r_f2 = 2.8;     // internal fillet radius
 
 d_div = 1.2;    // width of divider between compartments
