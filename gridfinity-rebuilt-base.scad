@@ -10,8 +10,8 @@ d_height = dht2-h_base;
 r_scoop = length*((d_height-2)/7+1)/12 - r_f2;  // scoop radius
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 
-xl = gridx*length-2*d_wall+d_div; 
-yl = gridy*length-2*d_wall+d_div;
+xl = gridx*length-2*d_clear-2*d_wall+d_div; 
+yl = gridy*length-2*d_clear-2*d_wall+d_div;
 
 echo("=====");
 echo(height_total=d_height+h_base+(enable_lip?3.8:0));
@@ -191,7 +191,7 @@ module block_cutter(x,y,w,h,t,s) {
     v_len_tab = d_tabh;
     v_len_lip = d_wall2-d_wall+1.2;
     v_cut_tab = d_tabh - (4*r_f1)/tan(a_tab); 
-    v_cut_lip = d_wall2-d_wall;
+    v_cut_lip = d_wall2-d_wall-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
     
