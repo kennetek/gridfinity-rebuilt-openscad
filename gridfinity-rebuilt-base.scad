@@ -98,13 +98,13 @@ module block_base() {
             mirror([0,0,1])
             union() {
                 hull() {
-                    rounded_square(length-2*r_c2-2*r_c1, h_base, r_fo3/2);
-                    rounded_square(length-2*r_c2, h_base-r_c1, r_fo2/2);
+                    rounded_square(length-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                    rounded_square(length-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
                 }
                 hull() {
-                    rounded_square(length-2*r_c2, r_c2, r_fo2/2);
+                    rounded_square(length-0.05-2*r_c2, r_c2, r_fo2/2);
                     mirror([0,0,1])
-                    rounded_square(length, h_bot/2, r_fo1/2);
+                    rounded_square(length-0.05, h_bot/2, r_fo1/2);
                 }
             }
             
