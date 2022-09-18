@@ -126,18 +126,22 @@ module block_base() {
     }
 }
 
+module profile_wall_sub_sub() {
+    polygon([
+        [0,0],
+        [d_wall/2,0],
+        [d_wall/2,d_height-1.2-d_wall2+d_wall/2],
+        [d_wall2-d_clear,d_height-1.2],
+        [d_wall2-d_clear,d_height+h_base],
+        [0,d_height+h_base]
+    ]);
+}
+
 module profile_wall_sub() {
     difference() {
-        polygon([
-            [0,0],
-            [d_wall/2,0],
-            [d_wall/2,d_height-1.2-d_wall2+d_wall/2],
-            [d_wall2-d_clear,d_height-1.2],
-            [d_wall2-d_clear,d_height+h_base],
-            [0,d_height+h_base]
-        ]);
+        profile_wall_sub_sub();
         color("red")
-        offset(delta = 0.25) 
+        offset(delta = d_clear) 
         translate([r_base-d_clear,d_height,0])
         mirror([1,0,0]) 
         profile_base();
@@ -150,12 +154,12 @@ module profile_wall() {
     mirror([1,0,0])
     difference() {
         profile_wall_sub();
-               difference() {
+        difference() {
             translate([0, d_height+h_base-d_clear*sqrt(2), 0]) 
             circle(r_base/2);
             offset(r = r_f1) 
             offset(delta = -r_f1)
-                        profile_wall_sub();
+            profile_wall_sub();
         }
     }
 }
