@@ -10,8 +10,8 @@ d_height = dht2-h_base;
 r_scoop = length*((d_height-2)/7+1)/12 - r_f2;  // scoop radius
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 
-xl = gridx*length-0.5-2*d_wall+d_div; 
-yl = gridy*length-0.5-2*d_wall+d_div;
+xl = gridx*length-2*d_clear-2*d_wall+d_div; 
+yl = gridy*length-2*d_clear-2*d_wall+d_div;
 
 echo("=====");
 echo(height_total=d_height+h_base+(enable_lip?3.8:0));
@@ -85,35 +85,40 @@ module profile_base() {
 module block_base() {
     translate([0,0,h_base])
     rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
-    pattern_linear(gridx, gridy, length) 
-    render()
-    difference() {
-        translate([0,0,h_base])
-        mirror([0,0,1])
-        union() {
-            hull() {
-                rounded_square(length-0.5-2*r_c2-2*r_c1, h_base, r_fo3/2);
-                rounded_square(length-0.5-2*r_c2, h_base-r_c1, r_fo2/2);
-            }
-            hull() {
-                rounded_square(length-0.5-2*r_c2, r_c2, r_fo2/2);
-                mirror([0,0,1])
-                rounded_square(length-0.5, h_bot/2, r_fo1/2);
-            }
-        }
-        
-        if (enable_holes)
-        pattern_circular(4) 
-        translate([d_hole/2, d_hole/2, 0]) {
+
+    intersection(){
+        translate([0,0,-1])
+        rounded_rectangle(gridx*length-0.5+0.005, gridy*length-0.5+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
+        pattern_linear(gridx, gridy, length) 
+        render()
+        difference() {
+            translate([0,0,h_base])
+            mirror([0,0,1])
             union() {
-                difference() {
-                    cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
-                    if (enable_hole_slit)
-                    copy_mirror([0,1,0])
-                    translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
-                    cube([r_hole2*3,r_hole2*3, 0.4]);
+                hull() {
+                    rounded_square(length-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                    rounded_square(length-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
                 }
-                cylinder(h = 3*h_base, r = r_hole1, center=true);
+                hull() {
+                    rounded_square(length-0.05-2*r_c2, r_c2, r_fo2/2);
+                    mirror([0,0,1])
+                    rounded_square(length-0.05, h_bot/2, r_fo1/2);
+                }
+            }
+            
+            if (enable_holes)
+            pattern_circular(4) 
+            translate([d_hole/2, d_hole/2, 0]) {
+                union() {
+                    difference() {
+                        cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
+                        if (enable_hole_slit)
+                        copy_mirror([0,1,0])
+                        translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
+                        cube([r_hole2*3,r_hole2*3, 0.4]);
+                    }
+                    cylinder(h = 3*h_base, r = r_hole1, center=true);
+                }
             }
         }
     }
@@ -125,13 +130,13 @@ module profile_wall_sub() {
             [0,0],
             [d_wall/2,0],
             [d_wall/2,d_height-1.2-d_wall2+d_wall/2],
-            [d_wall2,d_height-1.2],
-            [d_wall2,d_height+h_base],
+            [d_wall2-d_clear,d_height-1.2],
+            [d_wall2-d_clear,d_height+h_base],
             [0,d_height+h_base]
         ]);
         color("red")
         offset(delta = 0.25) 
-        translate([r_base,d_height,0]) 
+        translate([r_base-d_clear,d_height,0])
         mirror([1,0,0]) 
         profile_base();
         square([d_wall,0]);
@@ -143,12 +148,12 @@ module profile_wall() {
     mirror([1,0,0])
     difference() {
         profile_wall_sub();
-        difference() {
+               difference() {
             translate([0, d_height+h_base-d_clear*sqrt(2), 0]) 
             circle(r_base/2);
             offset(r = r_f1) 
             offset(delta = -r_f1)
-            profile_wall_sub();
+                        profile_wall_sub();
         }
     }
 }
@@ -184,7 +189,7 @@ module block_cutter(x,y,w,h,t,s) {
     v_len_tab = d_tabh;
     v_len_lip = d_wall2-d_wall+1.2;
     v_cut_tab = d_tabh - (2*r_f1)/tan(a_tab); 
-    v_cut_lip = d_wall2-d_wall;
+    v_cut_lip = d_wall2-d_wall-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
     
