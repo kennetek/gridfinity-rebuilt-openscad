@@ -85,12 +85,10 @@ module profile_base() {
 module block_base() {
     translate([0,0,h_base])
     rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
-    
-    
-    // translate([0,0,h_base])
-    intersection(){
-        rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_base+h_bot/2, r_fo1/2+0.001);
 
+    intersection(){
+        translate([0,0,-1])
+        rounded_rectangle(gridx*length-0.5+0.005, gridy*length-0.5+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
         pattern_linear(gridx, gridy, length) 
         render()
         difference() {
