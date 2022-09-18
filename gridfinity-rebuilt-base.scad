@@ -36,12 +36,14 @@ module gridfinityEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true) {
 // wrapper module
 // DOES NOT CHECK FOR VALID COMPARTMENT STRUCTURE
 module gridfinityCustom() {
-    difference() {
-        color("firebrick") block_bottom(d_height);
-        children();
+    if (gridz > 0) {
+        difference() {
+            color("firebrick") block_bottom(d_height-0.1);
+            children();
+        }
+        color("royalblue") block_wall();
     }
     color("orange") block_base();
-    color("royalblue") block_wall();
 }
 
 // Function to include in the custom() module to individually slice bins
@@ -174,7 +176,7 @@ module block_wall() {
 
 module block_bottom( h = 2.2 ) {
     translate([0,0,h_base+0.1])
-    rounded_rectangle(gridx*length-0.5-d_wall/4, gridy*length-0.5-d_wall/4, d_height-0.1, r_base+0.01);
+    rounded_rectangle(gridx*length-0.5-d_wall/4, gridy*length-0.5-d_wall/4, h, r_base+0.01);
 }
 
 module cut_move_unsafe(x, y, w, h) {

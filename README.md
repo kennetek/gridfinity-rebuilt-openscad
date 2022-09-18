@@ -36,7 +36,7 @@ Parameter | Range | Description
 `gridx` | {n>0\|n∈Z} | number of bases along the x-axis  
 `gridy` | {n>0\|n∈Z} | number of bases along the y-axis  
 `length` | {n>0\|n∈R} | size of the square bases in millimeters, default 42  
-`gridz` | {n>0\|n∈R} | height value (can be interpreted in various ways)  
+`gridz` | {n>=0\|n∈R} | height value (can be interpreted in various ways)  
 `gridz_define` | {0,1,2} | • (0) Unit height: `gridz` is the height in units (7mm increments). The stock bins have a unit height value of 2, 3, or 6. The overall height of the bin is `7*u + 3.8` millimeters, where the 3.8 is the height of the top lip. <br>     • (1) Internal height: `gridz` is the height from the bottom of a compartment to the top of the tab in millimeters. This is effectively the maximum height of an object that can fit inside the bin. <br>     • (2) External height: `gridz` is the overall height of the bin, from the base to the upper lip fillet. This is effectively how deep a drawer must be to fit the bin. 
 `enable_holes` | boolean | toggle holes for magnets and M3 screws on the base of the bin
 `enable_hole_slit` | boolean | toggle the printable countersunk hole cut
