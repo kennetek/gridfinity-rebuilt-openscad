@@ -190,7 +190,7 @@ module block_cutter(x,y,w,h,t,s) {
     
     v_len_tab = d_tabh;
     v_len_lip = d_wall2-d_wall+1.2;
-    v_cut_tab = d_tabh - (4*r_f1)/tan(a_tab); 
+    v_cut_tab = d_tabh - (2*r_f1)/tan(a_tab); 
     v_cut_lip = d_wall2-d_wall-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
