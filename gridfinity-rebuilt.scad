@@ -26,47 +26,48 @@ $fa = 8;
 $fs = 0.25;
 
 /* [General Settings] */
-gridx = 1;  // number of bases along x-axis   
-gridy = 1;  // number of bases along y-axis  
-gridz = 6;  // bin height. See bin height information and "gridz_define" below. 
-length = 42;// base unit (if you want to go rogue ig)
+// number of bases along x-axis
+gridx = 1;  
+// number of bases along y-axis   
+gridy = 1;  
+// bin height. See bin height information and "gridz_define" below.  
+gridz = 6;   
+// base unit
+length = 42;
 
-/* [Divisions] */
+/* [Compartments] */
 // DivX Number of x Divisions
-divx = 1; //[1,2,3,4,5,6,7,8,9,10]
-
+divx = 1;
 // DivY Number of y Divisions
-divy = 1; //[1,2,3,4,5,6,7,8,9,10]
-/* [Holes] */
-// Bottom screw/magnate holes?
-enable_holes = true; // [ture:false]
-// Extra cut for better slicing
-enable_hole_slit = true; // [true:false]
-/* [z Snap] */
-enable_zsnap = false; // [true:false]
-/* [Stacking Lip?] */
-enable_lip = true; // [true:false]
+divy = 1;
+
+/* [Toggles] */
+// Bottom screw/magnet holes
+enable_holes = true;
+// Extra cut inside magnet holes for better slicing
+enable_hole_slit = true;
+// Snap gridx height to nearest 7mm increment
+enable_zsnap = false;
+// enable upper lip for stacking other bins
+enable_lip = true;
+// internal fillet for easy part removal
+scoop = true;
+
+/* [Other] */
 
 // determine what the variable "gridz" applies to based on your use case
-// 0: gridz is the height of bins in units (7mm increments)
-// 1: gridz is the internal height in millimeters, or how tall an item inside the bin can be
-// 2: gridz is the overall external height of the bin in millimeters
-/* [Gridz Define] */
-gridz_define = 0; //[0:bin is 7mm increments, 1:Internal height, 2:External height]
+gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
+// the type of tabs
+tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
-/* [Tab Style] */
-tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:No Tab]
-
-/*[Scoop]*/
-scoop = true; //[true:false]
 
 // ===== Commands ===== //
 
-color("aqua")
+color("tomato")
  gridfinityEqual(n_divx = divx, n_divy = divy, style_tab = tab_style, enable_scoop = scoop);
 
 // ===== Reference Dimensions ===== //
-/*[Other features that can be reset]*/
+/*[Other Miscellaneous Features]*/
 h_base = 5;     // height of the base
 r_base = 4;     // outside rounded radius of bin
 r_c1 = 0.8;     // lower base chamfer "radius"
