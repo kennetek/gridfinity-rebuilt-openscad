@@ -150,8 +150,8 @@ gridfinityCustom() {
 }*/
 
 // Pyramid scheme bin
-
-/* gridfinityCustom() {
+/*
+gridfinityCustom() {
     for (i = [0:gridx-1]) 
     for (j = [0:i])
     cut(j*gridx/(i+1),gridy-i-1,gridx/(i+1),1,0);
