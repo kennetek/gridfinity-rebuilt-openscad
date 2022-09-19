@@ -5,7 +5,6 @@ $fs = 0.25;
 // ===== Commands ===== //
 
 color("tomato")
-rotate([0,0,180])
 //gridfinityBaseVase();
 gridfinityVase();
 
@@ -25,15 +24,15 @@ bottom_layer = 3;
 /* [General Settings] */
 
 // number of bases along x-axis 
-gridx = 7;
+gridx = 1;
 // number of bases along y-axis  
-gridy = 2;
+gridy = 1;
 // bin height. See bin height information and "gridz_define" below. 
 gridz = 6;  
 // base unit
 length = 42;
 // number of compartments along x-axis
-n_divx = 3;
+n_divx = 2;
 
 /* [Toggles] */
 // toggle holes on the base for magnet
@@ -58,10 +57,10 @@ enable_pinch = true;
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
 
 // how tabs are implemented
-style_tab = round($t*7); // [0:continuous, 1:broken, 2:auto, 3:right, 4:center, 5:left, 6:none]
+style_tab = 0; // [0:continuous, 1:broken, 2:auto, 3:right, 4:center, 5:left, 6:none]
 
 // where to put X cutouts for attaching bases
-style_base = 1; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
+style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
 
 
 /* [Miscellaneous] */
@@ -164,7 +163,7 @@ module gridfinityVase() {
             }
 
             if (enable_funnel)
-            pattern_linear(n_divx > 1 ? 1 : n_st == 0 || n_st == 1 ? gridx : 1, 1, (gridx*length-r_fo1)/gridx)
+            pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*length-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
             transform_funnel()
             block_funnel_outside();
 
@@ -178,7 +177,7 @@ module gridfinityVase() {
         }
         
         if (enable_funnel)
-        pattern_linear(n_divx > 1 ? 1 : n_st == 0 || n_st == 1 ? gridx : 1, 1, (gridx*length-r_fo1)/gridx)
+        pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*length-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
         transform_funnel()
         block_funnel_inside();
 
