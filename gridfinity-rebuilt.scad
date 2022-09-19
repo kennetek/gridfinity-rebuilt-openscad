@@ -20,36 +20,53 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 
 */
 
+/**/
+/* [Setup Parameters] */
 $fa = 8;
 $fs = 0.25;
 
-// ===== General Settings ===== //
-
+/* [General Settings] */
 gridx = 1;  // number of bases along x-axis   
 gridy = 1;  // number of bases along y-axis  
 gridz = 6;  // bin height. See bin height information and "gridz_define" below. 
 length = 42;// base unit (if you want to go rogue ig)
 
-enable_holes = true; // toggle holes on the base for magnet/screw
-enable_hole_slit = true; // extra cut within holes for better slicing
-enable_zsnap = false; // round up the bin height to match the closest 7mm unit
-enable_lip = true; // toggle the lip on the top of the bin that allows stacking
+/* [Divisions] */
+// DivX Number of x Divisions
+divx = 1; //[1,2,3,4,5,6,7,8,9,10]
+
+// DivY Number of y Divisions
+divy = 1; //[1,2,3,4,5,6,7,8,9,10]
+/* [Holes] */
+// Bottom screw/magnate holes?
+enable_holes = true; // [ture:false]
+// Extra cut for better slicing
+enable_hole_slit = true; // [true:false]
+/* [z Snap] */
+enable_zsnap = false; // [true:false]
+/* [Stacking Lip?] */
+enable_lip = true; // [true:false]
 
 // determine what the variable "gridz" applies to based on your use case
 // 0: gridz is the height of bins in units (7mm increments)
 // 1: gridz is the internal height in millimeters, or how tall an item inside the bin can be
 // 2: gridz is the overall external height of the bin in millimeters
-gridz_define = 0;
+/* [Gridz Define] */
+gridz_define = 0; //[0:bin is 7mm increments, 1:Internal height, 2:External height]
+
+/* [Tab Style] */
+tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:No Tab]
+
+/*[Scoop]*/
+scoop = true; //[true:false]
 
 // ===== Commands ===== //
 
-color("tomato")
-gridfinityEqual(n_divx = 2, n_divy = 1, style_tab = 1, enable_scoop = true);
-
-
+color("aqua")
+ gridfinityEqual(n_divx = divx, n_divy = divy, style_tab = tab_style, enable_scoop = scoop);
 
 // ===== Reference Dimensions ===== //
-
+/*[Other features that can be reset]*/
 h_base = 5;     // height of the base
 r_base = 4;     // outside rounded radius of bin
 r_c1 = 0.8;     // lower base chamfer "radius"
@@ -139,4 +156,3 @@ gridfinityCustom() {
     for (j = [0:i])
     cut(j*gridx/(i+1),gridy-i-1,gridx/(i+1),1,0);
 }*/
-
