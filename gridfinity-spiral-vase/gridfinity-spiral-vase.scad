@@ -28,15 +28,15 @@ bottom_layer = 3;
 /* [General Settings] */
 
 // number of bases along x-axis 
-gridx = 1;
+gridx = 2;
 // number of bases along y-axis  
-gridy = 1;
+gridy = 2;
 // bin height. See bin height information and "gridz_define" below. 
 gridz = 6;  
 // base unit
 length = 42;
 // number of compartments along x-axis
-n_divx = 2;
+n_divx = 3;
 
 /* [Toggles] */
 // toggle holes on the base for magnet
