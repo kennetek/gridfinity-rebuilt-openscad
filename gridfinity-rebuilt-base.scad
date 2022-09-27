@@ -67,7 +67,7 @@ module cut(x=0, y=0, w=1, h=1, t=1, s=true) {
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
-    translate([0,0,d_height+h_base])
+    translate([0,0,height_internal==0?d_height+h_base:height_internal+h_base])
     cut_move_unsafe(clp(x,0,gridx), clp(y,0,gridy), clp(w,0,gridx-x), clp(h,0,gridy-y))
     children();
 } 
