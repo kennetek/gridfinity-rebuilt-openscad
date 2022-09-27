@@ -60,6 +60,8 @@ gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments -
 // the type of tabs
 tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
+// overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
+height_internal = 0; 
 
 // ===== Commands ===== //
 

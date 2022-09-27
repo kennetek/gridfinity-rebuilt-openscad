@@ -28,6 +28,7 @@ echo("=====");
 // enable_scoop:    scoop toggle for all compartments. see cut()
 module gridfinityEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true) {
     gridfinityCustom()
+    translate([0,0,-d_height-h_base])
     for (i = [1:n_divx]) 
     for (j = [1:n_divy])
     cut((i-1)*gridx/n_divx,(j-1)*gridy/n_divy, gridx/n_divx, gridy/n_divy, style_tab, enable_scoop);
@@ -38,7 +39,7 @@ module gridfinityEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true) {
 module gridfinityCustom() {
     if (gridz > 0) {
         difference() {
-            color("firebrick") block_bottom(d_height-0.1);
+            color("firebrick") block_bottom(height_internal==0?d_height-0.1:height_internal);
             children();
         }
         color("royalblue") block_wall();
@@ -66,10 +67,52 @@ module cut(x=0, y=0, w=1, h=1, t=1, s=true) {
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
+    translate([0,0,d_height+h_base])
     cut_move_unsafe(clp(x,0,gridx), clp(y,0,gridy), clp(w,0,gridx-x), clp(h,0,gridy-y))
     children();
 } 
 
+
+
+module block_negative_chamfer(depth = 10, top = 0, bot = 0) {
+    bc = abs(bot);
+    tc = abs(top);
+    
+    hull() {
+        linear_extrude(2*(depth), center = true)
+        offset(-bc)
+        children();
+        
+        linear_extrude(2*(depth-bc), center = true)
+        children();
+    }
+    
+	if (tc != 0)
+    translate([0,0,tc])
+    block_negative_chamfer(depth = tc*2, bot = tc, top = 0)
+    offset(delta = tc-0.01)
+    children();
+}
+
+module block_negative_fillet(depth = 10, bot_fillet = 0) {
+    bf = abs(bot_fillet);
+    
+    block_negative_chamfer(depth, 0, bf)
+    children();
+    
+    minkowski() {
+        linear_extrude(2*(depth-bf), center = true)
+        offset(-bf)
+        children();
+        
+        if (bf > 0) sphere(r = bf);
+    }
+}
+
+module block_negative(depth) {
+    linear_extrude(2*depth, center=true)
+    children();
+}
 
 // ===== Modules ===== //
 

@@ -2,10 +2,14 @@
 $fa = 8;
 $fs = 0.25;
 
-// ===== Commands ===== //
+// ===== COMMANDS ===== //
 
 color("tomato")
+
+// Generate a single base
 //gridfinityBaseVase();
+
+// Generate the bin
 gridfinityVase();
 
 // ==================== // 
@@ -36,7 +40,7 @@ n_divx = 2;
 
 /* [Toggles] */
 // toggle holes on the base for magnet
-enable_holes = false; 
+enable_holes = true; 
 // round up the bin height to match the closest 7mm unit
 enable_zsnap = false; 
 // toggle the lip on the top of the bin that allows stacking
