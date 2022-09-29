@@ -28,6 +28,8 @@ How your sliced files should look (cross section shown for 1x1 bin):
 [<img src="../images/slicer_bin.png" height="200">]()
 [<img src="../images/slicer_base.png" height="200">]()
 
+Example sliced files can be found on the [Printables](https://www.printables.com/model/284371-spiral-vase-gridfinity-in-openscad) page. 
+
 ## Statistics
 Given how it has become a bit of a [challenge](https://www.printables.com/model/265271-gridfinity-lite-economical-plain-storage-bins) to reduce the weight and print time for these bins, here is a comparison for a large bin:
 
