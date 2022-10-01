@@ -27,9 +27,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 1;  
+gridx = 2;  
 // number of bases along y-axis   
-gridy = 1;  
+gridy = 2;  
 // bin height. See bin height information and "gridz_define" below.  
 gridz = 6;   
 // base unit
@@ -62,6 +62,12 @@ tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
 // overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0; 
+
+/* [Test] */
+// multiplier for bases along X axis. For example, if you wanted a gridx of 1.5, setting this to 0.5 would get you 3 bases divided along X that are compatible with the provided length. (default: 1, intended to work between 0 and 1)
+divbasex = 1;
+// multiplier for bases along Y axis. For example, if you wanted a gridy of 1.5, setting this to 0.5 would get you 3 bases divided along Y that are compatible with the provided length. (default: 1, intended to work between 0 and 1)
+divbasey = 1;
 
 // ===== Commands ===== //
 

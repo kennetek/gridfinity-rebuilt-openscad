@@ -134,39 +134,50 @@ module block_base() {
     intersection(){
         translate([0,0,-1])
         rounded_rectangle(gridx*length-0.5+0.005, gridy*length-0.5+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
-        pattern_linear(gridx, gridy, length) 
+        
         render()
         difference() {
-            translate([0,0,h_base])
-            mirror([0,0,1])
-            union() {
-                hull() {
-                    rounded_square(length-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
-                    rounded_square(length-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
-                }
-                hull() {
-                    rounded_square(length-0.05-2*r_c2, r_c2, r_fo2/2);
-                    mirror([0,0,1])
-                    rounded_square(length-0.05, h_bot/2, r_fo1/2);
-                }
-            }
+            pattern_linear2(gridx/divbasex, gridy/divbasey, divbasex*length, divbasey*length) 
+            block_base_solid();
+            
             
             if (enable_holes)
-            pattern_circular(4) 
-            translate([d_hole/2, d_hole/2, 0]) {
-                union() {
-                    difference() {
-                        cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
-                        if (enable_hole_slit)
-                        copy_mirror([0,1,0])
-                        translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
-                        cube([r_hole2*3,r_hole2*3, 0.4]);
-                    }
-                    cylinder(h = 3*h_base, r = r_hole1, center=true);
-                }
-            }
+            pattern_linear(gridx,gridy,length)
+            block_base_hole();
         }
     }
+}
+
+module block_base_solid() {
+    translate([0,0,h_base])
+        mirror([0,0,1])
+        union() {
+            hull() {
+                rounded_rectangle(divbasex*length-0.05-2*r_c2-2*r_c1,divbasey*length-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
+                rounded_rectangle(divbasex*length-0.05-2*r_c2, divbasey*length-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
+            }
+            hull() {
+                rounded_rectangle(divbasex*length-0.05-2*r_c2, divbasey*length-0.05-2*r_c2,r_c2, r_fo2/2);
+                mirror([0,0,1])
+                rounded_rectangle(divbasex*length-0.05, divbasey*length-0.05, h_bot/2, r_fo1/2);
+            }
+        }
+}
+
+module block_base_hole() {
+    pattern_circular(4) 
+        translate([d_hole/2, d_hole/2, 0]) {
+            union() {
+                difference() {
+                    cylinder(h = 2*(h_hole+(enable_hole_slit?0.2:0)), r = r_hole2, center=true);
+                    if (enable_hole_slit)
+                    copy_mirror([0,1,0])
+                    translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
+                    cube([r_hole2*3,r_hole2*3, 0.4]);
+                }
+                cylinder(h = 3*h_base, r = r_hole1, center=true);
+            }
+        }
 }
 
 module profile_wall_sub_sub() {
@@ -429,9 +440,17 @@ module copy_mirror(vec=[0,1,0]) {
 
 module pattern_linear(x = 1, y = 1, spacing = 0) {
     translate([-(x-1)*spacing/2,-(y-1)*spacing/2,0])
-    for (i = [1:x])
-    for (j = [1:y])
+    for (i = [1:ceil(x)])
+    for (j = [1:ceil(y)])
     translate([(i-1)*spacing,(j-1)*spacing,0]) 
+    children();
+}
+
+module pattern_linear2(x = 1, y = 1, xs = 0, ys = 0) {
+    translate([-(x-1)*xs/2,-(y-1)*ys/2,0])
+    for (i = [1:ceil(x)])
+    for (j = [1:ceil(y)])
+    translate([(i-1)*xs,(j-1)*ys,0]) 
     children();
 }
 
