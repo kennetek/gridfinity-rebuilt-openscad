@@ -27,7 +27,7 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 2;  
+gridx = 2.5;  
 // number of bases along y-axis   
 gridy = 2;  
 // bin height. See bin height information and "gridz_define" below.  
@@ -50,6 +50,8 @@ enable_hole_slit = true;
 enable_zsnap = false;
 // enable upper lip for stacking other bins
 enable_lip = true;
+// disable the screw part of base holes
+enable_screw = true; 
 // internal fillet for easy part removal
 scoop = true;
 
@@ -63,11 +65,12 @@ tab_style = 0; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0; 
 
-/* [Test] */
-// multiplier for bases along X axis. For example, if you wanted a gridx of 1.5, setting this to 0.5 would get you 3 bases divided along X that are compatible with the provided length. (default: 1, intended to work between 0 and 1)
-divbasex = 1;
-// multiplier for bases along Y axis. For example, if you wanted a gridy of 1.5, setting this to 0.5 would get you 3 bases divided along Y that are compatible with the provided length. (default: 1, intended to work between 0 and 1)
-divbasey = 1;
+// Automatically guess the ideal base dividing values based on gridx and gridy (if they are integers, defaults to 1)
+div_base_auto = true; 
+// number of divisions per 1 unit of base along the X axis. For instance, a value of 3 would make 3 mini-bases per length. (default 1, only use integers)
+div_base_x = 1;
+// number of divisions per 1 unit of base along the Y axis. For instance, a value of 3 would make 3 mini-bases per length. (default 1, only use integers)
+div_base_y = 1; 
 
 // ===== Commands ===== //
 
@@ -76,34 +79,54 @@ color("tomato")
 
 // ===== Reference Dimensions ===== //
 /*[Other Miscellaneous Features]*/
-h_base = 5;     // height of the base
-r_base = 4;     // outside rounded radius of bin
-r_c1 = 0.8;     // lower base chamfer "radius"
-r_c2 = 2.4;     // upper base chamfer "radius"
-h_bot = 2.2;    // bottom thiccness of bin
-r_fo1 = 7.5+1;    // outside radii
+// height of the base
+h_base = 5;     
+// outside rounded radius of bin
+r_base = 4;     
+// lower base chamfer "radius"
+r_c1 = 0.8;     
+// upper base chamfer "radius"
+r_c2 = 2.4;     
+// bottom thiccness of bin
+h_bot = 2.2;    
+// outside radii 1
+r_fo1 = 8.5;    
+// outside radii 2
 r_fo2 = 3.2;
+// outside radii 3
 r_fo3 = 1.6; 
 
-r_hole1 = 1.5;  // screw hole radius
-r_hole2 = 3.25; // magnet hole radius
-d_hole = 26;    // center-to-center distance between holes
-h_hole = 2.4;   // magnet hole depth
+// screw hole radius
+r_hole1 = 1.5;  
+// magnet hole radius
+r_hole2 = 3.25; 
+// center-to-center distance between holes
+d_hole = 26;    
+// magnet hole depth
+h_hole = 2.4;   
 
-r_f1 = 0.6;     // top edge fillet radius
-r_f2 = 2.8;     // internal fillet radius
+// top edge fillet radius
+r_f1 = 0.6;     
+// internal fillet radius
+r_f2 = 2.8;     
 
-d_div = 1.2;    // width of divider between compartments
-d_wall = 0.95;   // minimum wall thickness
-d_clear = 0.25; // tolerance fit factor
+// width of divider between compartments
+d_div = 1.2;    
+// minimum wall thickness
+d_wall = 0.95;  
+// tolerance fit factor 
+d_clear = 0.25; 
 
-d_tabh = 15.85;     // height of tab (yaxis, measured from inner wall)
-d_tabw = length;    // maximum width of tab
+// height of tab (yaxis, measured from inner wall)
+d_tabh = 15.85;    
+// maximum width of tab 
+d_tabw = 42; 
+// angle of tab   
 a_tab = 36; 
 
 // ===== Include ===== //
 
-include <gridfinity-rebuilt-base.scad>
+include <gridfinity-rebuilt-utility.scad>
 
 
 

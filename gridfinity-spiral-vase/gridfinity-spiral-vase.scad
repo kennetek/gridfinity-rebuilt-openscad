@@ -2,15 +2,15 @@
 $fa = 8;
 $fs = 0.25;
 
+/* [Bin or Base] */
+type = 0; // [0:bin, 1:base]
+
 // ===== COMMANDS ===== //
 
 color("tomato")
 
-// Generate a single base
-//gridfinityBaseVase();
-
-// Generate the bin
-gridfinityVase();
+if (type != 0) gridfinityBaseVase(); // Generate a single base
+else gridfinityVase(); // Generate the bin
 
 // ==================== // 
 
@@ -116,7 +116,7 @@ a_tab = 40;
 
 // ===== Include ===== //
 
-include <../gridfinity-rebuilt-base.scad>
+include <../gridfinity-rebuilt-utility.scad>
 
 // ===== Constants ===== //
 
@@ -128,7 +128,7 @@ f2c = sqrt(2)*(sqrt(2)-1); // fillet to chamfer ratio
 me = ((gridx*length-0.5)/n_divx)-nozzle*4-r_fo1-12.7-4;
 me2 = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
 m = me2;
-d_ramp = f2c*r_scoop+d_wall2;
+d_ramp = f2c*(length*((d_height-2)/7+1)/12-r_f2)+d_wall2;
 d_edge = ((gridx*length-0.5)/n_divx-d_tabw-r_fo1)/2; 
 n_st = d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab; 
 
