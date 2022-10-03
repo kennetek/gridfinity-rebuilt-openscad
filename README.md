@@ -18,6 +18,7 @@ A ground-up port (with a few extra features) of the stock [gridfinity](https://w
 - togglable holes (with togglable supportless printing hole structures)
 - manual compartment construction (make the most wacky bins imaginable)
 - togglable lip (if you don't care for stackability)
+- dividding bases (if you want a 1.5 unit long bin, for instance)
 
 ### Printable Holes
 The printable holes allow your slicer to bridge the gap inside the countersunk magnet hole (using the technique shown [here](https://www.youtube.com/watch?v=W8FbHTcB05w)) so that supports are not needed.
@@ -44,10 +45,63 @@ Parameter | Range | Description
 `enable_lip` | boolean | toggles the lip at the top of the bin that allows for bin stacking
 
 ## Modules  
-Run these functions inside the *Commands* section of *gridfinity-rebuilt.scad*.
+Run these functions inside the *Commands* section of *gridfinity-rebuilt-bins.scad*.
 
-### `gridfinityEqual(n_divx, n_divy, style_tab, enable_scoop)`  
-Generates the "traditional" bins. It is a utility function that creates evenly distributed compartments. 
+### `gridfinityInit(gridx, gridy, height, height_internal, length)`  
+Initializes the top part of the bin (walls and solid section). All bins have to use this module, and have the compartments cut out from it. 
+
+Parameter | Range | Description
+--- | ----- | ---
+`gridx` | {n>0\|n∈R} | number of grid units along X
+`gridy` | {n>0\|n∈R} | number of grid units along Y
+`height` | {n>0\|n∈R} | height of the bin, in millimeters (but not exactly). See the `height()` function for more info.
+`height_internal` | {n>0\|n∈R} | height of the internal block. Can be lower than bin height to save filament on custom bins. default of 0 means use the calculated height.
+`length` | {n>0\|n∈R} | length of one unit of the base. default: 42 (The Answer to the Ultimate Question of Life, the Universe, and Everything.)
+
+```
+// Example: generate a 3x3x6 bin with a 42mm unit size
+gridfinityInit(3, 3, height(6), 0, 42) {
+	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+}
+```
+
+### `height(gridz, gridz_define, enable_lip, enable_zsnap)`  
+Calculates the proper height for bins. 
+
+Parameter | Range | Description
+--- | ----- | ---
+`gridz` | {n>0\|n∈R} | bin height. See bin height information and "gridz_define" below.  
+`gridz_define` | {n>0\|n∈R} | determine what the variable "gridz" applies to based on your use case. default: 0. <br>     • (0) gridz is the height of bins in units of 7mm increments - Zack's method <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters
+`enable_lip` | boolean | if you are not stacking the bin, you can disable the top lip to save space. default: true
+`enable_zsnap` | boolean | automatically snap the bin size to the nearest 7mm increment. default: true
+
+```
+// Example: height for a 6 unit high bin
+height(6);
+
+// Example: height for a bin that can fit (at maximum) a 30mm high object inside
+height(30, 1, true, false); 
+```
+
+### `gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole)`  
+Generates the bases for bins. Has various different hole styles, and can be subdivided.
+
+Parameter | Range | Description
+--- | ----- | ---
+`gridx` | {n>0\|n∈R} | number of grid units along X
+`gridy` | {n>0\|n∈R} | number of grid units along Y
+`length` | {n>0\|n∈R} | length of one unit of the base. default: 42
+`div_base_x` | {n>=0\|n∈Z} | number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the division)
+`div_base_y` | {n>=0\|n∈Z} | number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the division)
+`style_hole` | {0, 1, 2, 3} | the style of holes in the bases <br>     • (0) No holes <br>     • (1) Magnet holes only <br>     • (2) Magnet and screw holes - no printable slit <br>     • (3) Magnet and screw holes - with printable slit
+
+```
+// Example: generate a 3x3 base with a 42mm unit size and clean magnet holes
+gridfinityBase(3, 3, 42, 0, 0, 1);
+```
+
+### `cutEqual(n_divx, n_divy, style_tab, enable_scoop)`  
+Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments. 
 
 Parameter | Range | Description
 --- | ----- | ---
@@ -58,12 +112,10 @@ Parameter | Range | Description
 
 ```
 // Example: this generates 9 compartments in a 3x3 grid, and all compartments have a full tab and a scoop
-gridfinityEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+gridfinityInit(3, 3, height(6), 0, 42) {
+	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+}
 ```
-
-### `gridfinityCustom() {}`
-
-If you want to get crazy with it, you can take control of your destiny and manually place the compartments. This can be done using this module, which will cut all child objects into the container. There are various modules that are exposed for this purpose.  
 
 ### `cut(x, y, w, h, t, s)` 
 Cuts a single compartment into the bin at the provided location with the provided attributes. The coordinate system for compartments originates (0,0) at the bottom left corner of the bin, where 1 unit is the length of 1 base. Positive X and positive Y are in the same direction as the global coordinate system.
@@ -77,10 +129,10 @@ Parameter | Range | Description
 `s` | boolean | toggles the scoopy bit on the bottom edge that allows easy removal of items, for this specific compartment
 
 ```
-// Example: Assuming a gridx of 3 and a gridy of 3
+// Example:
 // this cuts two compartments that are both 1 wide and 2 high. 
 // One is on the bottom left, and the other is at the top right. 
-gridfinityCustom() {
+gridfinityInit(3, 3, height(6), 0, 42) {
     cut(0, 0, 1, 2, 0, true);
     cut(2, 1, 1, 2, 0, true);
 }
@@ -96,10 +148,10 @@ Parameter | Range | Description
 `h` | {n>0\|n∈R} | Height of the area, in base units (1 unit = 1 `length`)
 
 ```
-// Example: assuming gridx of 3 and gridy of 3
+// Example:
 // cuts a cylindrical hole of radius 5
 // hole center is located 1/2 units from the right edge of the bin, and 1 unit from the top
-gridfinityCustom() {
+gridfinityInit(3, 3, height(6), 0, 42) {
     cut_move(x=2, y=1, w=1, h=2) {
           cylinder(r=5, h=100, center=true);
     }
