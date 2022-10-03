@@ -29,21 +29,6 @@ The printable holes allow your slicer to bridge the gap inside the countersunk m
 ## Recommendations
 For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the [development snapshots](https://openscad.org/downloads.html). To enable the feature, go to Edit > Preferences > Features > fast-csg. On my computer, this sped up rendering from 10 minutes down to a couple of seconds, even for comically large bins.  
 
-## Global Parameters
-These are the parameters that define the type of bin being constructed. Therefore, they impact everything that does not relate to compartments, such as the base and the outside wall. 
-
-Parameter | Range | Description
---- | ----- | ---
-`gridx` | {n>0\|n∈Z} | number of bases along the x-axis  
-`gridy` | {n>0\|n∈Z} | number of bases along the y-axis  
-`length` | {n>0\|n∈R} | size of the square bases in millimeters, default 42  
-`gridz` | {n>=0\|n∈R} | height value (can be interpreted in various ways)  
-`gridz_define` | {0,1,2} | • (0) Unit height: `gridz` is the height in units (7mm increments). The stock bins have a unit height value of 2, 3, or 6. The overall height of the bin is `7*u + 3.8` millimeters, where the 3.8 is the height of the top lip. <br>     • (1) Internal height: `gridz` is the height from the bottom of a compartment to the top of the tab in millimeters. This is effectively the maximum height of an object that can fit inside the bin. <br>     • (2) External height: `gridz` is the overall height of the bin, from the base to the upper lip fillet. This is effectively how deep a drawer must be to fit the bin. 
-`enable_holes` | boolean | toggle holes for magnets and M3 screws on the base of the bin
-`enable_hole_slit` | boolean | toggle the printable countersunk hole cut
-`enable_zsnap` | boolean | have the bin increase in height until it matches the nearest 7mm increment. Useful if a bin needs to be a minimum internal size to fit a part (i.e. `gridz_define == 1`) but you still want the bin to fit within the sizing standards of the gridfinity system
-`enable_lip` | boolean | toggles the lip at the top of the bin that allows for bin stacking
-
 ## Modules  
 Run these functions inside the *Commands* section of *gridfinity-rebuilt-bins.scad*.
 
@@ -52,8 +37,8 @@ Initializes the top part of the bin (walls and solid section). All bins have to 
 
 Parameter | Range | Description
 --- | ----- | ---
-`gridx` | {n>0\|n∈R} | number of grid units along X
-`gridy` | {n>0\|n∈R} | number of grid units along Y
+`gridx` | {n>0\|n∈R} | number of bases along the x-axis  
+`gridy` | {n>0\|n∈R} | number of bases along the y-axis  
 `height` | {n>0\|n∈R} | height of the bin, in millimeters (but not exactly). See the `height()` function for more info.
 `height_internal` | {n>0\|n∈R} | height of the internal block. Can be lower than bin height to save filament on custom bins. default of 0 means use the calculated height.
 `length` | {n>0\|n∈R} | length of one unit of the base. default: 42 (The Answer to the Ultimate Question of Life, the Universe, and Everything.)
@@ -88,8 +73,8 @@ Generates the bases for bins. Has various different hole styles, and can be subd
 
 Parameter | Range | Description
 --- | ----- | ---
-`gridx` | {n>0\|n∈R} | number of grid units along X
-`gridy` | {n>0\|n∈R} | number of grid units along Y
+`gridx` | {n>0\|n∈R} | number of bases along the x-axis  
+`gridy` | {n>0\|n∈R} | number of bases along the y-axis 
 `length` | {n>0\|n∈R} | length of one unit of the base. default: 42
 `div_base_x` | {n>=0\|n∈Z} | number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the division)
 `div_base_y` | {n>=0\|n∈Z} | number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the division)
