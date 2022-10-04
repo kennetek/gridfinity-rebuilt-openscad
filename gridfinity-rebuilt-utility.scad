@@ -126,7 +126,7 @@ module block_base_solid(dbnx, dbny, l) {
     }
 }
 
-module block_base_hole(style_hole) {
+module block_base_hole(style_hole, cs_z=0) {
     pattern_circular(4) 
     translate([d_hole/2, d_hole/2, 0])
     union() {
@@ -140,6 +140,10 @@ module block_base_hole(style_hole) {
         }
         if (style_hole > 1)
         cylinder(h = 3*h_base, r = r_hole1, center=true);
+
+        if (style_hole == 4 && cs_z != 0)
+        translate([0,0,cs_z])
+        cylinder(bp_csink_h, d2=bp_csink_d1, r1=r_hole1);
 
     }
 }
@@ -401,16 +405,8 @@ module baseplate(gridx, gridy, length, div_base_x, div_base_y, style_hole, weigh
 
                 pattern_linear(gridx, gridy, length)
                 union() {
-                    block_base_hole(style_hole);
-                    
-                    //TODO Do this part inside block_base_hole as it shares everything except the 
-                    // countersink cylinder? Maybe make an extra hole type
-                    if (style_hole > 2) {
-                        translate([0,0,-1*(bp_h_bot + bp_z_offset)])
-                        pattern_circular(4) 
-                        translate([d_hole/2, d_hole/2, 0])
-                        cylinder(bp_csink_h, d1=bp_csink_d1, r2=r_hole1);
-                    }
+                    rotate([180,0,0])
+                    block_base_hole(style_hole, bp_h_bot - bp_z_offset - bp_csink_h);
 
                     if (bottom_cutout) {
                         translate([0,0,-1*(bp_h_bot + bp_z_offset)])
