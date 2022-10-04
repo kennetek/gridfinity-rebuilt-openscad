@@ -79,7 +79,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole) {
+module gridfinityBase(gx, gy, l, dx, dy, style_hole, block_scale=1, final_cut=true) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -91,12 +91,14 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole) {
     rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
 
     intersection(){
+        if(final_cut) {
         translate([0,0,-1])
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
-        
+        }
         render()
         difference() {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
+            scale([block_scale,block_scale,1])
             block_base_solid(dbnx, dbny, l);
             
             if (style_hole > 0)
@@ -138,6 +140,7 @@ module block_base_hole(style_hole) {
         }
         if (style_hole > 1)
         cylinder(h = 3*h_base, r = r_hole1, center=true);
+
     }
 }
 
@@ -376,6 +379,62 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
     
+}
+
+// Baseplate modules
+module baseplate(gridx, gridy, length, div_base_x, div_base_y, style_hole, weighted, bottom_cutout) {
+
+    scale_factor = (bp_clear / (length /100)) /100 + 1;
+
+    union() {
+        difference(){
+            rounded_rectangle(gridx*length, gridy*length, bp_h_top + bp_z_offset - 0.001, r_base);
+            translate([0,0,-bp_z_offset])
+
+            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, 0, scale_factor, false);
+        }
+
+        if(weighted) {
+            difference() {
+                translate([0,0,-1*(bp_h_bot - bp_clear)])
+                rounded_rectangle(gridx*length, gridy*length, bp_h_bot, r_base);
+
+                pattern_linear(gridx, gridy, length)
+                union() {
+                    block_base_hole(style_hole);
+                    
+                    //TODO Do this part inside block_base_hole as it shares everything except the 
+                    // countersink cylinder? Maybe make an extra hole type
+                    if (style_hole > 2) {
+                        translate([0,0,-1*(bp_h_bot + bp_z_offset)])
+                        pattern_circular(4) 
+                        translate([d_hole/2, d_hole/2, 0])
+                        cylinder(bp_csink_h, d1=bp_csink_d1, r2=r_hole1);
+                    }
+
+                    if (bottom_cutout) {
+                        translate([0,0,-1*(bp_h_bot + bp_z_offset)])
+                        bottom_cutout();
+                    }
+                }
+            }
+        }        
+    }
+}
+
+module bottom_cutout(){
+    union() {
+        linear_extrude(bp_cut_depth)
+        square(bp_cut_size, center=true);
+        pattern_circular(4)
+        translate([0,10,0])
+        linear_extrude(bp_rcut_depth)
+        union() {
+            square([bp_rcut_width, bp_rcut_length], center=true);
+            translate([0,bp_rcut_length/2,0])
+            circle(d=bp_rcut_width);
+        }
+    }
 }
 
 // ==== Utilities =====

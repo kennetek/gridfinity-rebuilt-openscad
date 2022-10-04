@@ -46,3 +46,38 @@ a_tab = 36;
 
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div; 
+
+// Baseplate constants
+
+// Baseplate top part height (weigthed=false part)
+bp_h_top = 4.65;
+
+// Baseplate bottom part height (part added with weigthed=true)
+bp_h_bot = 6.4;
+
+// Baseplate z offset
+bp_z_offset = 0.1;
+
+// Baaseplate fitting clearance
+bp_clear = 0.5;
+
+// Baseplate countersink hole biggest diameter
+bp_csink_d1 = 8.5;
+
+// Baseplate countersink hole height
+bp_csink_h = 2.5;
+
+// Baseplate bottom cutout rectangle size
+bp_cut_size = 21.4;
+
+// Baseplate bottom cutout rectangle depth
+bp_cut_depth = 4;
+
+// Baseplate bottom cutout rounded thingy width
+bp_rcut_width = 8.5;
+
+// Baseplate bottom cutout rounded thingy left
+bp_rcut_length = 4.25;
+
+// Baseplate bottom cutout rounded thingy depth
+bp_rcut_depth = 2;
