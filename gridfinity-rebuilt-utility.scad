@@ -405,8 +405,10 @@ module baseplate(gridx, gridy, length, div_base_x, div_base_y, style_hole, weigh
 
                 pattern_linear(gridx, gridy, length)
                 union() {
-                    rotate([180,0,0])
-                    block_base_hole(style_hole, bp_h_bot - bp_z_offset - bp_csink_h);
+                    if (style_hole != 0) {
+                        rotate([180,0,0])
+                        block_base_hole(style_hole, bp_h_bot - bp_z_offset - bp_csink_h);
+                    }
 
                     if (bottom_cutout) {
                         translate([0,0,-1*(bp_h_bot + bp_z_offset)])
