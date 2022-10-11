@@ -17,8 +17,6 @@ $fs = 0.25;
 gridx = 2;  
 // number of bases along y-axis   
 gridy = 2;  
-// bin height. See bin height information and "gridz_define" below.  
-gridz = 6;   
 // base unit
 length = 42;
 
