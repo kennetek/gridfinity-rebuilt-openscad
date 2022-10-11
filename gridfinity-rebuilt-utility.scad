@@ -299,14 +299,14 @@ module block_cutter(x,y,w,h,t,s) {
         
         if (xcutfirst)
         color("indigo")
-        translate([ylen/2,0,xlen/2])
+        translate([ylen/2+0.001,0,xlen/2+0.001])
         rotate([0,90,0])
         transform_main(2*ylen)
         profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
         
         if (xcutlast)
         color("indigo")
-        translate([ylen/2,0,-xlen/2])
+        translate([ylen/2+0.001,0,-xlen/2+0.001])
         rotate([0,-90,0])
         transform_main(2*ylen)
         profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
