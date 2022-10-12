@@ -20,76 +20,67 @@ gridy = 2;
 // base unit
 length = 42;
 
+/* [Fit to Drawer] */
+// minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
+distancex = 0; 
+// minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
+distancey = 0; 
+
 /* [Styles] */
 
 // baseplate styles
-style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized]
+style_plate = 1; // [0: thin, 1:weighted, 2:skeletonized]
 
 // enable magnet hole
-style_magnet = true; 
+enable_magnet = true; 
 
 // hole styles
-style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
+style_hole = 1; // [0:none, 1:contersink, 2:counterbore]
 
 
 // ===== Commands ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, style_plate, style_magnet, style_hole);
+gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
 
-// Baseplate modules
-module gridfinityBaseplate(gridx, gridy, length, sp, sm, sh) {
+
+
+// ===== Construction ===== //
+
+module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     
-    off = (sp==0?0:sp==1?bp_h_bot:1+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
+    assert(gridx > 0 || dx > 0, "Must have positive x grid amount!");
+    assert(gridy > 0 || dy > 0, "Must have positive y grid amount!");
+    gx = gridx == 0 ? floor(dix/length) : gridx; 
+    gy = gridy == 0 ? floor(diy/length) : gridy; 
+    dx = max(gx*length-0.5, dix);
+    dy = max(gy*length-0.5, diy);
+    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
 
     difference() {
         translate([0,0,h_base])
         mirror([0,0,1])
-        rounded_rectangle(gridx*length-0.5, gridy*length-0.5, h_base+off, r_base);
+        rounded_rectangle(dx, dy, h_base+off, r_base);
         
-        gridfinityBase(gridx, gridy, length, 1, 1, 0, 0.5, false);
+        gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
         
         translate([0,0,h_base-0.6])
-        rounded_rectangle(gridx*length*2, gridy*length*2, h_base*2, r_base);
+        rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
-        pattern_linear(gridx, gridy, length) {
-            if (sm)
-            block_base_hole(1);
+        pattern_linear(gx, gy, length) {
+            if (sm) block_base_hole(1);
 
-            if (sp == 1) {
+            if (sp == 1)
                 translate([0,0,-off])
                 cutter_weight();
-            } else if (sp == 2) {
+            else if (sp == 2)
                 linear_extrude(10*(h_base+off), center = true)
                 profile_skeleton();
-            }
             
-            if (sh == 1) {
-                pattern_circular(4) 
-                translate([d_hole/2, d_hole/2, 0]) {
-                    cylinder(r = r_hole1+d_clear, h = 10*(h_base+off), center = true);
-                    
-                    translate([0,0,d_cs-off])
-                    mirror([0,0,1])
-                    hull() { 
-                        cylinder(h = d_cs+10, r=r_hole1+d_clear);
-                        translate([0,0,d_cs])
-                        cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
-                    }
-                }
-            } else if (sh == 2) {
-                pattern_circular(4)
-                translate([d_hole/2,d_hole/2,-off]) {
-                    cylinder(h=10*(h_base+off), r=r_hole1+d_clear, center=true);
-                    difference() {
-                        cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
-                        copy_mirror([0,1,0])
-                        translate([-1.5*r_cb,r_hole1+0.1,h_cb]) 
-                        cube([r_cb*3,r_cb*3, 0.4]);
-                    }
-                }
+            translate([0,0,-off]) { 
+                if (sh == 1) cutter_countersink();
+                else if (sh == 2) cutter_counterbore();
             }
-            
         }
     }       
 }
@@ -105,6 +96,34 @@ module cutter_weight(){
             square([bp_rcut_width, bp_rcut_length], center=true);
             translate([0,bp_rcut_length/2,0])
             circle(d=bp_rcut_width);
+        }
+    }
+}
+
+module cutter_countersink() {
+    pattern_circular(4) 
+    translate([d_hole/2, d_hole/2, 0]) {
+        cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
+        
+        translate([0,0,d_cs])
+        mirror([0,0,1])
+        hull() { 
+            cylinder(h = d_cs+10, r=r_hole1+d_clear);
+            translate([0,0,d_cs])
+            cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
+        }
+    }
+}
+
+module cutter_counterbore() {
+    pattern_circular(4)
+    translate([d_hole/2,d_hole/2,0]) {
+        cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
+        difference() {
+            cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
+            copy_mirror([0,1,0])
+            translate([-1.5*r_cb,r_hole1+0.1,h_cb]) 
+            cube([r_cb*3,r_cb*3, 0.4]);
         }
     }
 }

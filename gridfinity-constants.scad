@@ -78,3 +78,6 @@ r_cb = 2.75;
 
 // baseplate counterbore depth
 h_cb = 3;
+
+// minimum baseplate thickness (when skeletonized)
+h_skel = 1; 
