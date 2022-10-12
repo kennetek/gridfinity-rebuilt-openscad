@@ -49,23 +49,8 @@ d_magic = -2*d_clear-2*d_wall+d_div;
 
 // Baseplate constants
 
-// Baseplate top part height (weigthed=false part)
-bp_h_top = 4.65;
-
 // Baseplate bottom part height (part added with weigthed=true)
 bp_h_bot = 6.4;
-
-// Baseplate z offset
-bp_z_offset = 0.1;
-
-// Baaseplate fitting clearance
-bp_clear = 0.5;
-
-// Baseplate countersink hole biggest diameter
-bp_csink_d1 = 8.5;
-
-// Baseplate countersink hole height
-bp_csink_h = 2.5;
 
 // Baseplate bottom cutout rectangle size
 bp_cut_size = 21.4;
@@ -81,3 +66,15 @@ bp_rcut_length = 4.25;
 
 // Baseplate bottom cutout rounded thingy depth
 bp_rcut_depth = 2;
+
+// countersink diameter for baseplate
+d_cs = 2.5; 
+
+// radius of cutout for skeletonized baseplate
+r_skel = 2; 
+
+// baseplate counterbore radius
+r_cb = 2.75;
+
+// baseplate counterbore depth
+h_cb = 3;

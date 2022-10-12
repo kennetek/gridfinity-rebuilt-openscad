@@ -79,7 +79,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole, block_scale=1, final_cut=true) {
+module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -91,15 +91,14 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, block_scale=1, final_cut=tr
     rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
 
     intersection(){
-        if(final_cut) {
+        if (final_cut) 
         translate([0,0,-1])
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
-        }
+        
         render()
         difference() {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
-            scale([block_scale,block_scale,1])
-            block_base_solid(dbnx, dbny, l);
+            block_base_solid(dbnx, dbny, l, off);
             
             if (style_hole > 0)
             pattern_linear(gx, gy, l)
@@ -108,25 +107,26 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, block_scale=1, final_cut=tr
     }
 }
 
-module block_base_solid(dbnx, dbny, l) {
+module block_base_solid(dbnx, dbny, l, o) {
     xx = dbnx*l-0.05; 
     yy = dbny*l-0.05; 
+    oo = (o/2)*(sqrt(2)-1);
     translate([0,0,h_base])
     mirror([0,0,1])
     union() {
         hull() {
-            rounded_rectangle(xx-2*r_c2-2*r_c1,yy-2*r_c2-2*r_c1, h_base, r_fo3/2);
-            rounded_rectangle(xx-2*r_c2, yy-2*r_c2, h_base-r_c1, r_fo2/2);
+            rounded_rectangle(xx-2*r_c2-2*r_c1+o,yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
+            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2/2);
         }
         hull() {
-            rounded_rectangle(xx-2*r_c2, yy-2*r_c2,r_c2, r_fo2/2);
+            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o,r_c2+oo, r_fo2/2);
             mirror([0,0,1])
-            rounded_rectangle(xx, yy, h_bot/2, r_fo1/2);
+            rounded_rectangle(xx+o, yy+o, h_bot/2+oo, r_fo1/2);
         }
     }
 }
 
-module block_base_hole(style_hole, cs_z=0) {
+module block_base_hole(style_hole) {
     pattern_circular(4) 
     translate([d_hole/2, d_hole/2, 0])
     union() {
@@ -140,11 +140,6 @@ module block_base_hole(style_hole, cs_z=0) {
         }
         if (style_hole > 1)
         cylinder(h = 3*h_base, r = r_hole1, center=true);
-
-        if (style_hole == 4 && cs_z != 0)
-        translate([0,0,cs_z])
-        cylinder(bp_csink_h, d2=bp_csink_d1, r1=r_hole1);
-
     }
 }
 
@@ -383,56 +378,6 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
     
-}
-
-// Baseplate modules
-module baseplate(gridx, gridy, length, div_base_x, div_base_y, style_hole, weighted, bottom_cutout) {
-
-    scale_factor = (bp_clear / (length /100)) /100 + 1;
-
-    union() {
-        difference(){
-            rounded_rectangle(gridx*length, gridy*length, bp_h_top + bp_z_offset - 0.001, r_base);
-            translate([0,0,-bp_z_offset])
-
-            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, 0, scale_factor, false);
-        }
-
-        if(weighted) {
-            difference() {
-                translate([0,0,-1*(bp_h_bot - bp_clear)])
-                rounded_rectangle(gridx*length, gridy*length, bp_h_bot, r_base);
-
-                pattern_linear(gridx, gridy, length)
-                union() {
-                    if (style_hole != 0) {
-                        rotate([180,0,0])
-                        block_base_hole(style_hole, bp_h_bot - bp_z_offset - bp_csink_h);
-                    }
-
-                    if (bottom_cutout) {
-                        translate([0,0,-1*(bp_h_bot + bp_z_offset)])
-                        bottom_cutout();
-                    }
-                }
-            }
-        }        
-    }
-}
-
-module bottom_cutout(){
-    union() {
-        linear_extrude(bp_cut_depth)
-        square(bp_cut_size, center=true);
-        pattern_circular(4)
-        translate([0,10,0])
-        linear_extrude(bp_rcut_depth)
-        union() {
-            square([bp_rcut_width, bp_rcut_length], center=true);
-            translate([0,bp_rcut_length/2,0])
-            circle(d=bp_rcut_width);
-        }
-    }
 }
 
 // ==== Utilities =====
