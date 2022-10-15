@@ -255,7 +255,7 @@ module block_cutter(x,y,w,h,t,s) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
     
-    translate([0,ylen/2,h_base+h_bot+0.8])
+    translate([0,ylen/2,h_base+h_bot])
     rotate([90,0,-90]) {
     
     if (!zsmall && xlen - d_tabw > 4*r_f2 && t != 0) {
