@@ -46,3 +46,38 @@ a_tab = 36;
 
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div; 
+
+// Baseplate constants
+
+// Baseplate bottom part height (part added with weigthed=true)
+bp_h_bot = 6.4;
+
+// Baseplate bottom cutout rectangle size
+bp_cut_size = 21.4;
+
+// Baseplate bottom cutout rectangle depth
+bp_cut_depth = 4;
+
+// Baseplate bottom cutout rounded thingy width
+bp_rcut_width = 8.5;
+
+// Baseplate bottom cutout rounded thingy left
+bp_rcut_length = 4.25;
+
+// Baseplate bottom cutout rounded thingy depth
+bp_rcut_depth = 2;
+
+// countersink diameter for baseplate
+d_cs = 2.5; 
+
+// radius of cutout for skeletonized baseplate
+r_skel = 2; 
+
+// baseplate counterbore radius
+r_cb = 2.75;
+
+// baseplate counterbore depth
+h_cb = 3;
+
+// minimum baseplate thickness (when skeletonized)
+h_skel = 1; 
