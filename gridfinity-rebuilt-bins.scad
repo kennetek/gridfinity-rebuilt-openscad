@@ -48,6 +48,8 @@ enable_scoop = true;
 enable_zsnap = false;
 // enable upper lip for stacking other bins
 enable_lip = true;
+// remove flat bottom
+lite_mode = true;
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
@@ -69,8 +71,8 @@ div_base_y = 0;
 
 // ===== Commands ===== //
 
-color("tomato") {
-
+/*
+*color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
 
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
@@ -78,6 +80,25 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsna
 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 
 }
+*/
+
+color("tomato")
+gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
+    if(lite_mode)
+         block_base_cutout();
+}
+
+if(lite_mode) {
+   difference() {
+       gridfinityBase(gridx, gridy, length, div_base_x,    div_base_y, style_hole);
+      block_base_cutout();
+   }
+}
+else {
+gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
+}
+
 
 
 // ===== Examples =====
