@@ -20,7 +20,7 @@ A ground-up port (with a few extra features) of the stock [gridfinity](https://w
 - togglable holes (with togglable supportless printing hole structures)
 - manual compartment construction (make the most wacky bins imaginable)
 - togglable lip (if you don't care for stackability)
-- dividding bases (if you want a 1.5 unit long bin, for instance)
+- dividing bases (if you want a 1.5 unit long bin, for instance)
 
 ### Printable Holes
 The printable holes allow your slicer to bridge the gap inside the countersunk magnet hole (using the technique shown [here](https://www.youtube.com/watch?v=W8FbHTcB05w)) so that supports are not needed.
