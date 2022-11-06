@@ -132,7 +132,7 @@ module block_base_solid(dbnx, dbny, l, o) {
 module block_base_hole(style_hole, o) {
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
-    pattern_circular(4) 
+    pattern_circular(abs(d_hole)<0.001?1:4) 
     translate([d_hole/2, d_hole/2, 0])
     union() {
         difference() {
