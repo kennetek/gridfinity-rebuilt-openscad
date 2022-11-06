@@ -27,6 +27,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
     $gxx = gx;
     $gyy = gy;
     $dh = h; 
+    $dh0 = h0; 
     color("tomato") {
     difference() {
         color("firebrick") 
@@ -61,7 +62,7 @@ module cut(x=0, y=0, w=1, h=1, t=1, s=true) {
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
-    translate([0,0,height_internal==0?$dh+h_base:height_internal+h_base])
+    translate([0,0,$dh0==0?$dh+h_base:$dh0+h_base])
     cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
     children();
 } 
@@ -87,6 +88,7 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
     xx = gx*l-0.5;
     yy = gy*l-0.5;
     
+    if (final_cut)
     translate([0,0,h_base])
     rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
 
@@ -102,12 +104,12 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
             
             if (style_hole > 0)
             pattern_linear(gx, gy, l)
-            block_base_hole(style_hole);
+            block_base_hole(style_hole, off);
         }
     }
 }
 
-module block_base_solid(dbnx, dbny, l, o) {
+module block_base_solid(dbnx, dbny, l, o) { 
     xx = dbnx*l-0.05; 
     yy = dbny*l-0.05; 
     oo = (o/2)*(sqrt(2)-1);
@@ -115,56 +117,35 @@ module block_base_solid(dbnx, dbny, l, o) {
     mirror([0,0,1])
     union() {
         hull() {
-            rounded_rectangle(xx-2*r_c2-2*r_c1+o,yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
+            rounded_rectangle(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
             rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2/2);
         }
+        translate([0,0,oo])
         hull() {
-            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o,r_c2+oo, r_fo2/2);
+            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2/2);
             mirror([0,0,1])
-            rounded_rectangle(xx+o, yy+o, h_bot/2+oo, r_fo1/2);
+            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
         }
     }
 }
 
-module block_base_hole(style_hole) {
+module block_base_hole(style_hole, o) {
+    r1 = r_hole1-o/2;
+    r2 = r_hole2-o/2;
     pattern_circular(4) 
     translate([d_hole/2, d_hole/2, 0])
     union() {
         difference() {
-            cylinder(h = 2*(h_hole+(style_hole==3?0.2:0)), r=r_hole2, center=true);
+            cylinder(h = 2*(h_hole-o+(style_hole==3?0.2:0)), r=r2, center=true);
 
             if (style_hole==3)
             copy_mirror([0,1,0])
-            translate([-1.5*r_hole2,r_hole1+0.1,h_hole]) 
-            cube([r_hole2*3,r_hole2*3, 0.4]);
+            translate([-1.5*r2,r1+0.1,h_hole-o]) 
+            cube([r2*3,r2*3, 0.4]);
         }
         if (style_hole > 1)
-        cylinder(h = 3*h_base, r = r_hole1, center=true);
+        cylinder(h = 2*h_base-o, r = r1, center=true);
     }
-}
-
-module block_base_cutout(){
-    squidge=-2.5;
-    translate([0,0,h_base-2.5])
-    //rounded_rectangle(gridx*length-0.5+0.002, gridy*length-0.5+0.002, h_bot/1.5, r_fo1/2+0.001);
-    pattern_linear(gridx, gridy, length) 
-
-    render()
-        difference() {
-            translate([0,0,h_base])
-            mirror([0,0,1])
-            union() {
-                hull() {
-                    rounded_square(squidge+length-0.5-2*r_c2-2*r_c1, h_base+0.5, r_fo3/2);
-                    rounded_square(squidge+length-0.5-2*r_c2, h_base-r_c1+0.5, r_fo2/2);
-                }
-                hull() {
-                    rounded_square(squidge+length-0.5-2*r_c2, r_c2, r_fo2/2);
-                    mirror([0,0,1])
-                    rounded_square(squidge+length-0.5, h_bot/2, r_fo1/2);
-                }
-            }
-        }
 }
 
 module profile_wall_sub_sub() {

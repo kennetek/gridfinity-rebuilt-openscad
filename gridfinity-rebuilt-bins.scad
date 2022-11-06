@@ -27,9 +27,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 2;  
+gridx = 1;  
 // number of bases along y-axis   
-gridy = 2;  
+gridy = 1;  
 // bin height. See bin height information and "gridz_define" below.  
 gridz = 6;   
 // base unit
@@ -48,7 +48,7 @@ enable_scoop = true;
 enable_zsnap = false;
 // enable upper lip for stacking other bins
 enable_lip = true;
-// remove flat bottom
+// remove flat bottom to save material
 lite_mode = true;
 
 /* [Other] */
@@ -61,7 +61,7 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 height_internal = 0; 
 
 /* [Base] */
-style_hole = 1; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
+style_hole = 3; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
 // number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
@@ -71,8 +71,7 @@ div_base_y = 0;
 
 // ===== Commands ===== //
 
-/*
-*color("tomato") {
+color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
 
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
@@ -80,25 +79,6 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsna
 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 
 }
-*/
-
-color("tomato")
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
-    if(lite_mode)
-         block_base_cutout();
-}
-
-if(lite_mode) {
-   difference() {
-       gridfinityBase(gridx, gridy, length, div_base_x,    div_base_y, style_hole);
-      block_base_cutout();
-   }
-}
-else {
-gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
-}
-
 
 
 // ===== Examples =====
