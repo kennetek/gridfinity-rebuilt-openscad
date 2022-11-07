@@ -48,8 +48,6 @@ enable_scoop = true;
 enable_zsnap = false;
 // enable upper lip for stacking other bins
 enable_lip = true;
-// remove flat bottom to save material
-lite_mode = true;
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
