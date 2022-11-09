@@ -129,19 +129,19 @@ module block_base_solid(dbnx, dbny, l, o) {
     }
 }
 
-module block_base_hole(style_hole, o) {
+module block_base_hole(style_hole, o=0) {
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
     pattern_circular(abs(d_hole)<0.001?1:4) 
     translate([d_hole/2, d_hole/2, 0])
     union() {
         difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?0.2:0)), r=r2, center=true);
+            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r=r2, center=true);
 
             if (style_hole==3)
             copy_mirror([0,1,0])
             translate([-1.5*r2,r1+0.1,h_hole-o]) 
-            cube([r2*3,r2*3, 0.4]);
+            cube([r2*3,r2*3, 10]);
         }
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);

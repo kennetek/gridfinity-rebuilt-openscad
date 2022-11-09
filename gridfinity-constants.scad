@@ -24,6 +24,8 @@ r_hole2 = 3.25;
 d_hole = 26;    
 // magnet hole depth
 h_hole = 2.4;   
+// slit depth (printer layer height)
+h_slit = 0.2; 
 
 // top edge fillet radius
 r_f1 = 0.6;     
