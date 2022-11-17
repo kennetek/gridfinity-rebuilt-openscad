@@ -2,7 +2,9 @@
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
-A ground-up port (with a few extra features) of the stock [gridfinity](https://www.youtube.com/watch?v=ra_9zU-mnl8) bins in OpenSCAD. Open to feedback, because I could not feasibly test all combinations of bins. I tried my best to exactly match the original gridfinity dimensions, but some of the geometry is slightly incorrect (mainly fillets). However, I think they are negligible differences, and will not appear in the printed model. Full documentation can be found at the project's [website](https://kennetek.github.io/gridfinity-rebuilt-openscad/).
+A ground-up port (with a few extra features) of the stock [gridfinity](https://www.youtube.com/watch?v=ra_9zU-mnl8) bins in OpenSCAD. Open to feedback, because I could not feasibly test all combinations of bins. I tried my best to exactly match the original gridfinity dimensions, but some of the geometry is slightly incorrect (mainly fillets). However, I think they are negligible differences, and will not appear in the printed model. 
+
+Full documentation can be found at the project's [website](https://kennetek.github.io/gridfinity-rebuilt-openscad/).
 
 [<img src="./images/base_dimension.gif" width="320">]()
 [<img src="./images/compartment_dimension.gif" width="320">]()
