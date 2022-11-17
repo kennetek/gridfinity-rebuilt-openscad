@@ -1,4 +1,14 @@
-include <../gridfinity-rebuilt-utility.scad>
+include <gridfinity-rebuilt-utility.scad>
+
+// ===== INFORMATION ===== //
+/*
+ IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
+
+https://github.com/kennetek/gridfinity-rebuilt-openscad
+
+*/
+
+// ===== PARAMETERS ===== //
 
 /* [Special Variables] */
 $fa = 8;
@@ -7,18 +17,7 @@ $fs = 0.25;
 /* [Bin or Base] */
 type = 0; // [0:bin, 1:base]
 
-// ===== COMMANDS ===== //
-
-color("tomato")
-
-if (type != 0) gridfinityBaseVase(); // Generate a single base
-else gridfinityVase(); // Generate the bin
-
-// ==================== // 
-
-
 /* [Printer Settings] */
-
 // printer nozzle size
 nozzle = 0.6; 
 // slicer layer size
@@ -27,7 +26,6 @@ layer = 0.35;
 bottom_layer = 3;
 
 /* [General Settings] */
-
 // number of bases along x-axis 
 gridx = 2;
 // number of bases along y-axis  
@@ -55,26 +53,26 @@ enable_inset = true;
 // "pinches" the top lip of the bin, for added strength
 enable_pinch = true; 
 
-
 /* [Styles] */
-
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
-
 // how tabs are implemented
 style_tab = 0; // [0:continuous, 1:broken, 2:auto, 3:right, 4:center, 5:left, 6:none]
-
 // where to put X cutouts for attaching bases
 style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
    
 // tab angle
-a_tab = 40;         
+a_tab = 40;      
 
 
-// ===== Include ===== //
+// ===== IMPLEMENTATION ===== //
+
+color("tomato")
+if (type != 0) gridfinityBaseVase(); // Generate a single base
+else gridfinityVase(); // Generate the bin   
 
 
-// ===== Constants ===== //
+// ===== CONSTRUCTION ===== //
 
 d_bottom = layer*bottom_layer;
 x_l = length/2; 
@@ -94,7 +92,6 @@ spacing = (gridx*length-0.5)/(n_divx);
 shift = n_st==3?-1:n_st==5?1:0;
 shiftauto = function (a,b) n_st!=2?0:a==1?-1:a==b?1:0;
 
-
 xAll = function (a,b) true; 
 xCorner = function(a,b) (a==1||a==gridx)&&(b==1||b==gridy);
 xEdge = function(a,b) (a==1)||(a==gridx)||(b==1)||(b==gridy);
@@ -102,7 +99,6 @@ xAuto = function(a,b) xCorner(a,b) || (a%2==1 && b%2 == 1);
 xNone = function(a,b) false;
 xFunc = [xAll, xCorner, xEdge, xAuto, xNone];
 
-// ===== Modules ===== //
 
 module gridfinityVase() {
     $dh = d_height; 

@@ -3,3 +3,6 @@ ignore/
 gridfinity-rebuilt.json
 stl/
 batch/
+docs/
+site/
+mkdocs.yml

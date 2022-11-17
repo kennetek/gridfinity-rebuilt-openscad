@@ -1,12 +1,14 @@
 include <gridfinity-rebuilt-utility.scad>
 
-// ===== Info ===== //
+// ===== INFORMATION ===== //
 /*
  IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
 
 */
+
+// ===== PARAMETERS ===== //
 
 /* [Setup Parameters] */
 $fa = 8;
@@ -38,14 +40,14 @@ enable_magnet = true;
 style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
 
-// ===== Commands ===== //
+// ===== IMPLEMENTATION ===== //
 
 color("tomato") 
 gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
 
 
 
-// ===== Construction ===== //
+// ===== CONSTRUCTION ===== //
 
 module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     
@@ -85,7 +87,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     }       
 }
 
-module cutter_weight(){
+module cutter_weight() {
     union() {
         linear_extrude(bp_cut_depth*2,center=true)
         square(bp_cut_size, center=true);

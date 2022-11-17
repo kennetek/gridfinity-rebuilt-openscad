@@ -1,5 +1,15 @@
 include <gridfinity-rebuilt-utility.scad>
 
+// ===== INFORMATION ===== //
+/*
+ IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
+
+https://github.com/kennetek/gridfinity-rebuilt-openscad
+
+*/
+
+// ===== PARAMETERS ===== //
+
 /* [Setup Parameters] */
 $fa = 8;
 $fs = 0.25;
@@ -40,13 +50,15 @@ div_base_x = 0;
 div_base_y = 0; 
 
 
+// ===== IMPLEMENTATION ===== //
 
 // Input all the cutter types in here
 module cutterInput() {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = false);
 }
 
-// Does the necessary operations to get the base geometry
+// ===== CONSTRUCTION ===== //
+
 color("tomato") 
 difference() {
     union() {

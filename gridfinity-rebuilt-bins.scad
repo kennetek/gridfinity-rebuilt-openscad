@@ -1,6 +1,6 @@
 include <gridfinity-rebuilt-utility.scad>
 
-// ===== Info ===== //
+// ===== INFORMATION ===== //
 /*
  IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
  the magnet holes can have an extra cut in them to make it easier to print without supports
@@ -20,6 +20,8 @@ include <gridfinity-rebuilt-utility.scad>
 https://github.com/kennetek/gridfinity-rebuilt-openscad
 
 */
+
+// ===== PARAMETERS ===== //
 
 /* [Setup Parameters] */
 $fa = 8;
@@ -67,7 +69,7 @@ div_base_y = 0;
 
 
 
-// ===== Commands ===== //
+// ===== IMPLEMENTATION ===== //
 
 color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
@@ -79,7 +81,7 @@ gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 }
 
 
-// ===== Examples =====
+// ===== EXAMPLES ===== //
 
 // 3x3 even spaced grid
 /*
