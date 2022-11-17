@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>Gridfinity Rebuilt</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> Gridfinity Rebuilt
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="bins/">Bins</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="baseplates/">Baseplates</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="lite/">Lite</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="vase/">Vase</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="constants/">Constants</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="utility/">Utility</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">Gridfinity Rebuilt</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="introduction">Introduction</h2>
+<p>Gridfinity rebuilt aims to remake the brilliant Gridfinity project from <a href="https://www.youtube.com/c/ZackFreedman/about">Zack Freedman</a> in a more robust and open-source way than the original Fusion 360 files. Many major CAD suites struggle with making parametric models constructed from linear patterns, due to changing fillet edges and seams. Thus, a pure mathematical approach using OpenSCAD can allow a single solution for all possible bin variants. </p>
+<p>The project has expanded into more eccentric models that use modules from the original generator. This wiki aims to document these modules in great detail. </p>
+<p>Models are generated subtractively. First, the solid bin and bases are constructed, and then the compartments and holes are removed. This allows for internal fillets that nearly match the originals. However, they are not exactly perfect. There are some fillets that are too small and too difficult to be worth implementing, as most printers do not have a high enough resolution for it to matter. </p>
+<h2 id="getting-started">Getting Started</h2>
+<p>For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the <a href="https://openscad.org/downloads.html">development snapshots</a>. To enable the feature, go to Edit &gt; Preferences &gt; Features &gt; fast-csg. This can speed up rendering from 10 minutes down to a couple of seconds, even for comically large bins. It is not a requirement to use development versions of OpenSCAD. </p>
+<p>Most files will come ready-to-run, so parameters can be changed using OpenSCAD's built-in customizer window, and the bins will automatically generate. However, all modules are packed up nicely, so any module can be imported into other files or have more custom modifications beyond tweaking the parameters. </p>
+<h2 id="script-structure">Script Structure</h2>
+<ul>
+<li>Information (Imports / Script Details)</li>
+<li>Parameters (Shown in Customizer)</li>
+<li>Implementation (Executing the Parameters)</li>
+<li>Construction (Script-Specific Modules and Constants)</li>
+<li>Examples</li>
+</ul>
+<p>The two files which do not follow these conventions are <code>gridfinity-rebuilt-utility</code> and <code>gridfinity-rebuilt-constants</code>. These files are not meant to be exposed to the user, except for special requirements that the normal parameters cannot handle. Their respective wiki pages go into more depth. </p>
+<p><strong>NOTE: This documentation is a work in progress, just like the rest of the repository, so parts may still be under construction.</strong></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="bins/" class="btn btn-neutral float-right" title="Bins">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="bins/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.4.2
+Build Date UTC : 2022-11-17 19:51:42.787834+00:00
+-->
