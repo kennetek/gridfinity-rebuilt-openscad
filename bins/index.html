@@ -47,17 +47,23 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Bins</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#gridfinityinit-gridx-gridy-height-height_internal-length">gridfinityInit (gridx, gridy, height, height_internal, length)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#script-parameters">Script Parameters</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#height-gridz-gridz_define-enable_lip-enable_zsnap">height (gridz, gridz_define, enable_lip, enable_zsnap)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gridfinityinit-gridx-gridy-height-height_internal-length">gridfinityInit (gridx, gridy, height, height_internal, length)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole">gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#height-gridz-gridz_define-enable_lip-enable_zsnap">height (gridz, gridz_define, enable_lip, enable_zsnap)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#cutequal-n_divx-n_divy-style_tab-enable_scoop">cutEqual (n_divx, n_divy, style_tab, enable_scoop)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole">gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#cut-x-y-w-h-t-s">cut (x, y, w, h, t, s)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#cutequal-n_divx-n_divy-style_tab-enable_scoop">cutEqual (n_divx, n_divy, style_tab, enable_scoop)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#cut_move-x-y-w-h">cut_move (x, y, w, h)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#cut-x-y-w-h-t-s">cut (x, y, w, h, t, s)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cut_move-x-y-w-h">cut_move (x, y, w, h)</a>
+    </li>
+        </ul>
     </li>
     </ul>
                 </li>
@@ -106,9 +112,99 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="gridfinity-rebuilt-bins">gridfinity-rebuilt-bins</h1>
-<p>testing</p>
+<p>Generates stock bins, with a great number of variations. </p>
+<p><img alt="Bin" src="../images/custom_dimension.gif" /></p>
+<h2 id="script-parameters">Script Parameters</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gridx</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>number of bases along the x-axis</td>
+</tr>
+<tr>
+<td>gridy</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>number of bases along the y-axis</td>
+</tr>
+<tr>
+<td>gridz</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>bin height. See bin height information and "gridz_define" below.</td>
+</tr>
+<tr>
+<td>length</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)</td>
+</tr>
+<tr>
+<td>divx</td>
+<td>{ n&gt;0 | n∈Z }</td>
+<td>number of compartments along X</td>
+</tr>
+<tr>
+<td>divy</td>
+<td>{ n&gt;0 | n∈Z }</td>
+<td>number of compartments along Y</td>
+</tr>
+<tr>
+<td>enable_scoop</td>
+<td>boolean</td>
+<td>toggles the fillet on bottom edge for easy removal of items</td>
+</tr>
+<tr>
+<td>enable_zsnap</td>
+<td>boolean</td>
+<td>automatically snap the bin size to the nearest 7mm increment. <br> default: true</td>
+</tr>
+<tr>
+<td>enable_lip</td>
+<td>boolean</td>
+<td>if you are not stacking the bin, you can disable the top lip <br> to save space. default: true</td>
+</tr>
+<tr>
+<td>gridz_define</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters</td>
+</tr>
+<tr>
+<td>height_internal</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>height of the internal block. <br> Can be lower than bin height to save filament on custom bins. <br> default of 0 means use the calculated height.</td>
+</tr>
+<tr>
+<td>style_tab</td>
+<td>{ 0, 1, 2, 3, 4, 5 }</td>
+<td>how the tabs for labels are generated. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
+</tr>
+<tr>
+<td>style_hole</td>
+<td>{ 0, 1, 2, 3 }</td>
+<td>the style of holes in the bases <br>     • (0) No holes <br>     • (1) Magnet holes only <br>     • (2) Magnet and screw holes - no printable slit <br>     • (3) Magnet and screw holes - with printable slit</td>
+</tr>
+<tr>
+<td>div_base_x</td>
+<td>{ n&gt;=0 | n∈Z }</td>
+<td>number of divisions per 1 unit of base along the X axis. <br>(default 1, only use integers. <br>0 means automatically guess the division)</td>
+</tr>
+<tr>
+<td>div_base_y</td>
+<td>{ n&gt;=0 | n∈Z }</td>
+<td>number of divisions per 1 unit of base along the Y axis. <br>(default 1, only use integers. <br>0 means automatically guess the division)</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<h2 id="modules">Modules</h2>
 <hr />
-<h2 id="gridfinityinit-gridx-gridy-height-height_internal-length"><code>gridfinityInit (gridx, gridy, height, height_internal, length)</code></h2>
+<h3 id="gridfinityinit-gridx-gridy-height-height_internal-length"><code>gridfinityInit (gridx, gridy, height, height_internal, length)</code></h3>
 <p>Initializes the top part of the bin (walls and solid section). All bins have to use this module, and have the compartments cut out from it. </p>
 <table>
 <thead>
@@ -142,7 +238,7 @@
 <tr>
 <td>length</td>
 <td>{ n&gt;0 | n∈R }</td>
-<td>length of one unit of the base. <br> default: 42 <br> (The Answer to the Ultimate Question of Life, the Universe, and Everything.)</td>
+<td>length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)</td>
 </tr>
 </tbody>
 </table>
@@ -152,7 +248,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h2 id="height-gridz-gridz_define-enable_lip-enable_zsnap"><code>height (gridz, gridz_define, enable_lip, enable_zsnap)</code></h2>
+<h3 id="height-gridz-gridz_define-enable_lip-enable_zsnap"><code>height (gridz, gridz_define, enable_lip, enable_zsnap)</code></h3>
 <p>Calculates the proper height for bins. </p>
 <table>
 <thead>
@@ -171,12 +267,12 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 <tr>
 <td>gridz_define</td>
 <td>{ n&gt;0 | n∈R }</td>
-<td>determine what the variable "gridz" applies to based on your use case. default: 0. <br>     • (0) gridz is the height of bins in units of 7mm increments - Zack's method <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters</td>
+<td>determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters</td>
 </tr>
 <tr>
 <td>enable_lip</td>
 <td>boolean</td>
-<td>if you are not stacking the bin, you can disable the top lip to save space. <br> default: true</td>
+<td>if you are not stacking the bin, you can disable the top lip <br> to save space. default: true</td>
 </tr>
 <tr>
 <td>enable_zsnap</td>
@@ -192,7 +288,7 @@ height(6);
 height(30, 1, true, false); 
 </code></pre>
 <hr />
-<h2 id="gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole"><code>gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</code></h2>
+<h3 id="gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole"><code>gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</code></h3>
 <p>Generates the bases for bins. Has various different hole styles, and can be subdivided.</p>
 <table>
 <thead>
@@ -239,7 +335,7 @@ height(30, 1, true, false);
 gridfinityBase(3, 3, 42, 0, 0, 1);
 </code></pre>
 <hr />
-<h2 id="cutequal-n_divx-n_divy-style_tab-enable_scoop"><code>cutEqual (n_divx, n_divy, style_tab, enable_scoop)</code></h2>
+<h3 id="cutequal-n_divx-n_divy-style_tab-enable_scoop"><code>cutEqual (n_divx, n_divy, style_tab, enable_scoop)</code></h3>
 <p>Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments. </p>
 <table>
 <thead>
@@ -263,7 +359,7 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 <tr>
 <td>style_tab</td>
 <td>{ 0, 1, 2, 3, 4, 5 }</td>
-<td>how the tabs for labels are generated. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs, meaning left aligned tabs on the left edge, right aligned tabs on right edge, center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
+<td>how the tabs for labels are generated. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
 </tr>
 <tr>
 <td>enable_scoop</td>
@@ -278,7 +374,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h2 id="cut-x-y-w-h-t-s"><code>cut (x, y, w, h, t, s)</code></h2>
+<h3 id="cut-x-y-w-h-t-s"><code>cut (x, y, w, h, t, s)</code></h3>
 <p>Cuts a single compartment into the bin at the provided location with the provided attributes. The coordinate system for compartments originates (0,0) at the bottom left corner of the bin, where 1 unit is the length of 1 base. Positive X and positive Y are in the same direction as the global coordinate system.</p>
 <table>
 <thead>
@@ -310,9 +406,9 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 <td>Height of the compartment, in base units <br>(1 unit = 1 <code>length</code>)</td>
 </tr>
 <tr>
-<td>t</td>
+<td>style_tab</td>
 <td>{ 0, 1, 2, 3, 4, 5 }</td>
-<td>how the tabs for labels are generated for this specfic compartment. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs, meaning left aligned tabs on the left edge, right aligned tabs on right edge, center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
+<td>how the tabs for labels are generated for this compartment. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
 </tr>
 <tr>
 <td>s</td>
@@ -330,7 +426,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h2 id="cut_move-x-y-w-h"><code>cut_move (x, y, w, h)</code></h2>
+<h3 id="cut_move-x-y-w-h"><code>cut_move (x, y, w, h)</code></h3>
 <p>Moves all of its children from the global origin to the center of the area that a compartment would normally fill, and uses them to cut from the bin. This allows you to easily make custom cutouts in the bin.</p>
 <table>
 <thead>
