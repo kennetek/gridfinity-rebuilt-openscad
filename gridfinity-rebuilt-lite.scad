@@ -53,13 +53,9 @@ div_base_y = 0;
 // ===== IMPLEMENTATION ===== //
 
 // Input all the cutter types in here
-//color("tomato")
-//gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) {
-//    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = false);
-//}
 color("tomato")
-gridfinityLite(gridx=3, gridy=3, gridz=5, gridz_define=0, enable_lip=true, enable_zsnap=false, length=42, div_base_x=0, div_base_y=0, style_hole=0) {
-    cutEqual(n_divx=1, n_divy=1, style_tab=5, enable_scoop = false);
+gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) {
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = false);
 }
 
 // ===== CONSTRUCTION ===== //
