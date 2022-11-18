@@ -50,6 +50,16 @@
               </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Baseplates</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#script-parameters">Script Parameters</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gridfinitybaseplate">gridfinityBaseplate</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
@@ -62,10 +72,6 @@
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../constants/">Constants</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../utility/">Utility</a>
                 </li>
               </ul>
       </div>
@@ -91,7 +97,116 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="gridfinity-rebuilt-baseplate">gridfinity-rebuilt-baseplate</h1>
+<p>To round out the rebuilt catalog, we have baseplates. Originally, baseplates were not included as there was not anything really interesting to parameterize, unlike with bins. However, upon closer inspection, there is a couple things that would make peoples' lives easier. For instance, what is called here the "skeletonized" style, in that the baseplate is still thick to allow for magnets, but the center portion is removed. Additionally, being able to generate spacers for the sides of the bases, so that they fit perfectly inside your drawers.</p>
+<p><img alt="Bin" src="../images/baseplate.gif" /></p>
+<h2 id="script-parameters">Script Parameters</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gridx</td>
+<td>{ n&gt;=0 | n∈R }</td>
+<td>number of bases along the x-axis<br> If set to zero, will fill with as many <br>bases that fit within <code>distancex</code></td>
+</tr>
+<tr>
+<td>gridy</td>
+<td>{ n&gt;=0 | n∈R }</td>
+<td>number of bases along the y-axis<br> If set to zero, will fill with as many <br>bases that fit within <code>distancey</code></td>
+</tr>
+<tr>
+<td>length</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)</td>
+</tr>
+<tr>
+<td>distancex</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>minimum length of baseplate along x <br>alternatively, how large is the drawer along x <br>(leave zero to ignore)</td>
+</tr>
+<tr>
+<td>distancey</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>minimum length of baseplate along y <br>alternatively, how large is the drawer along y <br>(leave zero to ignore)</td>
+</tr>
+<tr>
+<td>style_plate</td>
+<td>{ 0, 1, 2 }</td>
+<td>the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed)</td>
+</tr>
+<tr>
+<td>enable_magnet</td>
+<td>boolean</td>
+<td>toggle hole for magnet on top</td>
+</tr>
+<tr>
+<td>style_hole</td>
+<td>{ 0, 1, 2 }</td>
+<td>the style of holes underneath the baseplate, if applicable <br>     • (0) none <br>     • (1) countersink <br>     • (2) counterbore</td>
+</tr>
+</tbody>
+</table>
+<h2 id="modules">Modules</h2>
+<h3 id="gridfinitybaseplate">gridfinityBaseplate</h3>
+<p>Generates a baseplate to use with gridfinity bins. </p>
+<p><strong> <code>gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole)</code> </strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gridx</td>
+<td>{ n&gt;=0 | n∈R }</td>
+<td>number of bases along the x-axis<br> If set to zero, will fill with as many <br>bases that fit within <code>distancex</code></td>
+</tr>
+<tr>
+<td>gridy</td>
+<td>{ n&gt;=0 | n∈R }</td>
+<td>number of bases along the y-axis<br> If set to zero, will fill with as many <br>bases that fit within <code>distancey</code></td>
+</tr>
+<tr>
+<td>length</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)</td>
+</tr>
+<tr>
+<td>distancex</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>minimum length of baseplate along x <br>alternatively, how large is the drawer along x <br>(leave zero to ignore)</td>
+</tr>
+<tr>
+<td>distancey</td>
+<td>{ n&gt;0 | n∈R }</td>
+<td>minimum length of baseplate along y <br>alternatively, how large is the drawer along y <br>(leave zero to ignore)</td>
+</tr>
+<tr>
+<td>style_plate</td>
+<td>{ 0, 1, 2 }</td>
+<td>the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed)</td>
+</tr>
+<tr>
+<td>enable_magnet</td>
+<td>boolean</td>
+<td>toggle hole for magnet on top</td>
+</tr>
+<tr>
+<td>style_hole</td>
+<td>{ 0, 1, 2 }</td>
+<td>the style of holes underneath the baseplate, if applicable <br>     • (0) none <br>     • (1) countersink <br>     • (2) counterbore</td>
+</tr>
+</tbody>
+</table>
               
             </div>
           </div><footer>

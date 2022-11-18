@@ -51,17 +51,17 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#gridfinityinit-gridx-gridy-height-height_internal-length">gridfinityInit (gridx, gridy, height, height_internal, length)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#gridfinityinit">gridfinityInit</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#height-gridz-gridz_define-enable_lip-enable_zsnap">height (gridz, gridz_define, enable_lip, enable_zsnap)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#height">height</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole">gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#gridfinitybase">gridfinityBase</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cutequal-n_divx-n_divy-style_tab-enable_scoop">cutEqual (n_divx, n_divy, style_tab, enable_scoop)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#cutequal">cutEqual</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cut-x-y-w-h-t-s">cut (x, y, w, h, t, s)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#cut">cut</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cut_move-x-y-w-h">cut_move (x, y, w, h)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#cut_move">cut_move</a>
     </li>
         </ul>
     </li>
@@ -82,10 +82,6 @@
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../constants/">Constants</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../utility/">Utility</a>
                 </li>
               </ul>
       </div>
@@ -204,8 +200,9 @@
 <p><br></p>
 <h2 id="modules">Modules</h2>
 <hr />
-<h3 id="gridfinityinit-gridx-gridy-height-height_internal-length"><code>gridfinityInit (gridx, gridy, height, height_internal, length)</code></h3>
+<h3 id="gridfinityinit">gridfinityInit</h3>
 <p>Initializes the top part of the bin (walls and solid section). All bins have to use this module, and have the compartments cut out from it. </p>
+<p><strong> <code>gridfinityInit (gridx, gridy, height, height_internal, length)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -248,8 +245,9 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h3 id="height-gridz-gridz_define-enable_lip-enable_zsnap"><code>height (gridz, gridz_define, enable_lip, enable_zsnap)</code></h3>
+<h3 id="height">height</h3>
 <p>Calculates the proper height for bins. </p>
+<p><strong> <code>height (gridz, gridz_define, enable_lip, enable_zsnap)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -288,8 +286,9 @@ height(6);
 height(30, 1, true, false); 
 </code></pre>
 <hr />
-<h3 id="gridfinitybase-gridx-gridy-length-div_base_x-div_base_y-style_hole"><code>gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</code></h3>
+<h3 id="gridfinitybase">gridfinityBase</h3>
 <p>Generates the bases for bins. Has various different hole styles, and can be subdivided.</p>
+<p><strong> <code>gridfinityBase (gridx, gridy, length, div_base_x, div_base_y, style_hole)</code>  </strong></p>
 <table>
 <thead>
 <tr>
@@ -335,8 +334,9 @@ height(30, 1, true, false);
 gridfinityBase(3, 3, 42, 0, 0, 1);
 </code></pre>
 <hr />
-<h3 id="cutequal-n_divx-n_divy-style_tab-enable_scoop"><code>cutEqual (n_divx, n_divy, style_tab, enable_scoop)</code></h3>
+<h3 id="cutequal">cutEqual</h3>
 <p>Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments. </p>
+<p><strong> <code>cutEqual (n_divx, n_divy, style_tab, enable_scoop)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -374,8 +374,9 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h3 id="cut-x-y-w-h-t-s"><code>cut (x, y, w, h, t, s)</code></h3>
+<h3 id="cut">cut</h3>
 <p>Cuts a single compartment into the bin at the provided location with the provided attributes. The coordinate system for compartments originates (0,0) at the bottom left corner of the bin, where 1 unit is the length of 1 base. Positive X and positive Y are in the same direction as the global coordinate system.</p>
+<p><strong> <code>cut (x, y, w, h, t, s)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -426,8 +427,9 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 </code></pre>
 <hr />
-<h3 id="cut_move-x-y-w-h"><code>cut_move (x, y, w, h)</code></h3>
+<h3 id="cut_move">cut_move</h3>
 <p>Moves all of its children from the global origin to the center of the area that a compartment would normally fill, and uses them to cut from the bin. This allows you to easily make custom cutouts in the bin.</p>
+<p><strong> <code>cut_move (x, y, w, h)</code> </strong></p>
 <table>
 <thead>
 <tr>

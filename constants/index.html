@@ -62,10 +62,8 @@
               </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Constants</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../utility/">Utility</a>
+    <ul class="current">
+    </ul>
                 </li>
               </ul>
       </div>
@@ -91,13 +89,151 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="gridfinity-rebuilt-constants">gridfinity-rebuilt-constants</h1>
+<p>This file contains dimensions that are critical to the constructiuon of the other models, but are not values that often need to be changed. Thus, they were outsourced to this file such that the rest of the files would retain parity. All values here have the same range, this is positive real numbers. Some can be zero, but that may result in strange or invalid geometry, </p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>h_base</td>
+<td>height of the base</td>
+</tr>
+<tr>
+<td>r_base</td>
+<td>outside rounded radius of bin</td>
+</tr>
+<tr>
+<td>r_c1</td>
+<td>lower base chamfer "radius"</td>
+</tr>
+<tr>
+<td>r_c2</td>
+<td>upper base chamfer "radius"</td>
+</tr>
+<tr>
+<td>h_bot</td>
+<td>bottom thiccness of bin</td>
+</tr>
+<tr>
+<td>r_fo1</td>
+<td>outside radii 1</td>
+</tr>
+<tr>
+<td>r_fo2</td>
+<td>outside radii 2</td>
+</tr>
+<tr>
+<td>r_fo3</td>
+<td>outside radii 3</td>
+</tr>
+<tr>
+<td>r_hole1</td>
+<td>screw hole radius</td>
+</tr>
+<tr>
+<td>r_hole2</td>
+<td>magnet hole radius</td>
+</tr>
+<tr>
+<td>d_hole</td>
+<td>center-to-center distance between holes</td>
+</tr>
+<tr>
+<td>h_hole</td>
+<td>magnet hole depth</td>
+</tr>
+<tr>
+<td>h_slit</td>
+<td>slit depth (printer layer height)</td>
+</tr>
+<tr>
+<td>r_f1</td>
+<td>top edge fillet radius</td>
+</tr>
+<tr>
+<td>r_f2</td>
+<td>internal fillet radius</td>
+</tr>
+<tr>
+<td>d_div</td>
+<td>width of divider between compartments</td>
+</tr>
+<tr>
+<td>d_wall</td>
+<td>minimum wall thickness</td>
+</tr>
+<tr>
+<td>d_clear</td>
+<td>tolerance fit factor</td>
+</tr>
+<tr>
+<td>d_tabh</td>
+<td>height of tab (yaxis, measured from inner wall)</td>
+</tr>
+<tr>
+<td>d_tabw</td>
+<td>maximum width of tab</td>
+</tr>
+<tr>
+<td>a_tab</td>
+<td>angle of tab</td>
+</tr>
+<tr>
+<td>bp_h_bot</td>
+<td>Baseplate bottom part height (part added with weigthed=true)</td>
+</tr>
+<tr>
+<td>bp_cut_size</td>
+<td>Baseplate bottom cutout rectangle size</td>
+</tr>
+<tr>
+<td>bp_cut_depth</td>
+<td>Baseplate bottom cutout rectangle depth</td>
+</tr>
+<tr>
+<td>bp_rcut_width</td>
+<td>Baseplate bottom cutout finger gap width</td>
+</tr>
+<tr>
+<td>bp_rcut_length</td>
+<td>Baseplate bottom cutout finger gap left</td>
+</tr>
+<tr>
+<td>bp_rcut_depth</td>
+<td>Baseplate bottom cutout finger gap depth</td>
+</tr>
+<tr>
+<td>d_cs</td>
+<td>countersink diameter for baseplate</td>
+</tr>
+<tr>
+<td>r_skel</td>
+<td>radius of cutout for skeletonized baseplate</td>
+</tr>
+<tr>
+<td>r_cb</td>
+<td>baseplate counterbore radius</td>
+</tr>
+<tr>
+<td>h_cb</td>
+<td>baseplate counterbore depth</td>
+</tr>
+<tr>
+<td>h_skel</td>
+<td>minimum baseplate thickness (when skeletonized)</td>
+</tr>
+</tbody>
+</table>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../vase/" class="btn btn-neutral float-left" title="Vase"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../utility/" class="btn btn-neutral float-right" title="Utility">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -122,8 +258,6 @@
     
       <span><a href="../vase/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../utility/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
