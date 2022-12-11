@@ -145,6 +145,9 @@ module block_base_hole(style_hole, o=0) {
         }
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
+        if (style_hole==4)
+        translate([0,0,(h_hole-o)])
+        cylinder(h = r2-r1, r1=r2, r2=r1, center=false);
     }
 }
 
