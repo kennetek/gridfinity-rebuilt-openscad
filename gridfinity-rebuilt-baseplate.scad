@@ -22,6 +22,17 @@ gridy = 4;
 // base unit
 length = 42;
 
+/* [Screw Together Settings - Defaults work for M3 and 4-40] */
+// screw diameter
+screw_d = 3.35;
+// screw head diameter
+screw_head_d = 5;
+// screw spacing distance
+screw_spacing=.5;
+// number of screws per grid block
+num_screws=1; // [1:3]
+
+
 /* [Fit to Drawer] */
 // minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
 distancex = 0; 
@@ -31,19 +42,17 @@ distancey = 0;
 /* [Styles] */
 
 // baseplate styles
-style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized]
+style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
 
 // enable magnet hole
 enable_magnet = true; 
 
-// hole styles
-style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
+gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet);
 
 
 
@@ -53,12 +62,15 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     
     assert(gridx > 0 || dx > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || dy > 0, "Must have positive y grid amount!");
+    
+   
     gx = gridx == 0 ? floor(dix/length) : gridx; 
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
     off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
 
+    
     difference() {
         translate([0,0,h_base])
         mirror([0,0,1])
@@ -75,16 +87,19 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
             if (sp == 1)
                 translate([0,0,-off])
                 cutter_weight();
-            else if (sp == 2)
+            else if (sp == 2 || sp == 3){
                 linear_extrude(10*(h_base+off), center = true)
-                profile_skeleton();
+                profile_skeleton();}
             
             translate([0,0,-off]) { 
                 if (sh == 1) cutter_countersink();
                 else if (sh == 2) cutter_counterbore();
             }
         }
-    }       
+        if (sp == 3)
+                screw_together(gx, gy);    
+    }
+
 }
 
 module cutter_weight() {
@@ -145,3 +160,42 @@ module profile_skeleton() {
         circle(r_skel);
     }
 }
+
+module screw_together(gx, gy) {
+    hole_length=15;
+    
+    
+    translate([0,0,-h_base*1.2])for(k=[-1:1:0]){//sides
+        translate([-(gx-1)*length/2,(gy-1)*length/2,0])
+        for(i=[0:gx-1]){//x holes
+            translate([i*length, k*gy*length,h_base/2])screw("y");
+            }
+        translate([(gx-1)*length/2,-(gy-1)*length/2,0])
+        for(j=[0:gy-1]){//y holes
+            translate([k*gx*length,j*length,h_base/2])screw("x");
+            }
+    }
+        
+    
+    module screw(axis="y"){
+        all_screws = (screw_head_d + screw_spacing) * (num_screws - 1);
+        
+        if(axis=="x"){
+            translate([(length/2 - hole_length/2),-(all_screws)/2,0])
+            for(i=[0:num_screws-1])
+                translate([0,i*(screw_head_d + screw_spacing),0])
+                rotate([0,90,0])
+                cylinder(h=15, d=screw_d);//screws into positive y-axis
+            }
+            
+        else if(axis=="y"){
+        translate([-(all_screws)/2,(length/2 - hole_length/2),0])
+        for(i=[0:num_screws-1])
+            translate([i*(screw_head_d + screw_spacing),0,0])
+            rotate([-90,0,0])
+            cylinder(h=15, d=screw_d);//screws into positive y-axis
+            }
+        }
+        
+    
+    }
