@@ -24,13 +24,13 @@ length = 42;
 
 /* [Screw Together Settings - Defaults work for M3 and 4-40] */
 // screw diameter
-screw_d = 3.35;
+d_screw = 3.35;
 // screw head diameter
-screw_head_d = 5;
+d_screw_head = 5;
 // screw spacing distance
-screw_spacing=.5;
+screw_spacing = .5;
 // number of screws per grid block
-num_screws=1; // [1:3]
+n_screws = 2; // [1:3]
 
 
 /* [Fit to Drawer] */
@@ -42,7 +42,7 @@ distancey = 0;
 /* [Styles] */
 
 // baseplate styles
-style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
+style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
 
 // enable magnet hole
 enable_magnet = true; 
@@ -53,7 +53,6 @@ enable_magnet = true;
 
 color("tomato") 
 gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet);
-
 
 
 // ===== CONSTRUCTION ===== //
@@ -87,17 +86,17 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
             if (sp == 1)
                 translate([0,0,-off])
                 cutter_weight();
-            else if (sp == 2 || sp == 3){
+            else if (sp == 2 || sp == 3) {
                 linear_extrude(10*(h_base+off), center = true)
-                profile_skeleton();}
+                profile_skeleton();
+            }
             
             translate([0,0,-off]) { 
                 if (sh == 1) cutter_countersink();
                 else if (sh == 2) cutter_counterbore();
             }
         }
-        if (sp == 3)
-                screw_together(gx, gy);    
+        if (sp == 3) cutter_screw_together(gx, gy, off);    
     }
 
 }
@@ -161,41 +160,18 @@ module profile_skeleton() {
     }
 }
 
-module screw_together(gx, gy) {
-    hole_length=15;
+module cutter_screw_together(gx, gy, off) {
+
+    screw(gx, gy);
+    rotate([0,0,90])
+    screw(gy, gx);
     
-    
-    translate([0,0,-h_base*1.2])for(k=[-1:1:0]){//sides
-        translate([-(gx-1)*length/2,(gy-1)*length/2,0])
-        for(i=[0:gx-1]){//x holes
-            translate([i*length, k*gy*length,h_base/2])screw("y");
-            }
-        translate([(gx-1)*length/2,-(gy-1)*length/2,0])
-        for(j=[0:gy-1]){//y holes
-            translate([k*gx*length,j*length,h_base/2])screw("x");
-            }
+    module screw(a, b) {
+        copy_mirror([1,0,0])
+        translate([a*length/2, 0, -off/2])
+        pattern_linear(1, b, 1, length)
+        pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
+        rotate([0,90,0])
+        cylinder(h=length/2, d=d_screw, center = true);
     }
-        
-    
-    module screw(axis="y"){
-        all_screws = (screw_head_d + screw_spacing) * (num_screws - 1);
-        
-        if(axis=="x"){
-            translate([(length/2 - hole_length/2),-(all_screws)/2,0])
-            for(i=[0:num_screws-1])
-                translate([0,i*(screw_head_d + screw_spacing),0])
-                rotate([0,90,0])
-                cylinder(h=15, d=screw_d);//screws into positive y-axis
-            }
-            
-        else if(axis=="y"){
-        translate([-(all_screws)/2,(length/2 - hole_length/2),0])
-        for(i=[0:num_screws-1])
-            translate([i*(screw_head_d + screw_spacing),0,0])
-            rotate([-90,0,0])
-            cylinder(h=15, d=screw_d);//screws into positive y-axis
-            }
-        }
-        
-    
-    }
+}
