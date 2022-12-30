@@ -59,10 +59,9 @@ gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, ena
 
 module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     
-    assert(gridx > 0 || dx > 0, "Must have positive x grid amount!");
-    assert(gridy > 0 || dy > 0, "Must have positive y grid amount!");
-    
-   
+    assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
+    assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
+
     gx = gridx == 0 ? floor(dix/length) : gridx; 
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
