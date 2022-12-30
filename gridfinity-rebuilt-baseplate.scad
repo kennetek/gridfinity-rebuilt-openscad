@@ -36,6 +36,9 @@ style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized]
 // enable magnet hole
 enable_magnet = true; 
 
+// divide extra space between both sides of the grid
+center_grid = true;
+
 // hole styles
 style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
@@ -57,10 +60,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
-    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
+    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb));
+    differencey = center_grid ? 0 : (dy-min(gy*length-0.5, diy))/2;
+    differencex = center_grid ? 0 : (dx-min(gx*length-0.5, dix))/2;
 
     difference() {
-        translate([0,0,h_base])
+        translate([differencex,differencey,h_base])
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
         
