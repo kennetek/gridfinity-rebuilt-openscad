@@ -47,12 +47,14 @@ style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
 // enable magnet hole
 enable_magnet = true; 
 
+// hole styles
+style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet);
+gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
 
 
 // ===== CONSTRUCTION ===== //
