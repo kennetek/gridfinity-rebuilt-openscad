@@ -34,10 +34,14 @@ n_screws = 1; // [1:3]
 
 
 /* [Fit to Drawer] */
-// minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
-distancex = 0; 
-// minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
-distancey = 0; 
+// minimum length of baseplate along x in negative direction from origin (leave zero to ignore, will automatically fill area if gridx is zero)
+distancex_neg = 100;
+// minimum length of baseplate along x in positive direction from origin (leave zero to ignore, will automatically fill area if gridx is zero)
+distancex_pos = 0;
+// minimum length of baseplate along y in negative direction from origin (leave zero to ignore, will automatically fill area if gridy is zero)
+distancey_neg = 0; 
+// minimum length of baseplate along y in positive direction from origin (leave zero to ignore, will automatically fill area if gridy is zero)
+distancey_pos = 100;
 
 /* [Styles] */
 
@@ -54,15 +58,25 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
+gridfinityBaseplate(gridx, gridy, length, distancex_neg, distancex_pos, distancey_neg, distancey_pos, style_plate, enable_magnet, style_hole);
 
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
+module gridfinityBaseplate(gridx, gridy, length, dix_neg, dix_pos, diy_neg, diy_pos, sp, sm, sh) {
     
-    assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
-    assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
+    assert(gridx > 0 || dix_neg > 0 || dix_pos > 0 , "Must have positive x grid amount!");
+    assert(gridy > 0 || diy_neg > 0 || diy_pos > 0, "Must have positive y grid amount!");
+
+    dix_min = (gridx * length)/ 2;
+    diy_min = (gridy * length)/ 2;
+    dix_neg = dix_neg < dix_min ? dix_min : dix_neg;
+    diy_neg = diy_neg < diy_min ? diy_min : diy_neg;
+    dix_pos = dix_pos < dix_min ? dix_min : dix_pos;
+    diy_pos = diy_pos < diy_min ? diy_min : diy_pos;
+
+    dix = dix_neg + dix_pos;
+    diy = diy_neg + diy_pos;
 
     gx = gridx == 0 ? floor(dix/length) : gridx; 
     gy = gridy == 0 ? floor(diy/length) : gridy; 
@@ -70,9 +84,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     dy = max(gy*length-0.5, diy);
     off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
 
-    
-    difference() {
-        translate([0,0,h_base])
+    dix_trans = gridx == 0 ? 0 : (dix_pos - dix_neg)/2;
+    diy_trans = gridy == 0 ? 0 : (diy_pos - diy_neg)/2;
+
+    difference() {        
+
+        translate([dix_trans,diy_trans,h_base])
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
         
