@@ -74,12 +74,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     difference() {
         translate([0,0,h_base])
         mirror([0,0,1])
-        rounded_rectangle(dx, dy, h_base+off, r_base);
+        rounded_rectangular_cuboid(dx, dy, h_base+off, r_base);
         
         gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
         
         translate([0,0,h_base-0.6])
-        rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
+        rounded_rectangular_cuboid(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
             if (sm) block_base_hole(1);
@@ -159,6 +159,13 @@ module profile_skeleton() {
         }
         circle(r_skel);
     }
+}
+
+module profile_skeleton_minimal() {
+    l = length - 6;
+    offset(r_fo3)
+    offset(-r_fo3) 
+    square([l,l], center = true);
 }
 
 module cutter_screw_together(gx, gy, off) {

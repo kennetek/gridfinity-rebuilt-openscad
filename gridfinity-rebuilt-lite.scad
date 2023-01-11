@@ -78,10 +78,10 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsna
                         cube([gridx*length,gridy*length,1000]);
                     }
                     translate([0,0,-1])
-                    rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
+                    rounded_rectangular_cuboid(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
                 }
                 translate([0,0,h_base+d_clear])
-                rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, h_base, r_f2);
+                rounded_rectangular_cuboid(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, h_base, r_f2);
             }
 
             translate([0,0,-4*h_base])
