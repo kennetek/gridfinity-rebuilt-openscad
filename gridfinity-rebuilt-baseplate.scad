@@ -101,7 +101,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
                 else if (sh == 2) cutter_counterbore();
             }
         }
-        if (sp == 3) cutter_screw_together(gx, gy, off);    
+        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);    
     }
 
 }
