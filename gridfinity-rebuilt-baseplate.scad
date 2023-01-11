@@ -42,7 +42,7 @@ distancey = 0;
 /* [Styles] */
 
 // baseplate styles
-style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
+style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
 
 // enable magnet hole
 enable_magnet = true; 
@@ -90,6 +90,10 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
             else if (sp == 2 || sp == 3) {
                 linear_extrude(10*(h_base+off), center = true)
                 profile_skeleton();
+            }
+            else if (sp == 4) {
+                linear_extrude(10*(h_base+off), center = true)
+                profile_skeleton_minimal();
             }
             
             translate([0,0,-off]) { 
@@ -163,9 +167,7 @@ module profile_skeleton() {
 
 module profile_skeleton_minimal() {
     l = length - 6;
-    offset(r_fo3)
-    offset(-r_fo3) 
-    square([l,l], center = true);
+    rounded_square(l,r_fo3);
 }
 
 module cutter_screw_together(gx, gy, off) {
