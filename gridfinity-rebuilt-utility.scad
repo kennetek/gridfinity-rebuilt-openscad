@@ -16,10 +16,10 @@ function height (z,d=0,l=true,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z
 //          set n_div values to 0 for a solid bin 
 // style_tab:   tab style for all compartments. see cut()
 // enable_scoop:    scoop toggle for all compartments. see cut()
-module cutEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true) {
+module cutEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true, style_hole=style_hole) {
     for (i = [1:n_divx]) 
     for (j = [1:n_divy])
-    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, enable_scoop);
+    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, enable_scoop, style_hole);
 }
 
 // initialize gridfinity
@@ -53,10 +53,10 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
 //      0:full, 1:auto, 2:left, 3:center, 4:right, 5:none
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else. 
 // s:   toggle the rounded back corner that allows for easy removal
-module cut(x=0, y=0, w=1, h=1, t=1, s=true) {
+module cut(x=0, y=0, w=1, h=1, t=1, s=true, style_hole=0) {
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
-    block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s);
+    block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, style_hole);
 }
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
@@ -213,7 +213,7 @@ module cut_move_unsafe(x, y, w, h) {
     children();
 }
 
-module block_cutter(x,y,w,h,t,s) {
+module block_cutter(x,y,w,h,t,s, style_hole) {
     
     v_len_tab = d_tabh;
     v_len_lip = d_wall2-d_wall+1.2;
@@ -238,7 +238,10 @@ module block_cutter(x,y,w,h,t,s) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
     
-    translate([0,ylen/2,h_base+h_bot])
+    h_bottom_overkill = style_hole< 2 ? h_bot : 0;
+    h_bottom = style_hole < 2 ? 0.001:h_bot;
+
+    translate([0,ylen/2,h_base+h_bottom])
     rotate([90,0,-90]) {
     
     if (!zsmall && xlen - d_tabw > 4*r_f2 && t != 0) {
@@ -246,15 +249,15 @@ module block_cutter(x,y,w,h,t,s) {
         difference() {
             transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0)
             translate([ycutlast?v_cut_lip:0,0]) 
-            profile_cutter(height-h_bot, ylen/2, s);
-
+            profile_cutter(height-h_bottom, ylen/2, s);
+            echo(h_bottom);
             if (xcutfirst)
             translate([0,0,(xlen/2-r_f2)-v_cut_lip]) 
-            cube([ylen,height,v_cut_lip*2]);
+            cube([ylen,height*2,v_cut_lip*2]);
             
             if (xcutlast)
             translate([0,0,-(xlen/2-r_f2)-v_cut_lip])
-            cube([ylen,height,v_cut_lip*2]);
+            cube([ylen,height*2,v_cut_lip*2]);
         }
         if (t != 0 && t != 5)
         fillet_cutter(2,"indigo")
@@ -262,23 +265,23 @@ module block_cutter(x,y,w,h,t,s) {
             transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0)
             difference() {
                 intersection() {
-                    profile_cutter(height-h_bot, ylen-extent, s);
-                    profile_cutter_tab(height-h_bot, v_len_tab, v_ang_tab);
+                    profile_cutter(height-h_bottom, ylen-extent, s);
+                    profile_cutter_tab(height-h_bottom, v_len_tab, v_ang_tab);
                 }
-                if (ycutlast) profile_cutter_tab(height-h_bot, v_len_lip, 45);
+                if (ycutlast) profile_cutter_tab(height-h_bottom, v_len_lip, 45);
             } 
             
             if (xcutfirst)
             translate([ylen/2,0,xlen/2])
             rotate([0,90,0])
             transform_main(2*ylen)
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-h_bottom, v_len_lip, v_ang_lip);
             
             if (xcutlast)
             translate([ylen/2,0,-xlen/2])
             rotate([0,-90,0])
             transform_main(2*ylen)
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-h_bottom, v_len_lip, v_ang_lip);
         }
     }
     
@@ -287,21 +290,21 @@ module block_cutter(x,y,w,h,t,s) {
     translate([0,0,xcutfirst?-v_cut_lip/2:0])
     transform_main(xlen-(xcutfirst?v_cut_lip:0)-(xcutlast?v_cut_lip:0))
     translate([cut,0]) 
-    profile_cutter(height-h_bot, ylen-extent-cut-(!s&&ycutfirst?v_cut_lip:0), s);
+    profile_cutter(height-h_bottom, ylen-extent-cut-(!s&&ycutfirst?v_cut_lip:0), s);
     
     fillet_cutter(0,"hotpink")
     difference() {
         transform_main(xlen)
         difference() {
-            profile_cutter(height-h_bot, ylen-extent, s);
+            profile_cutter(height-h_bottom, ylen-extent, s);
             
             if (!((zsmall || t == 5) && !ycutlast))
-            profile_cutter_tab(height-h_bot, tab, ang);
+            profile_cutter_tab(height-h_bottom, tab, ang);
             
             if (!s && y == 0)
             translate([ylen-extent,0,0])
             mirror([1,0,0])
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-h_bottom, v_len_lip, v_ang_lip);
         }
         
         if (xcutfirst)
@@ -309,14 +312,14 @@ module block_cutter(x,y,w,h,t,s) {
         translate([ylen/2+0.001,0,xlen/2+0.001])
         rotate([0,90,0])
         transform_main(2*ylen)
-        profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+        profile_cutter_tab(height-h_bottom, v_len_lip, v_ang_lip);
         
         if (xcutlast)
         color("indigo")
         translate([ylen/2+0.001,0,-xlen/2+0.001])
         rotate([0,-90,0])
         transform_main(2*ylen)
-        profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+        profile_cutter_tab(height-h_bottom, v_len_lip, v_ang_lip);
     }
 
     }
