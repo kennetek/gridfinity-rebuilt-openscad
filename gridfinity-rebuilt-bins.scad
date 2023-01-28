@@ -156,3 +156,23 @@ gridfinityInit(gx, gy, height(6), 0, 42) {
 }
 gridfinityBase(gx, gy, 42, 0, 0, 1);
 */
+
+// Clear front bin, 3 x 1 x 6, perfect for a microscope slide. Needs supports, though.
+/*
+glassz = 25.2; // size of the microscope glass.
+glassx = 76.5; 
+glassy = 1.25;
+gx = 2;  
+dx = 3;
+difference() {
+    union() {
+        gridfinityInit(gx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+
+            cutEqual(n_divx = dx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
+        }
+        gridfinityBase(gx, gridy, length, div_base_x, div_base_y, style_hole);
+    }
+    translate([-glassx/2, length/2 - glassy*2 + 0.00, 2.9]) cube([glassx, glassy + 0.02, glassz+5]);
+    translate([-(glassx-5)/2, length/2 - glassy, 2.9]) cube([glassx-5, glassy*3+0.02, glassz+5]);
+}
+*/
