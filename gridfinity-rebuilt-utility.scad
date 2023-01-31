@@ -346,7 +346,7 @@ module fillet_cutter(t = 0, c = "goldenrod") {
 }
 
 module profile_cutter(h, l, s) {
-    scoop = s ? (length*(($dh-2)/7+1)/12-r_f2) : 0; 
+    scoop = s ? (length*(($dh * ($scoop_percentage / 100)-2)/7+1)/12-r_f2) : 0; 
     translate([r_f2,r_f2])
     hull() {
         if (l-scoop-2*r_f2 > 0)
