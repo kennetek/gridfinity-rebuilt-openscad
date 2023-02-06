@@ -74,6 +74,7 @@ div_base_y = 0;
 color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
 
+    if (divx > 0 && divy > 0)
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
 }
 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
