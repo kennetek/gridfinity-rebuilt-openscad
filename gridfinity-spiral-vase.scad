@@ -59,6 +59,7 @@ gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments -
 // how tabs are implemented
 style_tab = 0; // [0:continuous, 1:broken, 2:auto, 3:right, 4:center, 5:left, 6:none]
 // where to put X cutouts for attaching bases
+// selecting none will also disable crosses on bases
 style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
    
 // tab angle
@@ -74,7 +75,7 @@ else gridfinityVase(); // Generate the bin
 
 // ===== CONSTRUCTION ===== //
 
-d_bottom = layer*bottom_layer;
+d_bottom = layer*(max(bottom_layer,1));
 x_l = length/2; 
 
 dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+h_base : gridz-(enable_lip?3.8:0);
@@ -147,6 +148,10 @@ module gridfinityVase() {
         block_inset();
         if (enable_pinch)
         block_pinch();
+        
+        if (bottom_layer <= 0)
+        translate([0,0,-50+layer+0.01])
+        cube([gridx*length*10,gridy*length*10,100], center=true);
     }
 }
 
@@ -169,6 +174,7 @@ module gridfinityBaseVase() {
         rotate([0,0,90])
         translate([0,0,-h_base+d_bottom+0.01])
         cube([0.001,length*gridx,d_height+d_bottom*2]);
+
     }
     
     pattern_circular(4)
@@ -191,6 +197,7 @@ module gridfinityBaseVase() {
     cube([length*2, length*2, h_base], center = true);
     }
     
+    if (style_base != 4)
     linear_extrude(d_bottom)
     profile_x(0.1);
 }
@@ -403,17 +410,17 @@ module profile_wall_sub_sub() {
 
 module block_inset() {
     ixx = (gridx*length-0.5)/2;
-    iyy = d_height/2+d_bottom*2;
+    iyy = d_height/1.875;
     izz = sqrt(ixx^2+iyy^2)*tan(40);
     if (enable_scoop_chamfer && enable_inset)
     difference() {
         intersection() {
             rotate([0,90,0])
-            translate([-iyy+d_bottom*2,0,0])
+            translate([-iyy,0,0])
             block_inset_sub(iyy, gridx*length, 45);
 
             rotate([0,90,0])
-            translate([-iyy+d_bottom*2,0,0])
+            translate([-iyy,0,0])
             rotate([0,90,0])
             block_inset_sub(ixx, d_height*2, 45);
         }
@@ -465,14 +472,14 @@ module profile_tabscoop(m) {
 module block_tabscoop(a=m, b=0, c=0, d=-1) {
     translate([0,d_tabh*cos(a_tab)-length*gridy/2+0.25+b,0])
     difference() {
-        translate([0,0,-d_tabh*sin(a_tab)*2+d_height+d_bottom*2])
+        translate([0,0,-d_tabh*sin(a_tab)*2+d_height+2.1])
         profile_tabscoop(a);
         
         translate([-gridx*length/2,-m,-m])
         cube([gridx*length,m-d_tabh*cos(a_tab)+0.005+c,d_height*2]);
         
         if (d >= 0)
-        translate([0,0,-d_tabh*sin(a_tab)+d_height+d_bottom*2+m/2+d])
+        translate([0,0,-d_tabh*sin(a_tab)+d_height+m/2+d+2.1])
         cube([gridx*length,gridy*length,m],center=true);
     }
 }
@@ -483,7 +490,7 @@ module transform_vtab(a=0,b=1) {
 }
 
 module transform_vtab_base(a) {
-    translate([0,d_tabh*cos(a_tab)-length*gridy/2+0.25,-d_tabh*sin(a_tab)+d_height+d_bottom*2])
+    translate([0,d_tabh*cos(a_tab)-length*gridy/2+0.25,-d_tabh*sin(a_tab)+d_height+2.1])
     rotate([90,0,270])
     linear_extrude(a, center=true)
     children();
@@ -506,7 +513,7 @@ module block_tab_base(del) {
 module transform_scoop() {
     intersection() {
         block_vase();
-        translate([0,gridy*length/2-d_ramp,1.21])
+        translate([0,gridy*length/2-d_ramp,layer*max(bottom_layer*1)])
         rotate([90,0,90])
         linear_extrude(2*length*gridx,center=true)
         children();
