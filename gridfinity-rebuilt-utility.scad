@@ -183,6 +183,9 @@ module profile_wall() {
             offset(delta = -r_f1)
             profile_wall_sub();
         }
+        // remove any negtive geometry in edge cases
+        mirror([0,1,0])
+        square(100*length);
     }
 }
 
