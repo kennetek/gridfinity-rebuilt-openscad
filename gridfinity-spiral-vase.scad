@@ -18,7 +18,7 @@ $fs = 0.25;
 type = 0; // [0:bin, 1:base]
 
 /* [Printer Settings] */
-// printer nozzle size
+// extrusion width (walls will be twice this size)
 nozzle = 0.6; 
 // slicer layer size
 layer = 0.35;
