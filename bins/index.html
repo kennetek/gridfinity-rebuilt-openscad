@@ -161,9 +161,9 @@
 <td>automatically snap the bin size to the nearest 7mm increment. <br> default: true</td>
 </tr>
 <tr>
-<td>enable_lip</td>
-<td>boolean</td>
-<td>if you are not stacking the bin, you can disable the top lip <br> to save space. default: true</td>
+<td>style_lip</td>
+<td>{0, 1, 2}</td>
+<td>if you are not stacking the bin, you can disable the top lip <br> to save space. <br>     • (0) Regular lip <br>     • (1) Subtract lip to save space <br>     • (2) Disable lip while retaining height</td>
 </tr>
 <tr>
 <td>gridz_define</td>
@@ -247,7 +247,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 <hr />
 <h3 id="height">height</h3>
 <p>Calculates the proper height for bins. </p>
-<p><strong> <code>height (gridz, gridz_define, enable_lip, enable_zsnap)</code> </strong></p>
+<p><strong> <code>height (gridz, gridz_define, style_lip, enable_zsnap)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -268,9 +268,9 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 <td>determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters</td>
 </tr>
 <tr>
-<td>enable_lip</td>
-<td>boolean</td>
-<td>if you are not stacking the bin, you can disable the top lip <br> to save space. default: true</td>
+<td>style_lip</td>
+<td>{0, 1, 2}</td>
+<td>if you are not stacking the bin, you can disable the top lip <br> to save space. <br>     • (0) Regular lip <br>     • (1) Subtract lip to save space <br>     • (2) Disable lip while retaining height</td>
 </tr>
 <tr>
 <td>enable_zsnap</td>
@@ -283,7 +283,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 height(6);
 
 // Example: height for a bin that can fit (at maximum) a 30mm high object inside
-height(30, 1, true, false); 
+height(30, 1, 0, false); 
 </code></pre>
 <hr />
 <h3 id="gridfinitybase">gridfinityBase</h3>
