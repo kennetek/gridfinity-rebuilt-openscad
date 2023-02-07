@@ -6,8 +6,8 @@ include <gridfinity-constants.scad>
 // ===== User Modules ===== //
 
 // functions to convert gridz values to mm values
-function hf (z, d, l) = (d==0)?z*7:(d==1)?h_bot+z+h_base:z-(l?3.8:0);
-function height (z,d=0,l=true,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z,d,l)+7-abs(hf(z,d,l))%7):hf(z,d,l))-h_base;
+function hf (z, d, l) = ((d==0)?z*7:(d==1)?h_bot+z+h_base:z-((l==1)?h_lip:0))+(l==2?h_lip:0);
+function height (z,d=0,l=0,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z,d,l)+7-abs(hf(z,d,l))%7):hf(z,d,l))-h_base;
 
 // Creates equally divided cutters for the bin
 //
@@ -36,7 +36,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
     }
     color("royalblue") 
     block_wall(gx, gy, l) {
-        if (enable_lip) profile_wall();
+        if (style_lip == 0) profile_wall();
         else profile_wall2();
     } 
     }
@@ -225,10 +225,10 @@ module block_cutter(x,y,w,h,t,s) {
     v_ang_tab = a_tab;
     v_ang_lip = 45;
     
-    ycutfirst = y == 0 && enable_lip;
-    ycutlast = abs(y+h-$gyy)<0.001 && enable_lip; 
-    xcutfirst = x == 0 && enable_lip;
-    xcutlast = abs(x+w-$gxx)<0.001 && enable_lip;
+    ycutfirst = y == 0 && style_lip == 0;
+    ycutlast = abs(y+h-$gyy)<0.001 && style_lip == 0; 
+    xcutfirst = x == 0 && style_lip == 0;
+    xcutlast = abs(x+w-$gxx)<0.001 && style_lip == 0;
     zsmall = ($dh+h_base)/7 < 3;
     
     ylen = h*($gyy*length+d_magic)/$gyy-d_div; 
