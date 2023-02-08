@@ -80,7 +80,6 @@ gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 
 }
 
-
 // ===== EXAMPLES ===== //
 
 // 3x3 even spaced grid
@@ -157,7 +156,8 @@ gridfinityInit(gx, gy, height(6), 0, 42) {
 gridfinityBase(gx, gy, 42, 0, 0, 1);
 */
 
-// Clear front bin, 3 x 1 x 6, perfect for a microscope slide. Needs supports, though.
+// Clear front bin, 3 x 1 x 6, perfect for a microscope slide.
+// Needs supports to hold up the label bar, because there is no front to build off.
 /*
 glassz = 25.2; // size of the microscope glass.
 glassx = 76.5; 
@@ -174,5 +174,8 @@ difference() {
     }
     translate([-glassx/2, length/2 - glassy*2 + 0.00, 2.9]) cube([glassx, glassy + 0.02, glassz+5]);
     translate([-(glassx-5)/2, length/2 - glassy, 2.9]) cube([glassx-5, glassy*3+0.02, glassz+5]);
+    // chamfer to make it easier to slide the glass in.
+    translate([-glassx/2 - 1, length/2 - glassy*2 + 0.00, 1.9]) rotate([0,10,0]) cube([5, glassy + 0.02, 10]);
+    mirror([1,0,0]) translate([-glassx/2 - 1, length/2 - glassy*2 + 0.00, 1.9]) rotate([0,10,0]) cube([5, glassy + 0.02, 10]);
 }
 */
