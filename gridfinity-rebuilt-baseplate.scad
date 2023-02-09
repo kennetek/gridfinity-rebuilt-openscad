@@ -35,14 +35,14 @@ n_screws = 1; // [1:3]
 
 /* [Fit to Drawer] */
 // minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
-distancex = 0; 
+distancex = 0;
 // minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
-distancey = 0; 
+distancey = 0;
 
 // split space to fit equal on each side along x or offset to the positive side or negative
-fitx = -1; // [-1:1]
+fitx = 0; // [-1:0.01:1]
 // split space to fit equal on each side along y
-fity = 0; // [-1:1]
+fity = 0; // [-1:0.01:1]
 
 
 /* [Styles] */
@@ -76,8 +76,8 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     dy = max(gy*length-0.5, diy);
     off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
 
-    offsetx=(gx*length-0.5-dix)/2*fitx*-1;
-    offsety=(gy*length-0.5-diy)/2*fity*-1;
+    offsetx = dix < dx ? 0 : (gx*length-0.5-dix)/2*fitx*-1;
+    offsety = diy < dy ? 0 : (gy*length-0.5-diy)/2*fity*-1;
     
     difference() {
         translate([offsetx,offsety,h_base])
