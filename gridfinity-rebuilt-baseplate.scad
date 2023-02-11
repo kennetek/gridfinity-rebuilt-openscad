@@ -68,7 +68,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
-    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
+    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?d_screw:sh==1?d_cs:h_cb)); 
 
     
     difference() {
