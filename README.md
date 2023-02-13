@@ -6,6 +6,8 @@ A ground-up port (with a few extra features) of the stock [gridfinity](https://w
 
 Full documentation can be found at the project's [website](https://kennetek.github.io/gridfinity-rebuilt-openscad/).
 
+The project can also be found on [Printables](https://www.printables.com/model/274917-gridfinity-rebuilt-in-openscad) if you want to support the project.
+
 [<img src="./images/base_dimension.gif" width="320">]()
 [<img src="./images/compartment_dimension.gif" width="320">]()
 [<img src="./images/height_dimension.gif" width="320">]()
