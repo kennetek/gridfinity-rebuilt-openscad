@@ -92,8 +92,8 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
                 profile_skeleton();
             }
             else if (sp == 4) {
-                linear_extrude(10*(h_base+off), center = true)
-                profile_skeleton_minimal();
+                translate([0,0,-off - 0.001])
+                rounded_square(length-6, off + 0.002, r_fo3);
             }
             
             translate([0,0,-off]) { 
@@ -163,11 +163,6 @@ module profile_skeleton() {
         }
         circle(r_skel);
     }
-}
-
-module profile_skeleton_minimal() {
-    l = length - 6;
-    rounded_square(l,r_fo3);
 }
 
 module cutter_screw_together(gx, gy, off) {
