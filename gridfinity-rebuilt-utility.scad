@@ -90,12 +90,12 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
     
     if (final_cut)
     translate([0,0,h_base])
-    rounded_rectangular_cuboid(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
+    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
 
     intersection(){
         if (final_cut) 
         translate([0,0,-1])
-        rounded_rectangular_cuboid(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
+        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
         
         render()
         difference() {
@@ -117,14 +117,14 @@ module block_base_solid(dbnx, dbny, l, o) {
     mirror([0,0,1])
     union() {
         hull() {
-            rounded_rectangular_cuboid(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
-            rounded_rectangular_cuboid(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2/2);
+            rounded_rectangle(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
+            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2/2);
         }
         translate([0,0,oo])
         hull() {
-            rounded_rectangular_cuboid(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2/2);
+            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2/2);
             mirror([0,0,1])
-            rounded_rectangular_cuboid(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
+            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
         }
     }
 }
@@ -201,7 +201,7 @@ module block_wall(gx, gy, l) {
 
 module block_bottom( h = 2.2, gx, gy, l ) {
     translate([0,0,h_base+0.1])
-    rounded_rectangular_cuboid(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
+    rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
 module cut_move_unsafe(x, y, w, h) {
@@ -389,23 +389,15 @@ module profile_cutter_tab(h, tab, ang) {
 
 function clp(x,a,b) = min(max(x,a),b);
 
-module rounded_rectangular_cuboid(length, width, height, rad) {
+module rounded_rectangle(length, width, height, rad) {
     linear_extrude(height)
-    rounded_rectangle(length, width, rad);
-}
-
-module rounded_cube(length, height, rad) {
-    rounded_rectangular_cuboid(length, length, height, rad);
-}
-
-module rounded_rectangle(length, width, rad){
     offset(rad) 
     offset(-rad) 
     square([length,width], center = true);
 }
 
-module rounded_square(length, rad){
-    rounded_rectangle(length,length,rad);
+module rounded_square(length, height, rad) {
+    rounded_rectangle(length, length, height, rad);
 }
 
 module copy_mirror(vec=[0,1,0]) {

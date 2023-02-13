@@ -74,12 +74,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     difference() {
         translate([0,0,h_base])
         mirror([0,0,1])
-        rounded_rectangular_cuboid(dx, dy, h_base+off, r_base);
+        rounded_rectangle(dx, dy, h_base+off, r_base);
         
         gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
         
         translate([0,0,h_base-0.6])
-        rounded_rectangular_cuboid(dx*2, dy*2, h_base*2, r_base);
+        rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
             if (sm) block_base_hole(1);

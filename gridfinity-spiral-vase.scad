@@ -157,7 +157,7 @@ module gridfinityBaseVase() {
         intersection() {
             block_base_blank(0);
             translate([0,0,-h_base-1])
-            rounded_rectangular_cuboid(length-0.5-0.005, length-0.5-0.005, h_base*10, r_fo1/2+0.001);
+            rounded_rectangle(length-0.5-0.005, length-0.5-0.005, h_base*10, r_fo1/2+0.001);
         }
         translate([0,0,0.01])
         difference() {
@@ -211,13 +211,13 @@ module block_magnet_blank(o = 0, half = true) {
 module block_base_blank(o = 0) {
     mirror([0,0,1]) {
         hull() {
-            rounded_cube(length-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
-            rounded_cube(length-o-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
+            rounded_square(length-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
+            rounded_square(length-o-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
         }
         hull() {
-            rounded_cube(length-o-0.05-2*r_c2, r_c2, r_fo2/2);
+            rounded_square(length-o-0.05-2*r_c2, r_c2, r_fo2/2);
             mirror([0,0,1])
-            rounded_cube(length-o-0.05, d_bottom, r_fo1/2);
+            rounded_square(length-o-0.05, d_bottom, r_fo1/2);
         }
     }
 }
@@ -515,7 +515,7 @@ module transform_scoop() {
 
 module block_vase(h = d_height*2) {
     translate([0,0,-0.1])
-    rounded_rectangular_cuboid(gridx*length-0.5-nozzle, gridy*length-0.5-nozzle, h, r_base+0.01-nozzle/2);
+    rounded_rectangle(gridx*length-0.5-nozzle, gridy*length-0.5-nozzle, h, r_base+0.01-nozzle/2);
 }
 
 module profile_x(x_f = 3) {
