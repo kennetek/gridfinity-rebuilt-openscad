@@ -151,9 +151,9 @@
 <td>number of compartments along Y</td>
 </tr>
 <tr>
-<td>enable_scoop</td>
-<td>boolean</td>
-<td>toggles the fillet on bottom edge for easy removal of items</td>
+<td>scoop</td>
+<td>n&gt;0 | n∈R</td>
+<td>controls the fillet on the bottom of the compartment for easy <br> item removal. 0 is disabled, 1 is full, any other real number will <br> scale from full.</td>
 </tr>
 <tr>
 <td>enable_zsnap</td>
@@ -241,7 +241,7 @@
 </table>
 <pre><code>// Example: generate a 3x3x6 bin with a 42mm unit size
 gridfinityInit(3, 3, height(6), 0, 42) {
-    cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+    cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 1);
 }
 </code></pre>
 <hr />
@@ -336,7 +336,7 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 <hr />
 <h3 id="cutequal">cutEqual</h3>
 <p>Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments. </p>
-<p><strong> <code>cutEqual (n_divx, n_divy, style_tab, enable_scoop)</code> </strong></p>
+<p><strong> <code>cutEqual (n_divx, n_divy, style_tab, scoop_weight)</code> </strong></p>
 <table>
 <thead>
 <tr>
@@ -362,15 +362,15 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 <td>how the tabs for labels are generated. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
 </tr>
 <tr>
-<td>enable_scoop</td>
-<td>boolean</td>
-<td>toggles the fillet on bottom edge for easy removal of items</td>
+<td>scoop</td>
+<td>n&gt;0 | n∈R</td>
+<td>controls the fillet on the bottom of the compartment for easy <br> item removal. 0 is disabled, 1 is full, any other real number will <br> scale from full.</td>
 </tr>
 </tbody>
 </table>
 <pre><code>// Example: this generates 9 compartments in a 3x3 grid, and all compartments have a full tab and a scoop
 gridfinityInit(3, 3, height(6), 0, 42) {
-    cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+    cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 1);
 }
 </code></pre>
 <hr />
@@ -407,14 +407,14 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 <td>Height of the compartment, in base units <br>(1 unit = 1 <code>length</code>)</td>
 </tr>
 <tr>
-<td>style_tab</td>
+<td>t</td>
 <td>{ 0, 1, 2, 3, 4, 5 }</td>
 <td>how the tabs for labels are generated for this compartment. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs</td>
 </tr>
 <tr>
 <td>s</td>
-<td>boolean</td>
-<td>toggles the fillet on bottom edge for easy removal of items, <br> only for this specific compartment</td>
+<td>n&gt;0 | n∈R</td>
+<td>controls the fillet on the bottom of the compartment for easy <br> item removal. 0 is disabled, 1 is full, any other real number will <br> scale from full, only for this specific compartment</td>
 </tr>
 </tbody>
 </table>
@@ -422,8 +422,8 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 // this cuts two compartments that are both 1 wide and 2 high. 
 // One is on the bottom left, and the other is at the top right. 
 gridfinityInit(3, 3, height(6), 0, 42) {
-    cut(0, 0, 1, 2, 0, true);
-    cut(2, 1, 1, 2, 0, true);
+    cut(0, 0, 1, 2, 0, 1);
+    cut(2, 1, 1, 2, 0, 1);
 }
 </code></pre>
 <hr />
