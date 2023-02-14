@@ -71,14 +71,14 @@ div_base_y = 0;
 
 // ===== IMPLEMENTATION ===== //
 
-//color("tomato") {
-//gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
-//
-//    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
-//}
-//gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
-//
-//}
+color("tomato") {
+gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+}
+gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
+
+}
 
 
 // ===== EXAMPLES ===== //
