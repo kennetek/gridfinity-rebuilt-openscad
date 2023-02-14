@@ -35,9 +35,15 @@ n_screws = 1; // [1:3]
 
 /* [Fit to Drawer] */
 // minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
-distancex = 0; 
+distancex = 0;
 // minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
-distancey = 0; 
+distancey = 0;
+
+// split space to fit equal on each side along x or offset to the positive side or negative
+fitx = 0; // [-1:0.01:1]
+// split space to fit equal on each side along y
+fity = 0; // [-1:0.01:1]
+
 
 /* [Styles] */
 
@@ -54,12 +60,12 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
+gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
+module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
     
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
@@ -70,15 +76,17 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     dy = max(gy*length-0.5, diy);
     off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
 
+    offsetx = dix < dx ? 0 : (gx*length-0.5-dix)/2*fitx*-1;
+    offsety = diy < dy ? 0 : (gy*length-0.5-diy)/2*fity*-1;
     
     difference() {
-        translate([0,0,h_base])
+        translate([offsetx,offsety,h_base])
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
         
         gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
         
-        translate([0,0,h_base-0.6])
+        translate([offsetx,offsety,h_base-0.6])
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
