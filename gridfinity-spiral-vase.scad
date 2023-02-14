@@ -86,7 +86,6 @@ me = ((gridx*length-0.5)/n_divx)-nozzle*4-r_fo1-12.7-4;
 m = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
 d_ramp = f2c*(length*((d_height-2)/7+1)/12-r_f2)+d_wall2;
 d_edge = ((gridx*length-0.5)/n_divx-d_tabw-r_fo1)/2; 
-n_st = d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab; 
 n_st = gridz <= 3 ? 6 : d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab; 
 
 n_x = (n_st==0?1:n_divx); 
