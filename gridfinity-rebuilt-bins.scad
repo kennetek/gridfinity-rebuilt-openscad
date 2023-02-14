@@ -26,7 +26,6 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 /* [Setup Parameters] */
 $fa = 8;
 $fs = 0.25;
-$scoop_percentage = 100;
 
 /* [General Settings] */
 // number of bases along x-axis
@@ -45,8 +44,6 @@ divx = 1;
 divy = 1;
 
 /* [Toggles] */
-// internal fillet for easy part removal
-enable_scoop = true;
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
 // enable upper lip for stacking other bins
@@ -57,6 +54,8 @@ enable_lip = true;
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
 // the type of tabs
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
+// scoop weight percentage. 0 disables scoop, 1 is regualar scoop. Any real number will scale the effective scoop. 
+scoop = 1;
 
 // overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0; 
@@ -72,14 +71,14 @@ div_base_y = 0;
 
 // ===== IMPLEMENTATION ===== //
 
-color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
-
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
-}
-gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
-
-}
+//color("tomato") {
+//gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+//
+//    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+//}
+//gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
+//
+//}
 
 
 // ===== EXAMPLES ===== //
