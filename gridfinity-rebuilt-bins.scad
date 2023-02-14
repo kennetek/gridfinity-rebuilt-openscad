@@ -46,8 +46,8 @@ divy = 1;
 /* [Toggles] */
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
-// enable upper lip for stacking other bins
-enable_lip = true;
+// how should the top lip act
+style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
@@ -72,8 +72,9 @@ div_base_y = 0;
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
 
+    if (divx > 0 && divy > 0)
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
 }
 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
