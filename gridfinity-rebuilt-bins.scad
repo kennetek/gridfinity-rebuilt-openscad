@@ -55,7 +55,7 @@ gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments -
 // the type of tabs
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // scoop weight percentage. 0 disables scoop, 1 is regualar scoop. Any real number will scale the effective scoop. 
-scoop = 1;
+scoop = 1; //[0:0.1:1]
 
 // overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0; 
