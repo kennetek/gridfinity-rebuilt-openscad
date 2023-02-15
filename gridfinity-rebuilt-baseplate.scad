@@ -92,8 +92,9 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
                 profile_skeleton();
             }
             else if (sp == 4) {
+                l = length-2*r_c2-2*r_c1; 
                 translate([0,0,-off - 0.001])
-                rounded_square(length-6, off + 0.002, r_fo3);
+                rounded_square(l, off + 0.002, r_fo3);
             }
             
             translate([0,0,-off]) { 
