@@ -39,10 +39,10 @@ distancex = 0;
 // minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
 distancey = 0;
 
-// split space to fit equal on each side along x or offset to the positive side or negative
-fitx = 0; // [-1:0.01:1]
-// split space to fit equal on each side along y
-fity = 0; // [-1:0.01:1]
+// where to align extra space along x
+fitx = 0; // [-1:0.1:1]
+// where to align extra space along y
+fity = 0; // [-1:0.1:1]
 
 
 /* [Styles] */
