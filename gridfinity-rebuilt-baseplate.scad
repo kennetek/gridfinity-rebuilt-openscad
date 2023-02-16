@@ -35,14 +35,20 @@ n_screws = 1; // [1:3]
 
 /* [Fit to Drawer] */
 // minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
-distancex = 0; 
+distancex = 0;
 // minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
-distancey = 0; 
+distancey = 0;
+
+// where to align extra space along x
+fitx = 0; // [-1:0.1:1]
+// where to align extra space along y
+fity = 0; // [-1:0.1:1]
+
 
 /* [Styles] */
 
 // baseplate styles
-style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together]
+style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
 
 // enable magnet hole
 enable_magnet = true; 
@@ -54,12 +60,12 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole);
+gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
+module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
     
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
@@ -68,16 +74,20 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
-    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?sp!=3?0:d_screw:sh==1?d_cs:h_cb));
+
+    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?(sp!=3&&sp!=4)?0:d_screw:sh==1?d_cs:h_cb));
+
+    offsetx = dix < dx ? 0 : (gx*length-0.5-dix)/2*fitx*-1;
+    offsety = diy < dy ? 0 : (gy*length-0.5-diy)/2*fity*-1;
     
     difference() {
-        translate([0,0,h_base])
+        translate([offsetx,offsety,h_base])
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
         
         gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
         
-        translate([0,0,h_base-0.6])
+        translate([offsetx,offsety,h_base-0.6])
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
@@ -86,17 +96,19 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh) {
             if (sp == 1)
                 translate([0,0,-off])
                 cutter_weight();
-            else if (sp == 2 || sp == 3) {
+            else if (sp == 2 || sp == 3) 
                 linear_extrude(10*(h_base+off), center = true)
                 profile_skeleton();
-            }
+            else if (sp == 4) 
+                translate([0,0,-5*(h_base+off)])
+                rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
             
             translate([0,0,-off]) { 
                 if (sh == 1) cutter_countersink();
                 else if (sh == 2) cutter_counterbore();
             }
         }
-        if (sp == 3) cutter_screw_together(gx, gy, off);    
+        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);    
     }
 
 }

@@ -33,8 +33,8 @@ divy = 2;
 /* [Toggles] */
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
-// enable upper lip for stacking other bins
-enable_lip = true;
+// how should the top lip act
+style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
@@ -48,23 +48,25 @@ style_hole = 0; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes -
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0; 
+// thickness of bottom layer
+bottom_layer = 1;
 
 
 // ===== IMPLEMENTATION ===== //
 
 // Input all the cutter types in here
 color("tomato")
-gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) {
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = false);
+gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) {
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
 
 // ===== CONSTRUCTION ===== //
 
 
-module gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) { 
+module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) { 
     difference() {
         union() {
-            gridfinityInit(gridx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), 0, length)
+            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length)
             children();
             gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
         }
@@ -79,6 +81,8 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, enable_lip, enable_zsna
                     }
                     translate([0,0,-1])
                     rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
+                    translate([0,0,bottom_layer])
+                    rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
                 }
                 translate([0,0,h_base+d_clear])
                 rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, h_base, r_f2);

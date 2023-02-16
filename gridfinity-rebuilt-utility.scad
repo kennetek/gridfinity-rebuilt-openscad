@@ -15,11 +15,11 @@ function height (z,d=0,l=0,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z,d,
 // n_divy:  number of y compartments (ideally, coprime w/ gridy) 
 //          set n_div values to 0 for a solid bin 
 // style_tab:   tab style for all compartments. see cut()
-// enable_scoop:    scoop toggle for all compartments. see cut()
-module cutEqual(n_divx=1, n_divy=1, style_tab=1, enable_scoop=true) {
+// scoop_weight:    scoop toggle for all compartments. see cut()
+module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
     for (i = [1:n_divx]) 
     for (j = [1:n_divy])
-    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, enable_scoop);
+    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
 }
 
 // initialize gridfinity
@@ -53,7 +53,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
 //      0:full, 1:auto, 2:left, 3:center, 4:right, 5:none
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else. 
 // s:   toggle the rounded back corner that allows for easy removal
-module cut(x=0, y=0, w=1, h=1, t=1, s=true) {
+module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s);
@@ -235,7 +235,7 @@ module block_cutter(x,y,w,h,t,s) {
     xlen = w*($gxx*length+d_magic)/$gxx-d_div; 
     
     height = $dh;
-    extent = (s && ycutfirst ? d_wall2-d_wall-d_clear : 0); 
+    extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall-d_clear : 0); 
     tab = (zsmall || t == 5) ? (ycutlast?v_len_lip:0) : v_len_tab; 
     ang = (zsmall || t == 5) ? (ycutlast?v_ang_lip:0) : v_ang_tab;
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
@@ -301,7 +301,7 @@ module block_cutter(x,y,w,h,t,s) {
             if (!((zsmall || t == 5) && !ycutlast))
             profile_cutter_tab(height-h_bot, tab, ang);
             
-            if (!s && y == 0)
+            if (!(abs(s) > 0)&& y == 0)
             translate([ylen-extent,0,0])
             mirror([1,0,0])
             profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
@@ -349,7 +349,7 @@ module fillet_cutter(t = 0, c = "goldenrod") {
 }
 
 module profile_cutter(h, l, s) {
-    scoop = s ? (length*(($dh-2)/7+1)/12-r_f2) : 0; 
+    scoop = max(s*$dh/2-r_f2,0); 
     translate([r_f2,r_f2])
     hull() {
         if (l-scoop-2*r_f2 > 0)

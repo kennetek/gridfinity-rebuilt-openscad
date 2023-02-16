@@ -86,7 +86,7 @@ me = ((gridx*length-0.5)/n_divx)-nozzle*4-r_fo1-12.7-4;
 m = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
 d_ramp = f2c*(length*((d_height-2)/7+1)/12-r_f2)+d_wall2;
 d_edge = ((gridx*length-0.5)/n_divx-d_tabw-r_fo1)/2; 
-n_st = d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab; 
+n_st = gridz <= 3 ? 6 : d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab; 
 
 n_x = (n_st==0?1:n_divx); 
 spacing = (gridx*length-0.5)/(n_divx);
@@ -121,7 +121,7 @@ module gridfinityVase() {
                 cube([gridx*length,d_wall2,d_height-0.2],center=true);
             }
 
-            if (enable_funnel)
+            if (enable_funnel && gridz > 3)
             pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*length-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
             transform_funnel()
             block_funnel_outside();
@@ -135,7 +135,7 @@ module gridfinityVase() {
             block_tabsupport();
         }
         
-        if (enable_funnel)
+        if (enable_funnel && gridz > 3)
         pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*length-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
         transform_funnel()
         block_funnel_inside();
@@ -330,7 +330,7 @@ module block_divider_edgecut() {
 }
 
 module transform_funnel() {
-    if (me > 6 && enable_funnel && n_st != 6)
+    if (me > 6 && enable_funnel && gridz > 3 && n_st != 6)
     transform_style()
     render()
     children();
@@ -476,7 +476,7 @@ module block_tabscoop(a=m, b=0, c=0, d=-1) {
         profile_tabscoop(a);
         
         translate([-gridx*length/2,-m,-m])
-        cube([gridx*length,m-d_tabh*cos(a_tab)+0.005+c,d_height*2]);
+        cube([gridx*length,m-d_tabh*cos(a_tab)+0.005+c,d_height*20]);
         
         if (d >= 0)
         translate([0,0,-d_tabh*sin(a_tab)+d_height+m/2+d+2.1])

@@ -1,0 +1,24 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "New set 1": {
+            "$fa": "8",
+            "$fs": "0.25",
+            "div_base_x": "0",
+            "div_base_y": "0",
+            "divx": "1",
+            "divy": "1",
+            "enable_zsnap": "false",
+            "gridx": "1",
+            "gridy": "1",
+            "gridz": "6",
+            "gridz_define": "0",
+            "height_internal": "0",
+            "length": "42",
+            "scoop": "1",
+            "style_hole": "3",
+            "style_lip": "0",
+            "style_tab": "1"
+        }
+    }
+}

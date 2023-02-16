@@ -43,22 +43,21 @@ divx = 1;
 // number of y Divisions
 divy = 1;
 
-/* [Toggles] */
-// internal fillet for easy part removal
-enable_scoop = true;
-// snap gridz height to nearest 7mm increment
-enable_zsnap = false;
-// how should the top lip act
-style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
-
-/* [Other] */
+/* [Height] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
-// the type of tabs
-style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
-
 // overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0; 
+// snap gridz height to nearest 7mm increment
+enable_zsnap = false;
+
+/* [Features] */
+// the type of tabs
+style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
+// how should the top lip act
+style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
+// scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop. 
+scoop = 1; //[0:0.1:1]
 
 /* [Base] */
 style_hole = 3; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
@@ -75,7 +74,7 @@ color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
 
     if (divx > 0 && divy > 0)
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
 }
 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 
@@ -87,7 +86,7 @@ gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
 // 3x3 even spaced grid
 /*
 gridfinityInit(3, 3, height(6), 0, 42) {
-	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, enable_scoop = true);
+	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 0);
 }
 gridfinityBase(3, 3, 42, 0, 0, 1);
 */
@@ -95,13 +94,13 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 // Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop. 
 /*
 gridfinityInit(3, 3, height(6), 0, 42) {
-    cut(x=0, y=0, w=1.5, h=0.5, t=5, s=false);
-    cut(0, 0.5, 1.5, 0.5, 5, false);
-    cut(0, 1, 1.5, 0.5, 5, false);
+    cut(x=0, y=0, w=1.5, h=0.5, t=5, s=0);
+    cut(0, 0.5, 1.5, 0.5, 5, 0);
+    cut(0, 1, 1.5, 0.5, 5, 0);
     
-    cut(0,1.5,0.5,1.5,5,false);
-    cut(0.5,1.5,0.5,1.5,5,false);
-    cut(1,1.5,0.5,1.5,5,false);
+    cut(0,1.5,0.5,1.5,5,0);
+    cut(0.5,1.5,0.5,1.5,5,0);
+    cut(1,1.5,0.5,1.5,5,0);
     
     cut(1.5, 0, 1.5, 5/3, 2);
     cut(1.5, 5/3, 1.5, 4/3, 4);
@@ -112,7 +111,7 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin. 
 /*
 gridfinityInit(3, 3, height(6), 0, 42)  {
-    cut(0,2,2,1,5,false);
+    cut(0,2,2,1,5,0);
     cut(1,0,1,3,5);
     cut(1,0,2,1,5);
     cut(0,0,1,2);
