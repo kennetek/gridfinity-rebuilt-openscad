@@ -74,7 +74,8 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     gy = gridy == 0 ? floor(diy/length) : gridy; 
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
-    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?0:sh==1?d_cs:h_cb)); 
+
+    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?(sp!=3&&sp!=4)?0:d_screw:sh==1?d_cs:h_cb));
 
     offsetx = dix < dx ? 0 : (gx*length-0.5-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-0.5-diy)/2*fity*-1;
