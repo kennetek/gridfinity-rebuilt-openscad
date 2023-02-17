@@ -44,6 +44,8 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
 /* [Base] */
 style_hole = 0; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
+// only cut magnet/screw holes at the corners of the bin to save uneccesary print time
+style_corners = true;
 // number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
@@ -64,18 +66,19 @@ gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, lengt
 
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) { 
+    sh = style_hole*(style_corners?p_corn:1);
     difference() {
         union() {
             gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length)
             children();
-            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole);
+            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, sh);
         }
 
         difference() {
             union() {
                 intersection() {
                     difference() {
-                        gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, -d_wall*2, false);
+                        gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, sh, -d_wall*2, false);
                         translate([-gridx*length/2,-gridy*length/2,2*h_base])
                         cube([gridx*length,gridy*length,1000]);
                     }
