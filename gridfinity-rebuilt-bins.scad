@@ -59,7 +59,7 @@ style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and 
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop. 
 scoop = 1; //[0:0.1:1]
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
-style_corners = true;
+style_corners = false;
 
 /* [Base] */
 style_hole = 3; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
