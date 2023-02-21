@@ -17,13 +17,16 @@ function height (z,d=0,l=0,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z,d,
 // style_tab:   tab style for all compartments. see cut()
 // scoop_weight:    scoop toggle for all compartments. see cut()
 module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
+    trace_entry(str("ndiv_x=",n_divx,",ndivy=",n_divy,",style_tab=",style_tab,",scoop_weight=",scoop_weight));
     for (i = [1:n_divx]) 
     for (j = [1:n_divy])
     cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
+    trace_exit();
 }
 
 // initialize gridfinity
 module gridfinityInit(gx, gy, h, h0 = 0, l) {
+    trace_entry(str("gx=",gx,",gy=",gy,",h=",h,",h0=",h0,",l=",l));
     $gxx = gx;
     $gyy = gy;
     $dh = h; 
@@ -40,6 +43,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
         else profile_wall2();
     } 
     }
+    trace_exit();
 }
 // Function to include in the custom() module to individually slice bins
 // Will try to clamp values to fit inside the provided base size
@@ -54,22 +58,27 @@ module gridfinityInit(gx, gy, h, h0 = 0, l) {
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else. 
 // s:   toggle the rounded back corner that allows for easy removal
 module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
+    trace_entry(str("x=",x,",y=",y,",w=",w,",h=",h,",t=",t,",s=",s));
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s);
+    trace_exit();
 }
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
+    trace_entry(str("x=",x,",y=",y,",w=",w,",h=",h));
     translate([0,0,$dh0==0?$dh+h_base:$dh0+h_base])
     cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
     children();
+    trace_exit();
 } 
 
 // ===== Modules ===== //
 
 module profile_base() {
+    trace_entry();
     polygon([
         [0,0],
         [0,h_base],
@@ -78,9 +87,11 @@ module profile_base() {
         [r_base-r_c2,r_c1],
         [r_base-r_c2-r_c1,0]
     ]);
+    trace_exit();
 }
 
 module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
+    trace_entry(str("gx=",gx,",gy=",gy,",l=",l,",dx=",dx,",dy=",dy,",style_hole=",style_hole,",off=",off,",final_cut=",final_cut));
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -113,9 +124,11 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
                 block_base_hole(style_hole, off);
         }
     }
+    trace_exit();
 }
 
 module block_base_solid(dbnx, dbny, l, o) { 
+    trace_entry(str("dbnx=",dbnx,",dbny=",dbny,",l=",l,",o=",o));
     xx = dbnx*l-0.05; 
     yy = dbny*l-0.05; 
     oo = (o/2)*(sqrt(2)-1);
@@ -133,9 +146,11 @@ module block_base_solid(dbnx, dbny, l, o) {
             rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
         }
     }
+    trace_exit();
 }
 
 module block_base_hole(style_hole, o=0) {
+    trace_entry(str("style_hole=",style_hole,",o=",o));
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
     union() {
@@ -150,9 +165,11 @@ module block_base_hole(style_hole, o=0) {
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
     }
+    trace_exit();
 }
 
 module profile_wall_sub_sub() {
+    trace_entry();
     polygon([
         [0,0],
         [d_wall/2,0],
@@ -161,9 +178,11 @@ module profile_wall_sub_sub() {
         [d_wall2-d_clear,$dh+h_base],
         [0,$dh+h_base]
     ]);
+    trace_exit();
 }
 
 module profile_wall_sub() {
+    trace_entry();
     difference() {
         profile_wall_sub_sub();
         color("red")
@@ -173,9 +192,11 @@ module profile_wall_sub() {
         profile_base();
         square([d_wall,0]);
     }
+    trace_exit();
 }
 
 module profile_wall() {
+    trace_entry();
     translate([r_base,0,0])
     mirror([1,0,0])
     difference() {
@@ -191,36 +212,46 @@ module profile_wall() {
         mirror([0,1,0])
         square(100*length);
     }
+    trace_exit();
 }
 
 // lipless profile
 module profile_wall2() {
+    trace_entry();
     translate([r_base,0,0]) 
     mirror([1,0,0]) 
     square([d_wall,$dh]);
+    trace_exit();
 }
 
 module block_wall(gx, gy, l) {
+    trace_entry(str("gx=",gx,",gy=",gy,",l=",l));
     translate([0,0,h_base]) 
     sweep_rounded(gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001)
     children();
+    trace_exit();
 }
 
 module block_bottom( h = 2.2, gx, gy, l ) {
+    trace_entry(str("h=",h,",gx=",gx,",gy=",gy,",l=",l));
     translate([0,0,h_base+0.1])
     rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
+    trace_exit();
 }
 
 module cut_move_unsafe(x, y, w, h) {
+    trace_entry(str("x=",x,",y=",y,",w=",w,",h=",h));
     xx = ($gxx*length+d_magic);
     yy = ($gyy*length+d_magic); 
     translate([(x)*xx/$gxx,(y)*yy/$gyy,0])
     translate([(-xx+d_div)/2,(-yy+d_div)/2,0])
     translate([(w*xx/$gxx-d_div)/2,(h*yy/$gyy-d_div)/2,0])
     children();
+    trace_exit();
 }
 
 module block_cutter(x,y,w,h,t,s) {
+    trace_entry(str("x=",x,",y=",y,",w=",w,",h=",h,",t=",t,",s=",s));
     
     v_len_tab = d_tabh;
     v_len_lip = d_wall2-d_wall+1.2;
@@ -242,7 +273,7 @@ module block_cutter(x,y,w,h,t,s) {
     extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall-d_clear : 0); 
     tab = (zsmall || t == 5) ? (ycutlast?v_len_lip:0) : v_len_tab; 
     ang = (zsmall || t == 5) ? (ycutlast?v_ang_lip:0) : v_ang_tab;
-    cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
+    cut = (zsmall || t == 5) ? (y2cutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
     
     translate([0,ylen/2,h_base+h_bot])
@@ -327,32 +358,40 @@ module block_cutter(x,y,w,h,t,s) {
     }
 
     }
+    trace_exit();
 }
 
 module transform_main(xlen) {
+    trace_entry(str("xlen=",xlen));
     translate([0,0,-(xlen-2*r_f2)/2])
     linear_extrude(xlen-2*r_f2)
     children();
+    trace_exit();
 }
 
 module transform_tab(type, xlen, cut) {
+    trace_entry(str("type=",type,",xlen=",xlen,",cut=",cut));
     mirror([0,0,type==1?1:0])
     copy_mirror([0,0,-(abs(type)-1)])
     translate([0,0,-(xlen)/2])
     translate([0,0,r_f2])
     linear_extrude((xlen-d_tabw-abs(cut))/(1-(abs(type)-1))-2*r_f2)
     children();
+    trace_exit();
 }
 
 module fillet_cutter(t = 0, c = "goldenrod") {
+    trace_entry(str("t=",t,",c=",c));
     color(c)
     minkowski() {
         children();
         sphere(r = r_f2-t/1000);
     }
+    trace_exit();
 }
 
 module profile_cutter(h, l, s) {
+    trace_entry(str("h=",h,",l=",l,",s=",s));
     scoop = max(s*$dh/2-r_f2,0); 
     translate([r_f2,r_f2])
     hull() {
@@ -382,14 +421,16 @@ module profile_cutter(h, l, s) {
             square([2*l,scoop]);
         }
     }
+    trace_exit();
 }
 
 module profile_cutter_tab(h, tab, ang) {
+    trace_entry(str("h=",h,",tab=",tab,",ang=",ang));
     if (tab > 0)
         color("blue")
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
-    
+    trace_exit();
 }
 
 // ==== Utilities =====
@@ -397,39 +438,50 @@ module profile_cutter_tab(h, tab, ang) {
 function clp(x,a,b) = min(max(x,a),b);
 
 module rounded_rectangle(length, width, height, rad) {
+    trace_entry(str("length=",length,",width=",width,",height=",height,",rad=",rad));
     linear_extrude(height)
     offset(rad) 
     offset(-rad) 
     square([length,width], center = true);
+    trace_exit();
 }
 
 module rounded_square(length, height, rad) {
+    trace_entry(str("length=",length,",height=",height,",rad=",rad));
     rounded_rectangle(length, length, height, rad);
+    trace_exit();
 }
 
 module copy_mirror(vec=[0,1,0]) {
+    trace_entry(str("vec=",vec));
     children();
     if (vec != [0,0,0]) 
     mirror(vec) 
     children();
+    trace_exit();
 } 
 
 module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
+    trace_entry(str("x=",x,",y=",y,",sx=",sx,",sy=",sy));
     yy = sy <= 0 ? sx : sy; 
     translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
     for (i = [1:ceil(x)])
     for (j = [1:ceil(y)])
     translate([(i-1)*sx,(j-1)*yy,0]) 
     children();
+    trace_exit();
 }
 
 module pattern_circular(n=2) {
+    trace_entry(str("n=",n));
     for (i = [1:n]) 
     rotate(i*360/n) 
     children();
+    trace_exit();
 }
 
 module sweep_rounded(w=10, h=10) {
+    trace_entry(str("w=",w,",h=",h));
     union() pattern_circular(2) {
         copy_mirror([1,0,0]) 
         translate([w/2,h/2,0])
@@ -447,5 +499,44 @@ module sweep_rounded(w=10, h=10) {
         linear_extrude(height = w, center = true)
         children();
     }
+    trace_exit();
 }
 
+// Tracing modules/functions which can be called from other modules
+module trace_entry(text=""){
+    if (text == "") {
+        trace_helper("entry");
+    }
+    else {
+        trace_helper(str("entry: ", text));
+    }
+}
+
+module trace_exit(text="") {
+    if (text == "") {
+        trace_helper("exit");
+    }
+    else {
+        trace_helper(str("exit: ", text));
+    }
+}
+
+module trace(text="") {
+    trace_helper(text);
+}
+
+// trace helper modules//functions whch are designed to be called by other trace functions
+
+module trace_helper(text="") {
+    if (tracing) echo(str(trace_string(idx=2), text));
+}
+
+function trace_string(idx=2) = 
+    idx == undef
+        ? "<top-level>"
+        : str(trace_tab(), parent_module(idx), ": ");
+
+function trace_tab(idx = $parent_modules-3) =
+    idx == 0
+        ? ""
+        : str("| ", trace_tab(idx -1));

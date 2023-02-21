@@ -68,6 +68,9 @@ div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0; 
 
+/* [Trace] */
+// Enable to get trace output
+tracing = false;
 
 
 // ===== IMPLEMENTATION ===== //
