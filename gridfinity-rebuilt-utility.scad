@@ -273,7 +273,7 @@ module block_cutter(x,y,w,h,t,s) {
     extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall-d_clear : 0); 
     tab = (zsmall || t == 5) ? (ycutlast?v_len_lip:0) : v_len_tab; 
     ang = (zsmall || t == 5) ? (ycutlast?v_ang_lip:0) : v_ang_tab;
-    cut = (zsmall || t == 5) ? (y2cutlast?v_cut_lip:0) : v_cut_tab;
+    cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
     
     translate([0,ylen/2,h_base+h_bot])
