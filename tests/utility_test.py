@@ -1,5 +1,5 @@
 from unittest import TestCase
-from openscad_test_runner import OpenScadModuleTestRunner, Module
+from openscadtestrunner import OpenScadModuleTestRunner, Module
 
 
 class UtilityTest(TestCase):
