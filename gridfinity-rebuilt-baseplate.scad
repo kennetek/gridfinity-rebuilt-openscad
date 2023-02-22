@@ -16,9 +16,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 2;  
+gridx = 4;  
 // number of bases along y-axis   
-gridy = 2;  
+gridy = 4;  
 // base unit
 length = 42;
 
@@ -54,7 +54,7 @@ style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: 
 enable_magnet = true; 
 
 // hole styles
-style_hole = 1; // [0:none, 1:contersink, 2:counterbore]
+style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
@@ -171,34 +171,6 @@ module cutter_counterbore(){
         copy_mirror([0,1,0])
         translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit]) 
         cube([r_cb*3,r_cb*3, 10]);
-    }
-}
-
-module cutter_countersink2() {
-    pattern_circular(4)
-    translate([d_hole/2, d_hole/2, 0]) {
-        cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
-        
-        translate([0,0,d_cs])
-        mirror([0,0,1])
-        hull() { 
-            cylinder(h = d_cs+10, r=r_hole1+d_clear);
-            translate([0,0,d_cs])
-            cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
-        }
-    }
-}
-
-module cutter_counterbore2() {
-    pattern_circular(4)
-    translate([d_hole/2, d_hole/2, 0]) {
-        cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
-        difference() {
-            cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
-            copy_mirror([0,1,0])
-            translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit]) 
-            cube([r_cb*3,r_cb*3, 10]);
-        }
     }
 }
 
