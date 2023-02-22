@@ -6,3 +6,8 @@ stl/
 batch/
 site/
 *.json
+
+__pycache__
+
+#exclude generated temporary test folders
+openscad_test_*
