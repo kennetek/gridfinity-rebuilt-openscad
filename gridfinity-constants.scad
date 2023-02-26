@@ -16,6 +16,11 @@ r_fo2 = 3.2;
 // outside radii 3
 r_fo3 = 1.6; 
 
+// bottom indent offset
+d_indent = 1.6;
+// bottom indent height
+h_indent = 4.68;
+
 // screw hole radius
 r_hole1 = 1.5;  
 // magnet hole radius

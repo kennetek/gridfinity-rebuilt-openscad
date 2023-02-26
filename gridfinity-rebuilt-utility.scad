@@ -101,8 +101,11 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
         difference() {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
             block_base_solid(dbnx, dbny, l, off);
-            
-            if (style_hole > 0) 
+
+            if (style_hole == 4)
+            pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
+            block_base_indent(dbnx, dbny, l, off);
+            else if (style_hole > 0) 
                 if (style_hole % p_corn < 0.001)
                 pattern_linear(2, 2, (gx-1)*length+d_hole, (gy-1)*length+d_hole)
                 block_base_hole(style_hole / p_corn, off);
@@ -133,6 +136,15 @@ module block_base_solid(dbnx, dbny, l, o) {
             rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
         }
     }
+}
+
+module block_base_indent(dbnx, dbny, l, o) { 
+    xx = dbnx*l-0.05; 
+    yy = dbny*l-0.05; 
+    oo = (o/2)*(sqrt(2)-1);
+    translate([0,0,h_indent])
+    mirror([0,0,1])
+    rounded_rectangle(xx-2*r_c2-2*r_c1-2*d_indent+o, yy-2*r_c2-2*r_c1-2*d_indent+o, h_indent+oo, r_fo3/2);
 }
 
 module block_base_hole(style_hole, o=0) {
