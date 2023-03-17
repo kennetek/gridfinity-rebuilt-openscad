@@ -58,6 +58,7 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
+screw_together = (style_plate == 3 || style_plate == 4);
 
 color("tomato") 
 gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
@@ -75,7 +76,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     dx = max(gx*length-0.5, dix);
     dy = max(gy*length-0.5, diy);
 
-    off = (sp==0?0:sp==1?bp_h_bot:h_skel+(sm?h_hole:0)+(sh==0?(sp!=3&&sp!=4)?0:d_screw:sh==1?d_cs:h_cb));
+    off = calculate_off(sp, sm, sh);
 
     offsetx = dix < dx ? 0 : (gx*length-0.5-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-0.5-diy)/2*fity*-1;
@@ -91,8 +92,6 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
-            if (sm) block_base_hole(1);
-
             if (sp == 1)
                 translate([0,0,-off])
                 cutter_weight();
@@ -103,7 +102,11 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
                 translate([0,0,-5*(h_base+off)])
                 rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
             
-            translate([0,0,-off]) { 
+             
+            hole_pattern(){
+                if (sm) block_base_hole(1);
+
+                translate([0,0,-off])
                 if (sh == 1) cutter_countersink();
                 else if (sh == 2) cutter_counterbore();
             }
@@ -112,6 +115,21 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     }
 
 }
+
+function calculate_off(sp, sm, sh) = 
+    screw_together
+        ? 6.75
+        :sp==0
+            ?0
+            : sp==1
+                ?bp_h_bot
+                :h_skel + (sm
+                    ?h_hole
+                    : 0)+(sh==0
+                        ? d_screw
+                        : sh==1
+                            ?d_cs
+                            :h_cb);
 
 module cutter_weight() {
     union() {
@@ -127,32 +145,32 @@ module cutter_weight() {
         }
     }
 }
-
-module cutter_countersink() {
-    pattern_circular(4) 
+module hole_pattern(){
+    pattern_circular(4)
     translate([d_hole/2, d_hole/2, 0]) {
-        cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
-        
-        translate([0,0,d_cs])
-        mirror([0,0,1])
-        hull() { 
-            cylinder(h = d_cs+10, r=r_hole1+d_clear);
-            translate([0,0,d_cs])
-            cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
-        }
+        render();
+        children();
     }
 }
 
-module cutter_counterbore() {
-    pattern_circular(4)
-    translate([d_hole/2,d_hole/2,0]) {
-        cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
-        difference() {
-            cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
-            copy_mirror([0,1,0])
-            translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit]) 
-            cube([r_cb*3,r_cb*3, 10]);
-        }
+module cutter_countersink(){
+    cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);     
+    translate([0,0,d_cs])
+    mirror([0,0,1])
+    hull() { 
+        cylinder(h = d_cs+10, r=r_hole1+d_clear);
+        translate([0,0,d_cs])
+        cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
+    }
+}
+
+module cutter_counterbore(){
+    cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
+    difference() {
+        cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
+        copy_mirror([0,1,0])
+        translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit]) 
+        cube([r_cb*3,r_cb*3, 10]);
     }
 }
 
