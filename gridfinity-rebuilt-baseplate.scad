@@ -16,9 +16,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 4;  
+gridx = 5;  
 // number of bases along y-axis   
-gridy = 4;  
+gridy = 5;  
 // base unit
 length = 42;
 
@@ -92,23 +92,27 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
-            if (sp == 1)
-                translate([0,0,-off])
-                cutter_weight();
-            else if (sp == 2 || sp == 3) 
-                linear_extrude(10*(h_base+off), center = true)
-                profile_skeleton();
-            else if (sp == 4) 
-                translate([0,0,-5*(h_base+off)])
-                rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
-            
-             
-            hole_pattern(){
+            render() {
                 if (sm) block_base_hole(1);
 
-                translate([0,0,-off])
-                if (sh == 1) cutter_countersink();
-                else if (sh == 2) cutter_counterbore();
+                if (sp == 1)
+                    translate([0,0,-off])
+                    cutter_weight();
+                else if (sp == 2 || sp == 3) 
+                    linear_extrude(10*(h_base+off), center = true)
+                    profile_skeleton();
+                else if (sp == 4) 
+                    translate([0,0,-5*(h_base+off)])
+                    rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
+
+
+                hole_pattern(){
+                    if (sm) block_base_hole(1);
+
+                    translate([0,0,-off])
+                    if (sh == 1) cutter_countersink();
+                    else if (sh == 2) cutter_counterbore();
+                }
             }
         }
         if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);    
