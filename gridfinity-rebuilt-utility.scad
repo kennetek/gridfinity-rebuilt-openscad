@@ -108,23 +108,26 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
         translate([0,0,-1])
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
         
-        render()
-        difference() {
-            pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
-            block_base_solid(dbnx, dbny, l, off);
-            
-            if (style_hole > 0) 
-                if (style_hole % p_corn < 0.001)
-                pattern_linear(2, 2, (gx-1)*length+d_hole, (gy-1)*length+d_hole)
-                block_base_hole(style_hole / p_corn, off);
-                else
-                pattern_linear(gx, gy, l)
-                pattern_circular(abs(d_hole)<0.001?1:4) 
-                translate([d_hole/2, d_hole/2, 0])
-                block_base_hole(style_hole, off);
-        }
+        pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
+        block_base(gx, gy, l, dbnx, dbny, style_hole, off);
     }
     trace_exit();
+}
+
+module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
+    render()
+    difference() {
+        block_base_solid(dbnx, dbny, l, off);
+        
+        if (style_hole > 0) 
+            if (style_hole % p_corn < 0.001)
+            pattern_linear(2, 2, (gx-1)*length+d_hole, (gy-1)*length+d_hole)
+            block_base_hole(style_hole / p_corn, off);
+            else
+            pattern_circular(abs(d_hole)<0.001?1:4) 
+            translate([d_hole/2, d_hole/2, 0])
+            block_base_hole(style_hole, off);
+        }
 }
 
 module block_base_solid(dbnx, dbny, l, o) { 
