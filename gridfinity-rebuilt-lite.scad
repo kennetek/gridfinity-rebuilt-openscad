@@ -53,6 +53,9 @@ div_base_y = 0;
 // thickness of bottom layer
 bottom_layer = 1;
 
+/* [Trace] */
+// Enable to get trace output
+tracing = false;
 
 // ===== IMPLEMENTATION ===== //
 
@@ -66,6 +69,7 @@ gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, lengt
 
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole) { 
+    trace_entry(str("gridx=",gridx,",gridy=",gridy,",gridz=",gridz,",gridz_define=",gridz_define,",style_lip=",style_lip,",enable_zsnap=",enable_zsnap,",length=",length,",div_base_x=",div_base_x,",div_base_y=",div_base_y,",style_hole=",style_hole));
     sh = style_hole*(style_corners?p_corn:1);
     difference() {
         union() {
@@ -97,4 +101,5 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
         }
 
     }
+    trace_exit();
 }

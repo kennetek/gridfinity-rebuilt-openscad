@@ -56,6 +56,10 @@ enable_magnet = true;
 // hole styles
 style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 
+/* [Trace] */
+// Enable to get trace output
+tracing = false;
+
 
 // ===== IMPLEMENTATION ===== //
 
@@ -66,7 +70,7 @@ gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, ena
 // ===== CONSTRUCTION ===== //
 
 module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
-    
+    trace_entry(str("gridx=",gridx,",gridy=",gridy,",length=",length,",dix=",dix,",diy=",diy,",sp=",sp,",sm=",sm,",sh=",sh,",fitx=",fitx,",fity=",fity));
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
 
@@ -110,10 +114,11 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         }
         if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);    
     }
-
+    trace_exit();
 }
 
 module cutter_weight() {
+    trace_entry();
     union() {
         linear_extrude(bp_cut_depth*2,center=true)
         square(bp_cut_size, center=true);
@@ -126,9 +131,11 @@ module cutter_weight() {
             circle(d=bp_rcut_width);
         }
     }
+    trace_exit();
 }
 
 module cutter_countersink() {
+    trace_entry();
     pattern_circular(4) 
     translate([d_hole/2, d_hole/2, 0]) {
         cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
@@ -141,9 +148,11 @@ module cutter_countersink() {
             cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
         }
     }
+    trace_exit();
 }
 
 module cutter_counterbore() {
+    trace_entry();
     pattern_circular(4)
     translate([d_hole/2,d_hole/2,0]) {
         cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
@@ -154,9 +163,11 @@ module cutter_counterbore() {
             cube([r_cb*3,r_cb*3, 10]);
         }
     }
+    trace_exit();
 }
 
 module profile_skeleton() {
+    trace_entry();
     l = length-2*r_c2-2*r_c1; 
     minkowski() { 
         difference() {
@@ -170,10 +181,11 @@ module profile_skeleton() {
         }
         circle(r_skel);
     }
+    trace_exit();
 }
 
 module cutter_screw_together(gx, gy, off) {
-
+    trace_entry(str("gx=",gx,",gy=",gy,",off=",off));
     screw(gx, gy);
     rotate([0,0,90])
     screw(gy, gx);
@@ -186,4 +198,5 @@ module cutter_screw_together(gx, gy, off) {
         rotate([0,90,0])
         cylinder(h=length/2, d=d_screw, center = true);
     }
+    trace_exit();
 }

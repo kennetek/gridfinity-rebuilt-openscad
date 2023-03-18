@@ -65,6 +65,9 @@ style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
 // tab angle
 a_tab = 40;      
 
+/* [Trace] */
+// Enable to get trace output
+tracing = false;
 
 // ===== IMPLEMENTATION ===== //
 
@@ -102,6 +105,7 @@ xFunc = [xAll, xCorner, xEdge, xAuto, xNone];
 
 
 module gridfinityVase() {
+    trace_entry();
     $dh = d_height; 
     difference() {
         union() {
@@ -153,9 +157,11 @@ module gridfinityVase() {
         translate([0,0,-50+layer+0.01])
         cube([gridx*length*10,gridy*length*10,100], center=true);
     }
+    trace_exit();
 }
 
 module gridfinityBaseVase() {
+    trace_entry();
     difference() {
     union() {
     difference() {
@@ -200,9 +206,11 @@ module gridfinityBaseVase() {
     if (style_base != 4)
     linear_extrude(d_bottom)
     profile_x(0.1);
+    trace_exit();
 }
 
 module block_magnet_blank(o = 0, half = true) {
+    trace_entry(str("o=",o,",half=",half));
     translate([d_hole/2,d_hole/2,-h_base+0.1])
     difference() {
         hull() {
@@ -213,9 +221,11 @@ module block_magnet_blank(o = 0, half = true) {
         mirror([0,0,1])
         cylinder(r=(r_hole2+o)*2, h = (h_base+0.1)*4);
     }
+    trace_exit();
 }
 
 module block_base_blank(o = 0) {
+    trace_entry(str("o=",o));
     mirror([0,0,1]) {
         hull() {
             rounded_square(length-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
@@ -227,9 +237,11 @@ module block_base_blank(o = 0) {
             rounded_square(length-o-0.05, d_bottom, r_fo1/2);
         }
     }
+    trace_exit();
 }
 
 module block_pinch() {
+    trace_entry();
     sweep_rounded(gridx*length-2*r_base-0.5-0.001, gridy*length-2*r_base-0.5-0.001)
     translate([r_base,0,0])
     mirror([1,0,0])
@@ -250,9 +262,11 @@ module block_pinch() {
         translate([d_wall2-nozzle*2-d_clear*2,0,0])
         square(r_c2*2);
     }
+    trace_exit();
 }
 
 module block_tabsupport() {
+    trace_entry();
     intersection() {
         translate([0,0,0.1])
         block_vase(d_height*4);
@@ -262,9 +276,11 @@ module block_tabsupport() {
         transform_vtab_base(gridx*length*2)
         block_tab_base(-nozzle*sqrt(2));
     }
+    trace_exit();
 }
 
 module block_divider() {
+    trace_entry();
     difference() {
         intersection() {
             translate([0,0,0.1])
@@ -319,31 +335,39 @@ module block_divider() {
         transform_vtab_base((n_st<2?gridx*length/n_x-0.5-r_fo1:d_tabw)-nozzle*4)
         block_tab_base(-nozzle*sqrt(2));
     }
+    trace_exit();
 }
 
 module block_divider_edgecut() {
+    trace_entry();
     translate([-50,-gridy*length/2+0.25,0])
     rotate([90,0,90])
     linear_extrude(100)
     offset(delta = 0.1)
     profile_wall_sub();
+    trace_exit();
 }
 
 module transform_funnel() {
+    trace_entry();
     if (me > 6 && enable_funnel && gridz > 3 && n_st != 6)
     transform_style()
     render()
     children();
+    trace_exit();
 }
 
 module block_funnel_inside() {
+    trace_entry();
     intersection() {
         block_tabscoop(m-nozzle*3*sqrt(2), 0.003, nozzle*2, 0.01);
         block_tab(0.1);
     }
+    trace_exit();
 }
 
 module block_funnel_outside() {
+    trace_entry();
     intersection() {
         difference() {
             block_tabscoop(m, 0, 0, 0);
@@ -351,9 +375,11 @@ module block_funnel_outside() {
         }
         block_tab(-nozzle*sqrt(2)/2);
     }
+    trace_exit();
 }
 
 module block_vase_base() {
+    trace_entry();
     difference() {
         // base
         translate([0,0,-h_base]) {
@@ -395,9 +421,11 @@ module block_vase_base() {
         transform_vtab_base(n_st<2?gridx*length/n_x-0.5-r_fo1:d_tabw)
         profile_tab();
     }
+    trace_exit();
 }
 
 module profile_wall_sub_sub() {
+    trace_entry();
     polygon([
         [0,0],
         [nozzle*2,0],
@@ -406,9 +434,11 @@ module profile_wall_sub_sub() {
         [d_wall2-d_clear,d_height+h_base],
         [0,d_height+h_base]
     ]);
+    trace_exit();
 }
 
 module block_inset() {
+    trace_entry();
     ixx = (gridx*length-0.5)/2;
     iyy = d_height/1.875;
     izz = sqrt(ixx^2+iyy^2)*tan(40);
@@ -429,24 +459,30 @@ module block_inset() {
         translate([-gridx*length/2,-(gridy*length-0.5)/2+d_wall2-2*nozzle,0])
         cube([gridx*length,izz,d_height*2]);
     }
+    trace_exit();
 }
 
 module block_inset_sub(x, y, ang) {  
+    trace_entry(str("x=",x,",y=",y,",ang=",ang));
     translate([0,(gridy*length-0.5)/2+r_fo1/2,0])
     mirror([0,1,0])
     linear_extrude(y,center=true)
     polygon([[-x,0],[x,0],[0,x*tan(ang)]]);
+    trace_exit();
 }
 
 module transform_style() {
+    trace_entry();
     translate([-(n_x-1)*spacing/2,0,0])
     for (i = [1:n_x])
     translate([(i-1)*spacing,0,0])
     translate([shiftauto(i,n_x)*d_edge + shift*d_edge,0,0])
     children();
+    trace_exit();
 }
 
 module block_flushscoop() {
+    trace_entry();
     translate([0,gridy*length/2-d_wall2-nozzle/2-1,d_height/2])
     linear_extrude(d_height)
     union() {
@@ -456,20 +492,26 @@ module block_flushscoop() {
 
     transform_scoop() 
     polygon([[0,0],[d_ramp,0],[d_ramp,d_ramp]]);
+    trace_exit();
 }
 
 module profile_tab() {
+    trace_entry();
     union() {
         copy_mirror([0,1,0])
         polygon([[0,0],[d_tabh*cos(a_tab),0],[d_tabh*cos(a_tab),d_tabh*sin(a_tab)]]);
     }
+    trace_exit();
 }
 
 module profile_tabscoop(m) {
+    trace_entry();
     polyhedron([[m/2,0,0],[0,-m,0],[-m/2,0,0],[0,0,m]], [[0,2,1],[1,2,3],[0,1,3],[0,3,2]]);
+    trace_exit();
 }
 
 module block_tabscoop(a=m, b=0, c=0, d=-1) {
+    trace_entry(str("a=",a,",b=",b,",c=",c,",d=",d));
     translate([0,d_tabh*cos(a_tab)-length*gridy/2+0.25+b,0])
     difference() {
         translate([0,0,-d_tabh*sin(a_tab)*2+d_height+2.1])
@@ -482,35 +524,45 @@ module block_tabscoop(a=m, b=0, c=0, d=-1) {
         translate([0,0,-d_tabh*sin(a_tab)+d_height+m/2+d+2.1])
         cube([gridx*length,gridy*length,m],center=true);
     }
+    trace_exit();
 }
 
 module transform_vtab(a=0,b=1) {
+    trace_entry(str("a=",a,",b=",b));
     transform_vtab_base(gridx*length/b-0.5-r_fo1+a)
     children();
+    trace_exit();
 }
 
 module transform_vtab_base(a) {
+    trace_entry(str("a=",a));
     translate([0,d_tabh*cos(a_tab)-length*gridy/2+0.25,-d_tabh*sin(a_tab)+d_height+2.1])
     rotate([90,0,270])
     linear_extrude(a, center=true)
     children();
+    trace_exit();
 }
 
 module block_tab(del, b=1) {
+    trace_entry(str("del=",del,",b=",b));
     transform_vtab(-nozzle*4, b)
     block_tab_base(del);
+    trace_exit();
 }
 
 module block_tab_base(del) {
+    trace_entry(str("del=",del));
     offset(delta = del)
     union() {
         profile_tab();
         translate([d_tabh*cos(a_tab),-d_tabh*sin(a_tab),0])
         square([length,d_tabh*sin(a_tab)*2]);
     }
+    trace_exit();
 }
 
 module transform_scoop() {
+    trace_entry();
     intersection() {
         block_vase();
         translate([0,gridy*length/2-d_ramp,layer*max(bottom_layer*1)])
@@ -518,14 +570,18 @@ module transform_scoop() {
         linear_extrude(2*length*gridx,center=true)
         children();
     }
+    trace_exit();
 }
 
 module block_vase(h = d_height*2) {
+    trace_entry(str("h=",h));
     translate([0,0,-0.1])
     rounded_rectangle(gridx*length-0.5-nozzle, gridy*length-0.5-nozzle, h, r_base+0.01-nozzle/2);
+    trace_exit();
 }
 
 module profile_x(x_f = 3) {
+    trace_entry(str("x_f=",x_f));
     difference() {
         square([x_l,x_l],center=true);
 
@@ -538,19 +594,24 @@ module profile_x(x_f = 3) {
             circle(x_f);
         }
     }
+    trace_exit();
 }
 
 module block_x() {
+    trace_entry();
     translate([-(gridx-1)*length/2,-(gridy-1)*length/2,0])
     for (i = [1:gridx])
     for (j = [1:gridy])
     if (xFunc[style_base](i,j))
     translate([(i-1)*length,(j-1)*length,0])
     block_x_sub();
+    trace_exit();
 }
 
 module block_x_sub() {
+    trace_entry();
     linear_extrude(d_bottom*2+0.01,center=true)
     offset(0.05)
     profile_x();
+    trace_exit();
 }
