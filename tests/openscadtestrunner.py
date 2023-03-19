@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import shutil
-from contextlib import contextmanager
 from subprocess import Popen, PIPE
 from unittest import TestCase
 import filecmp
@@ -15,23 +14,40 @@ class Module():
         name (str): Name of the module
         kwargs (kwargs): arguments for a module in key-value format.
     """
+    class Method():
+        USE = "use"
+        INCLUDE = "include"
 
-    def __init__(self, file_name, name, **kwargs):
+    def __init__(self, file_name, name, method=Method.USE, **kwargs):
         self.file_name = file_name
         self.name = name
+        self.method = method
         self.args = kwargs
 
 
 class OpenScadModuleTestRunner(TestCase):
     executable = "openscad"
-    tmp_dir = "./openscad_test_" + datetime.now().strftime("%d%m%Y_%H%M%S") + "/"
+    cwd = os.getcwd()
+    tmp_dir = cwd + "/openscad_test_" + datetime.now().strftime("%d%m%Y_%H%M%S")
     out_file = "out.stl"
-    out_file_path = tmp_dir + out_file
+    out_file_path = tmp_dir + "/" + out_file
     default_args = " --enable fast-csg -o "
     file_name = "test.scad"
-    keep_folder = False
 
-    def Run(self, module, expected, way="include"):
+    def __init__(self):
+        with Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE) as process:
+            out, err = process.communicate()
+            out = out.decode("utf-8").strip()
+            if (out != self.cwd):
+                raise OSError(
+                    "Should be executed in root dir of git repo.")
+
+        self._create_tmp_dir()
+
+    def __del__(self):
+        self._remove_tmp_dir()
+
+    def Run(self, module, expected):
         """Creates a scad file with the nesecary content to run a module stand
             alone, generates a stl file and compares it with an expected stl 
             file
@@ -40,14 +56,10 @@ class OpenScadModuleTestRunner(TestCase):
             module (Module): Contains information regarding the to be tested
                 module. See Module documentation.
             expected (str): File path of the expected stl file.
-            way (str, optional): Openscad can include files via "include" and
-                "use". See documentation of openscad for difference. Defaults
-                to "include".
         """
-        with self._tmp_dir():
-            file_path = self._create_scadfile(module, way)
-            self._run_scadfile(file_path)
-            self._compare_output(expected)
+        file_path = self._create_scadfile(module)
+        self._run_scadfile(file_path)
+        self._compare_output(expected)
 
     def _compare_output(self, expected_file_path):
         self.assertTrue(filecmp.cmp(expected_file_path,
@@ -61,14 +73,14 @@ class OpenScadModuleTestRunner(TestCase):
             ret = process.wait()
             self.assertFalse(ret)
 
-    def _create_scadfile(self, module, way):
-        file_path = self.tmp_dir + self.file_name
+    def _create_scadfile(self, module):
+        file_path = self.tmp_dir + "/" + self.file_name
         with open(file_path, "w", encoding="utf8") as infile:
-            infile.write(self._create_openscad_string(module, way))
+            infile.write(self._create_openscad_string(module))
         return file_path
 
-    def _create_openscad_string(self, module, way):
-        string = way + " <" + module.file_name + ">\n"
+    def _create_openscad_string(self, module):
+        string = module.method + " <" + self.cwd + "/" + module.file_name + ">\n"
         string += module.name + "("
         for key, value in module.args.items():
             string += key + "=" + str(value)
@@ -77,9 +89,15 @@ class OpenScadModuleTestRunner(TestCase):
         string += ");"
         return string
 
-    @ contextmanager
-    def _tmp_dir(self):
+    def _create_tmp_dir(self):
         os.mkdir(self.tmp_dir)
-        yield
-        if not self.keep_folder:
-            shutil.rmtree(self.tmp_dir)
+
+    def _remove_tmp_dir(self):
+        shutil.rmtree(self.tmp_dir)
+
+
+class OpenscadTestCase(TestCase):
+    _runner = OpenScadModuleTestRunner()
+
+    def scad_module_test(self, module, expected_file):
+        self._runner.Run(module, expected_file)
