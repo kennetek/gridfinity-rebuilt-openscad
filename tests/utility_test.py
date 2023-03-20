@@ -1,47 +1,47 @@
-from unittest import TestCase
-from openscadtestrunner import OpenScadModuleTestRunner, Module, OpenscadTestCase
+from pathlib import Path
+from openscadtestrunner import ScadModule, OpenscadTestCase
 
 
 class UtilityTesttest(OpenscadTestCase):
 
-    def test_block_base_hole_style_0(self):
+    def test_block_base_hole_style_0(self) -> None:
         self.scad_module_test(
-            Module("gridfinity-rebuilt-utility.scad",
-                   "block_base_hole",
-                   style_hole=1), "tests/expected/test_block_base_hole_style_1.stl")
+            ScadModule(Path("gridfinity-rebuilt-utility.scad"),
+                       "block_base_hole",
+                       style_hole=1), Path("tests/expected/test_block_base_hole_style_1.stl"))
 
 
 class UtilityTest(OpenscadTestCase):
-    def test_block_base_hole_style_0(self):
-        module = Module("gridfinity-rebuilt-utility.scad",
-                        "block_base_hole",
-                        style_hole=1)
+    def test_block_base_hole_style_0(self) -> None:
+        module = ScadModule(Path("gridfinity-rebuilt-utility.scad"),
+                            "block_base_hole",
+                            style_hole=1)
         self.scad_module_test(
-            module, "tests/expected/test_block_base_hole_style_1.stl")
+            module, Path("tests/expected/test_block_base_hole_style_1.stl"))
 
-    def test_block_base_hole_style_1(self):
-        module = Module("gridfinity-rebuilt-utility.scad",
-                        "block_base_hole", style_hole=1)
+    def test_block_base_hole_style_1(self) -> None:
+        module = ScadModule(Path("gridfinity-rebuilt-utility.scad"),
+                            "block_base_hole", style_hole=1)
         self.scad_module_test(
-            module, "tests/expected/test_block_base_hole_style_1.stl")
+            module, Path("tests/expected/test_block_base_hole_style_1.stl"))
 
-    def test_block_base_hole_style_2(self):
-        module = Module("gridfinity-rebuilt-utility.scad",
-                        "block_base_hole", style_hole=2)
+    def test_block_base_hole_style_2(self) -> None:
+        module = ScadModule(Path("gridfinity-rebuilt-utility.scad"),
+                            "block_base_hole", style_hole=2)
         self.scad_module_test(
-            module, "tests/expected/test_block_base_hole_style_2.stl")
+            module, Path("tests/expected/test_block_base_hole_style_2.stl"))
 
-    def test_block_base_hole_style_3(self):
-        module = Module("gridfinity-rebuilt-utility.scad",
-                        "block_base_hole", style_hole=3)
+    def test_block_base_hole_style_3(self) -> None:
+        module = ScadModule(Path("gridfinity-rebuilt-utility.scad"),
+                            "block_base_hole", style_hole=3)
         self.scad_module_test(
-            module, "tests/expected/test_block_base_hole_style_3.stl")
+            module, Path("tests/expected/test_block_base_hole_style_3.stl"))
 
 
 class BaseplateTest(OpenscadTestCase):
 
-    def test_cutter_weight(self):
-        module = Module("gridfinity-rebuilt-baseplate.scad",
-                        "cutter_weight")
+    def test_cutter_weight(self) -> None:
+        module = ScadModule(Path("gridfinity-rebuilt-baseplate.scad"),
+                            "cutter_weight")
         self.scad_module_test(
-            module, "tests/expected/test_cutter_weight.stl")
+            module, Path("tests/expected/test_cutter_weight.stl"))
