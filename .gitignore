@@ -7,7 +7,9 @@ batch/
 site/
 *.json
 
-__pycache__
+#Python related
+__pycache__/
+.mypy_cache/
 
 #exclude generated temporary test folders
-openscad_test_*
+oscad_generated_test_files.*/
