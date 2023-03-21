@@ -1,6 +1,9 @@
 # Openscad test framework
 The openscad framework will isolate a openscad module by generating a new scad file and copy the to be tested module to that file. The file is rendered with openscad to a stl which is compared with an expected stl.
-
+## How to run tests manualy
+```bash
+python -m unittest discover tests/
+```
 ## How to use the test framework
 Lets test the following scad module `module_to_be_tested` witch has a dependecy `module_dependency`.
 ```openscad
