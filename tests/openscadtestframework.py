@@ -7,6 +7,7 @@ from re import match, search
 from subprocess import Popen, PIPE
 from unittest import TestCase
 from contextlib import contextmanager
+from platform import system
 
 
 def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
@@ -128,7 +129,6 @@ class ModuleTest():
 
 
 class ModuleTestRunner(TestCase):
-    executable: str = "openscad"
     out_file: Path = Path("out.stl")
     default_args: str = " --enable fast-csg -o "
     test_scad_file: Path = Path("test.scad")
@@ -142,6 +142,15 @@ class ModuleTestRunner(TestCase):
         super().__init__()
 
         self.tmp_dir: Path = Path()
+
+    def _scad_executable(self) -> str:
+        if system() == "Linux":
+            return "openscad"
+        if system() == "Windows":
+            return r'"C:\Program Files\Openscad\openscad.exe"'
+        if system() == "Darwin":
+            return r"/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
+        raise OSError(f"Unkown OS: {system()}")
 
     def _check_if_run_on_root_repo(self) -> bool:
         with Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE) as process:
@@ -175,7 +184,7 @@ class ModuleTestRunner(TestCase):
                         self.tmp_dir.joinpath(self.out_file), shallow=False))
 
     def _run_scadfile(self, file_path: Path) -> None:
-        command = self.executable + self.default_args + \
+        command = self._scad_executable() + self.default_args + \
             str(self.tmp_dir.joinpath(self.out_file)) + " " + str(file_path)
         with Popen(command, stdout=PIPE, stderr=PIPE, shell=True) as process:
             _, stderr = process.communicate()
