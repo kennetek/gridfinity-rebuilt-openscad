@@ -2,7 +2,7 @@ from __future__ import annotations
 import filecmp
 import shutil
 from pathlib import Path
-from typing import Tuple, List, Union, Iterator, Optional
+from typing import Tuple, List, Union, Iterator, Optional, Dict
 from re import match, search
 from subprocess import Popen, PIPE
 from unittest import TestCase
@@ -88,13 +88,15 @@ class ModuleBuilder():
 
 
 class ModuleTest():
-    def __init__(self, module_under_test: Module, **kwargs: Union[str, int]):
+    def __init__(self, module_under_test: Module):
         self.module_under_test = module_under_test
-        self._kwargs = kwargs
+        self._args: Tuple[Union[int, bool], ...] = ()
+        self._kwargs: Dict[str, Union[str, int]] = {}
         self.dependencies: List[Module] = []
         self.const_files: List[Path] = []
 
-    def add_arguments(self, **kwargs: Union[str, int]) -> None:
+    def add_arguments(self, *args: Union[int, bool], **kwargs: Union[str, int]) -> None:
+        self._args = self._args + args
         self._kwargs.update(kwargs)
 
     def add_dependency(self, module: Module) -> None:
@@ -121,10 +123,15 @@ class ModuleTest():
 
     def _get_call_string(self) -> str:
         out_str = self.module_under_test.name + "("
+        for arg in self._args:
+            out_str = out_str + str(arg) + ","
+
         for key, value in self._kwargs.items():
-            out_str = out_str + key + "=" + str(value)
-            if key != list(self._kwargs.keys())[-1]:
-                out_str = out_str + ","
+            out_str = out_str + key + "=" + str(value) + ","
+
+        if out_str[-1] == ",":
+            out_str = out_str[:-1]
+
         out_str = out_str + ");"
         return out_str
 
