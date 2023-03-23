@@ -1,5 +1,4 @@
 from __future__ import annotations
-import filecmp
 import shutil
 from pathlib import Path
 from typing import Tuple, List, Union, Iterator, Optional, Dict
@@ -8,7 +7,6 @@ from subprocess import Popen, PIPE
 from unittest import TestCase
 from contextlib import contextmanager
 from platform import system
-from collections import Counter
 
 
 def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
@@ -16,12 +14,15 @@ def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
 
 
 class Module():
-    def __init__(self, name: str, content: List[str], arguments: List[str]):
+    def __init__(self, name: str, content: List[str] = [], arguments: List[str] = []):
         self.name = name
         self.content = content
         self.arguments = arguments
+        self._call_args: Tuple[Union[str, int, bool], ...] = ()
+        self._call_kwargs: Dict[str, Union[str, int]] = {}
+        self._children: List[Module] = []
 
-    def get_scad_string(self) -> str:
+    def get_module_string(self) -> str:
         out_str = "module " + self.name + "("
         for arg in self.arguments:
             out_str = out_str + arg
@@ -38,15 +39,63 @@ class Module():
         return out_str
 
     def __str__(self) -> str:
-        return self.get_scad_string()
+        return self.get_module_string()
+
+    def add_child(self, child: Module) -> None:
+        self._children.append(child)\
+
+
+    def add_call_args(self, *args: Union[str, int, bool], **kwargs: Union[str, int]) -> None:
+        self._call_args += args
+        self._call_kwargs.update(kwargs)
+
+    def get_call_string(self) -> str:
+        out_str = self.name + "("
+        for arg in self._call_args:
+            if isinstance(arg, bool):
+                out_str += str(arg).lower() + ","
+            else:
+                out_str += str(arg) + ","
+
+        for key, value in self._call_kwargs.items():
+            out_str += key + "=" + str(value) + ","
+
+        if out_str[-1] == ",":
+            out_str = out_str[:-1]
+
+        out_str += ")"
+
+        if self._children:
+            out_str += "{\n"
+            for child in self._children:
+                out_str += child.get_call_string() + "\n"
+            out_str += "}"
+
+        out_str += ";"
+        return out_str
 
     @staticmethod
     def from_file(module_name: str, file_name: str) -> Module:
         return ModuleBuilder.from_file(module_name, file_name)
 
 
+class Cube(Module):
+    def __init__(self, size: Union[int, List[int]], center: bool = False) -> None:
+        if isinstance(size, int):
+            super().__init__("cube")
+            self.add_call_args(size, center)
+        if isinstance(size, list):
+            if len(size) != 3:
+                raise ValueError("Cube expects linst of 3")
+            super().__init__("cube")
+            self.add_call_args(str(size), center)
+
+    def _tuple_to_string(self, arg: Tuple[int, int, int]) -> str:
+        return str(list(arg))
+
+
 class ModuleBuilder():
-    @staticmethod
+    @ staticmethod
     def from_file(module_name: str, file_name: str) -> Module:
         file_path = Path.cwd().joinpath(Path(file_name))
 
@@ -77,7 +126,7 @@ class ModuleBuilder():
                 f'Module "{module_name}" not found in {file_path}')
         return Module(module_name, content, arguments)
 
-    @staticmethod
+    @ staticmethod
     def _get_arguments(line: str) -> List[str]:
         result = search(r"\((.*?)\)", line)
         if result:
@@ -90,28 +139,31 @@ class ModuleBuilder():
 class ModuleTest():
     def __init__(self, module_under_test: Module):
         self.module_under_test = module_under_test
-        self._args: Tuple[Union[int, bool], ...] = ()
-        self._kwargs: Dict[str, Union[str, int]] = {}
         self.dependencies: List[Module] = []
         self.const_files: List[Path] = []
-
-    def add_arguments(self, *args: Union[int, bool], **kwargs: Union[str, int]) -> None:
-        self._args = self._args + args
-        self._kwargs.update(kwargs)
 
     def add_dependency(self, module: Module) -> None:
         self.dependencies.append(module)
 
+    def add_arguments(self, *args: Union[int, bool], **kwargs: Union[str, int]) -> None:
+        self.module_under_test.add_call_args(*args, **kwargs)
+
+    def add_children(self, children: List[Module]) -> None:
+        for child in children:
+            self.module_under_test.add_child(child)
+
+    def add_child(self, child: Module) -> None:
+        self.module_under_test.add_child(child)
+
     def get_test_file_string(self) -> str:
         out_str = ""
         for const_file in self.const_files:
-            out_str = out_str + "include <" + str(const_file) + ">\n"
+            out_str += "include <" + str(const_file) + ">\n"
 
-        out_str = out_str + self._get_call_string() + "\n" + \
-            self.module_under_test.get_scad_string() + "\n"
-
+        out_str += self._get_call_string() + "\n"
+        out_str += self.module_under_test.get_module_string() + "\n"
         for dependency in self.dependencies:
-            out_str = out_str + dependency.get_scad_string() + "\n"
+            out_str += dependency.get_module_string() + "\n"
 
         return out_str
 
@@ -122,18 +174,7 @@ class ModuleTest():
         self.const_files.append(full_path)
 
     def _get_call_string(self) -> str:
-        out_str = self.module_under_test.name + "("
-        for arg in self._args:
-            out_str = out_str + str(arg) + ","
-
-        for key, value in self._kwargs.items():
-            out_str = out_str + key + "=" + str(value) + ","
-
-        if out_str[-1] == ",":
-            out_str = out_str[:-1]
-
-        out_str = out_str + ");"
-        return out_str
+        return self.module_under_test.get_call_string()
 
 
 class ModuleTestRunner(TestCase):
@@ -250,9 +291,6 @@ class Mesh():
 
         if not self.solid:
             raise ValueError("Failed to parse file")
-
-    def _parse_solid(self, input: str) -> None:
-        pass
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Mesh):
