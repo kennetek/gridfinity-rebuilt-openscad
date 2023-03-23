@@ -1,4 +1,4 @@
-from openscadtestframework import ScadTestCase, Module, ModuleTest
+from openscadtestframework import ScadTestCase, Module, ModuleTest, Cube
 
 
 class block_base(ScadTestCase):
@@ -45,4 +45,34 @@ class rounded_rectangle(ScadTestCase):
     def test_basic_different(self) -> None:
         self.module_test.add_arguments(30, 60, 50, 2)
         self.scad_module_test(
-            self.module_test, "test_rounded_rectangle_basic_different.stl", keep_files=True)
+            self.module_test, "test_rounded_rectangle_basic_different.stl")
+
+
+class pattern_linear(ScadTestCase):
+    def setUp(self) -> None:
+        self.module = Module.from_file(
+            "pattern_linear", "gridfinity-rebuilt-utility.scad")
+        self.module_test = ModuleTest(self.module)
+
+    def test_no_values(self) -> None:
+        self.module_test.add_child(Cube([1, 2, 3], True))
+        self.scad_module_test(
+            self.module_test, "test_pattern_linear_no_values.stl")
+
+    def test_x_axis(self) -> None:
+        self.module_test.add_arguments(x=3, sx=10)
+        self.module_test.add_child(Cube([1, 2, 3], True))
+        self.scad_module_test(
+            self.module_test, "test_pattern_linear_x_axis.stl", keep_files=True)
+
+    def test_y_axis(self) -> None:
+        self.module_test.add_arguments(y=3, sy=10)
+        self.module_test.add_child(Cube([1, 2, 3], True))
+        self.scad_module_test(
+            self.module_test, "test_pattern_linear_y_axis.stl", keep_files=True)
+
+    def test_both_axes(self) -> None:
+        self.module_test.add_arguments(x=3, y=3, sx=10, sy=10)
+        self.module_test.add_child(Cube([1, 2, 3], True))
+        self.scad_module_test(
+            self.module_test, "test_pattern_linear_both_axes.stl", keep_files=True)
