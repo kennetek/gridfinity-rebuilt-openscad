@@ -330,6 +330,8 @@ class Solid():
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Solid):
             return NotImplemented
+        if len(self.facets) != len(other.facets):
+            return False
         for facet in self.facets:
             if not facet in other.facets:
                 print(f"facet not found: {facet}")
