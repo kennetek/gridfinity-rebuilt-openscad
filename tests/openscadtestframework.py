@@ -179,7 +179,7 @@ class ModuleTest():
 
 class ModuleTestRunner(TestCase):
     out_file: Path = Path("out.stl")
-    default_args: str = " --enable fast-csg -o "
+    default_args: str = " -o "
     test_scad_file: Path = Path("test.scad")
     expected_dir = Path.cwd().joinpath("tests/expected")
 
