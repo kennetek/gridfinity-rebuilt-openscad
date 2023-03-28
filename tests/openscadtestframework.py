@@ -18,7 +18,7 @@ class Module():
         self.name = name
         self.content = content
         self.arguments = arguments
-        self._call_args: Tuple[Union[str, int, bool], ...] = ()
+        self._call_args: Tuple[Union[str, int, bool, List[int]], ...] = ()
         self._call_kwargs: Dict[str, Union[str, int]] = {}
         self._children: List[Module] = []
 
@@ -45,7 +45,7 @@ class Module():
         self._children.append(child)\
 
 
-    def add_call_args(self, *args: Union[str, int, bool], **kwargs: Union[str, int]) -> None:
+    def add_call_args(self, *args: Union[str, int, bool, List[int]], **kwargs: Union[str, int]) -> None:
         self._call_args += args
         self._call_kwargs.update(kwargs)
 
@@ -145,7 +145,7 @@ class ModuleTest():
     def add_dependency(self, module: Module) -> None:
         self.dependencies.append(module)
 
-    def add_arguments(self, *args: Union[int, bool], **kwargs: Union[str, int]) -> None:
+    def add_arguments(self, *args: Union[int, bool, List[int]], **kwargs: Union[str, int]) -> None:
         self.module_under_test.add_call_args(*args, **kwargs)
 
     def add_children(self, children: List[Module]) -> None:
