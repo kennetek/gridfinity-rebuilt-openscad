@@ -40,6 +40,13 @@ jobs:
       - name: Test with unittest
         run: |
           python -m unittest discover tests/
+      - name: Get generated testfiles on fail
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: generated_test_files
+          path: |
+            oscad_generated_test_files*
 
   test_windows:
     runs-on: windows-latest
@@ -57,3 +64,10 @@ jobs:
       - name: Test with unittest
         run: |
           python -m unittest discover tests/
+      - name: Get generated testfiles on fail
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: generated_test_files
+          path: |
+            oscad_generated_test_files*
