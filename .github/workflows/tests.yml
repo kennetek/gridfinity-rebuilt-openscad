@@ -60,7 +60,7 @@ jobs:
         run: |
           curl.exe --output openscad.zip --url https://files.openscad.org/OpenSCAD-2021.01-x86-64.zip
           tar -xf openscad.zip
-          move "OpenSCAD-2021.01-x86-64" "C:\Program Files\Openscad"
+          move "openscad-2021.01" "C:\Program Files\Openscad"
       - name: Test with unittest
         run: |
           python -m unittest discover tests/
