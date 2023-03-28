@@ -1,4 +1,4 @@
-from openscadtestframework import ScadTestCase, Module, ModuleTest, Cube
+from openscadtestframework import ScadTestCase, Module, ModuleTest, Cube, Square
 
 
 class block_base(ScadTestCase):
@@ -65,4 +65,74 @@ class pattern_linear(ScadTestCase):
     def test_both_axes(self) -> None:
         self.module_test.add_arguments(x=3, y=3, sx=10, sy=10)
         self.module_test.add_child(Cube([1, 2, 3], True))
+        self.scad_module_test(self.module_test)
+
+
+class pattern_circular(ScadTestCase):
+    def setUp(self) -> None:
+        self.module = Module.from_file(
+            "pattern_circular", "gridfinity-rebuilt-utility.scad")
+        self.module_test = ModuleTest(self.module)
+
+    def test_no_args(self) -> None:
+        self.module_test.add_child(Cube([1, 2, 3], False))
+        self.scad_module_test(self.module_test)
+
+    def test_3(self) -> None:
+        self.module_test.add_arguments(3)
+        self.module_test.add_child(Cube([1, 2, 3], False))
+        self.scad_module_test(self.module_test)
+
+
+class copy_mirror(ScadTestCase):
+    def setUp(self) -> None:
+        self.module = Module.from_file(
+            "copy_mirror", "gridfinity-rebuilt-utility.scad")
+        self.module_test = ModuleTest(self.module)
+
+    def test_no_args(self) -> None:
+        self.module_test.add_child(Cube([1, 2, 3], False))
+        self.scad_module_test(self.module_test)
+
+    def test_with_args(self) -> None:
+        self.module_test.add_arguments([8, 4, 9])
+        self.module_test.add_child(Cube([1, 2, 3], False))
+        self.scad_module_test(self.module_test)
+
+
+class rounded_square(ScadTestCase):
+    def setUp(self) -> None:
+        self.module = Module.from_file(
+            "rounded_square", "gridfinity-rebuilt-utility.scad")
+        self.module_test = ModuleTest(self.module)
+        self.module_test.add_dependency(Module.from_file(
+            "rounded_rectangle", "gridfinity-rebuilt-utility.scad"))
+
+    def test(self) -> None:
+        self.module_test.add_arguments(20, 30, 2)
+        self.scad_module_test(self.module_test)
+
+
+class sweep_rounded(ScadTestCase):
+    def setUp(self) -> None:
+        self.module = Module.from_file(
+            "sweep_rounded", "gridfinity-rebuilt-utility.scad")
+        self.module_test = ModuleTest(self.module)
+        self.module_test.add_dependency(Module.from_file(
+            "pattern_circular", "gridfinity-rebuilt-utility.scad"))
+        self.module_test.add_dependency(Module.from_file(
+            "copy_mirror", "gridfinity-rebuilt-utility.scad"))
+
+    def test_no_args(self) -> None:
+        self.module_test.add_child(Square(5, False))
+        self.scad_module_test(self.module_test)
+
+    def test_width(self) -> None:
+        self.module_test.add_arguments(w=50)
+        self.module_test.add_child(Square(5, False))
+        self.scad_module_test(self.module_test)
+
+    def test_height(self) -> None:
+        self.module_test.add_arguments(h=50)
+        self.module_test.add_child(Square(5, False))
         self.scad_module_test(self.module_test)
