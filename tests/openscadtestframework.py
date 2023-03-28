@@ -178,7 +178,7 @@ class ModuleTest():
 
 
 class ModuleTestRunner(TestCase):
-    out_file: Path = Path("out.stl")
+    out_file_extention = ".stl"
     default_args: str = " -o "
     test_scad_file: Path = Path("test.scad")
     expected_dir = Path.cwd().joinpath("tests/expected")
@@ -191,6 +191,7 @@ class ModuleTestRunner(TestCase):
         super().__init__()
 
         self.tmp_dir: Path = Path()
+        self.out_file: Path = Path()
 
     def _scad_executable(self) -> str:
         if system() == "Linux":
@@ -209,7 +210,7 @@ class ModuleTestRunner(TestCase):
                 return True
         return False
 
-    def Run(self, test_name: str, module_test: ModuleTest, expected: str, keep_dir: bool = False) -> None:
+    def Run(self, test_name: str, module_test: ModuleTest, keep_dir: bool = False) -> None:
         """Creates a scad file with the nesecary content to run a module stand
             alone, generates a stl file and compares it with an expected stl
             file
@@ -220,13 +221,14 @@ class ModuleTestRunner(TestCase):
             expected (str): File path of the expected stl file.
         """
         with self._temp_dir(test_name, keep_dir):
+            self.out_file = Path(test_name + self.out_file_extention)
             file_path = self._create_scadfile(module_test)
             self._run_scadfile(file_path)
-            compare_file = self.expected_dir.joinpath(Path(expected))
+            compare_file = self.expected_dir.joinpath(self.out_file)
             if not compare_file.exists():
                 raise FileNotFoundError(
                     f"Expected file does noet exist: {compare_file}")
-            self._compare_output(self.expected_dir.joinpath(Path(expected)))
+            self._compare_output(self.expected_dir.joinpath(self.out_file))
 
     def _compare_output(self, expected_file_path: Path) -> None:
         expected_mesh = Mesh(expected_file_path)
@@ -264,8 +266,8 @@ class ModuleTestRunner(TestCase):
 class ScadTestCase(TestCase):
     _runner = ModuleTestRunner()
 
-    def scad_module_test(self, module_test: ModuleTest, expected_file: str, keep_files: bool = False) -> None:
-        self._runner.Run(self.id(), module_test, expected_file, keep_files)
+    def scad_module_test(self, module_test: ModuleTest, keep_files: bool = False) -> None:
+        self._runner.Run(self.id(), module_test, keep_files)
 
 
 class Mesh():
