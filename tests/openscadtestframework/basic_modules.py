@@ -9,7 +9,7 @@ class Cube(Module):
             self.add_call_args(size, center)
         if isinstance(size, list):
             if len(size) != 3:
-                raise ValueError("Cube expects linst of 3")
+                raise ValueError("Cube expects list of 3")
             self.add_call_args(str(size), center)
 
 
@@ -20,5 +20,5 @@ class Square(Module):
             self.add_call_args(size, center)
         if isinstance(size, list):
             if len(size) != 2:
-                raise ValueError("Cube expects linst of 3")
+                raise ValueError("Square expects list of 2")
             self.add_call_args(str(size), center)
