@@ -1,7 +1,7 @@
 from __future__ import annotations
 import shutil
 from pathlib import Path
-from typing import Tuple, List, Union, Iterator, Dict, Any
+from typing import Tuple, List, Union, Iterator, Dict, Any, Optional
 from re import match, search
 from subprocess import Popen, PIPE
 from unittest import TestCase
@@ -14,14 +14,18 @@ def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
     return input_line.count("{"), input_line.count("}")
 
 
-def to_scad_str(input: Any) -> str:
-    if isinstance(input, bool):
-        return str(input).lower()
-    return str(input)
+def to_scad_str(input_str: Any) -> str:
+    if isinstance(input_str, bool):
+        return str(input_str).lower()
+    return str(input_str)
 
 
 class Module():
-    def __init__(self, name: str, content: List[str] = [], arguments: List[str] = []):
+    def __init__(self, name: str, content: Optional[List[str]] = None, arguments: Optional[List[str]] = None):
+        if content is None:
+            content = []
+        if arguments is None:
+            arguments = []
         self.name = name
         self.content = content
         self.arguments = arguments
@@ -224,7 +228,9 @@ class TestRunner():
             return r"/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
         raise OSError(f"Unkown OS: {system()}")
 
-    def _run_openscad_command(self, in_file: Path, out_file: Path, args: List[str] = []) -> None:
+    def _run_openscad_command(self, in_file: Path, out_file: Path, args: Optional[List[str]] = None) -> None:
+        if args is None:
+            args = []
         cmd = [self._get_scad_executable(), self.output_arg,
                str(out_file), str(in_file)] + args
         with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
@@ -253,6 +259,7 @@ class TestRunner():
 
 class IntegrationTestRunner(TestRunner):
     def __init__(self) -> None:
+        super().__init__()
         self.out_file: Path = Path()
 
     def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:

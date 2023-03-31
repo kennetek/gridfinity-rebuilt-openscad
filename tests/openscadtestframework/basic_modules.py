@@ -1,9 +1,11 @@
-from typing import Union, List
+from typing import Union, List, Optional
 from .openscadtestframework import Module
 
 
 class Cube(Module):
-    def __init__(self, size: Union[int, List[int]] = [1, 1, 1], center: bool = False) -> None:
+    def __init__(self, size: Union[int, Optional[List[int]]] = None, center: bool = False) -> None:
+        if size is None:
+            size = [1, 1, 1]
         super().__init__("cube")
         if isinstance(size, int):
             self.add_call_args(size, center)
@@ -14,7 +16,9 @@ class Cube(Module):
 
 
 class Square(Module):
-    def __init__(self, size: Union[int, List[int]] = [1, 1], center: bool = False) -> None:
+    def __init__(self, size: Union[int, Optional[List[int]]] = None, center: bool = False) -> None:
+        if size is None:
+            size = [1, 1]
         super().__init__("square")
         if isinstance(size, int):
             self.add_call_args(size, center)
