@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: generated_test_files
+          name: generated_test_files_lnx
           path: |
             oscad_generated_test_files*
 
@@ -68,6 +68,6 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: generated_test_files
+          name: generated_test_files_windows
           path: |
             oscad_generated_test_files*
