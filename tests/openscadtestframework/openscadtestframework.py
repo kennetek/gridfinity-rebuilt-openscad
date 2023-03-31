@@ -1,7 +1,7 @@
 from __future__ import annotations
 import shutil
 from pathlib import Path
-from typing import Tuple, List, Union, Iterator, Dict
+from typing import Tuple, List, Union, Iterator, Dict, Any
 from re import match, search
 from subprocess import Popen, PIPE
 from unittest import TestCase
@@ -12,6 +12,12 @@ from .mesh import Mesh
 
 def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
     return input_line.count("{"), input_line.count("}")
+
+
+def to_scad_str(input: Any) -> str:
+    if isinstance(input, bool):
+        return str(input).lower()
+    return str(input)
 
 
 class Module():
@@ -53,13 +59,10 @@ class Module():
     def get_call_string(self) -> str:
         out_str = self.name + "("
         for arg in self._call_args:
-            if isinstance(arg, bool):
-                out_str += str(arg).lower() + ","
-            else:
-                out_str += str(arg) + ","
+            out_str += to_scad_str(arg) + ","
 
         for key, value in self._call_kwargs.items():
-            out_str += key + "=" + str(value) + ","
+            out_str += key + "=" + to_scad_str(value) + ","
 
         if out_str[-1] == ",":
             out_str = out_str[:-1]
@@ -122,7 +125,31 @@ class ModuleBuilder():
         return []
 
 
-class ModuleTest():
+class ScadTest():
+
+    def __init__(self) -> None:
+        pass
+
+
+class IntegrationTest(ScadTest):
+    default_args: List[str] = ["-D$fa=12", "-D$fs=2"]
+
+    def __init__(self, test_file: str) -> None:
+        self.test_file = Path(test_file)
+        self._kwargs: Dict[str, Union[int, bool]] = {}
+
+    def add_arguments(self, **kwargs: Union[int, bool]) -> None:
+        self._kwargs.update(kwargs)
+
+    def get_cli_arg_list(self) -> List[str]:
+        tmp_list: List[str] = []
+        for key, value in self._kwargs.items():
+            tmp_list.append("-D" + key + "=" + to_scad_str(value))
+        tmp_list += self.default_args
+        return tmp_list
+
+
+class ModuleTest(ScadTest):
     def __init__(self, module_under_test: Module):
         self.module_under_test = module_under_test
         self.dependencies: List[Module] = []
@@ -163,23 +190,32 @@ class ModuleTest():
         return self.module_under_test.get_call_string()
 
 
-class ModuleTestRunner(TestCase):
+class TestRunner():
     out_file_extention = ".stl"
-    default_args: str = " -o "
-    test_scad_file: Path = Path("test.scad")
+    output_arg: str = "-o"
     expected_dir = Path.cwd().joinpath("tests/expected")
+    tmp_dir_prefix = "oscad_generated_test_files."
+    git_root_cmd = ["git", "rev-parse", "--show-toplevel"]
 
     def __init__(self) -> None:
         if (not self._check_if_run_on_root_repo()):
             raise OSError(
                 "Should be executed in root dir of git repo.")
 
-        super().__init__()
-
         self.tmp_dir: Path = Path()
-        self.out_file: Path = Path()
 
-    def _scad_executable(self) -> str:
+    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+        raise NotImplementedError()
+
+    def _check_if_run_on_root_repo(self) -> bool:
+        with Popen(self.git_root_cmd, stdout=PIPE, stderr=PIPE) as process:
+            out, _ = process.communicate()
+            result_path = Path(out.decode("utf-8").strip())
+            if result_path == Path.cwd():
+                return True
+        return False
+
+    def _get_scad_executable(self) -> str:
         if system() == "Linux":
             return "openscad"
         if system() == "Windows":
@@ -188,55 +224,22 @@ class ModuleTestRunner(TestCase):
             return r"/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
         raise OSError(f"Unkown OS: {system()}")
 
-    def _check_if_run_on_root_repo(self) -> bool:
-        with Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE) as process:
-            out, _ = process.communicate()
-            result_path = Path(out.decode("utf-8").strip())
-            if (result_path == Path.cwd()):
-                return True
-        return False
-
-    def Run(self, test_name: str, module_test: ModuleTest, keep_dir: bool = False) -> None:
-        """Creates a scad file with the nesecary content to run a module stand
-            alone, generates a stl file and compares it with an expected stl
-            file
-
-        Args:
-            module (ScadModule): Contains information regarding the to be tested
-                module. See Module documentation.
-            expected (str): File path of the expected stl file.
-        """
-        with self._temp_dir(test_name, keep_dir):
-            self.out_file = Path(test_name + self.out_file_extention)
-            file_path = self._create_scadfile(module_test)
-            self._run_scadfile(file_path)
-            compare_file = self.expected_dir.joinpath(self.out_file)
-            if not compare_file.exists():
-                raise FileNotFoundError(
-                    f"Expected file does noet exist: {compare_file}")
-            self._compare_output(self.expected_dir.joinpath(self.out_file))
-
-    def _compare_output(self, expected_file_path: Path) -> None:
-        expected_mesh = Mesh(expected_file_path)
-        current_mesh = Mesh(self.tmp_dir.joinpath(self.out_file))
-        self.assertEqual(expected_mesh, current_mesh,
-                         "Stl files are not equal")
-
-    def _run_scadfile(self, file_path: Path) -> None:
-        command = self._scad_executable() + self.default_args + \
-            str(self.tmp_dir.joinpath(self.out_file)) + " " + str(file_path)
-        with Popen(command, stdout=PIPE, stderr=PIPE, shell=True) as process:
+    def _run_openscad_command(self, in_file: Path, out_file: Path, args: List[str] = []) -> None:
+        cmd = [self._get_scad_executable(), self.output_arg,
+               str(out_file), str(in_file)] + args
+        print(cmd)
+        with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
             _, stderr = process.communicate()
             if process.returncode != 0:
                 err_mesage = stderr.decode("utf-8")
                 raise OSError(
                     f"openscad failed executing with message:\n{err_mesage}")
 
-    def _create_scadfile(self, module_test: ModuleTest) -> Path:
-        file_path = self.tmp_dir.joinpath(self.test_scad_file)
-        with open(file_path, "w", encoding="utf8") as infile:
-            infile.write(module_test.get_test_file_string())
-        return file_path
+    def _compare_output(self, expected: Path, current: Path) -> None:
+        expected_mesh = Mesh(expected)
+        current_mesh = Mesh(current)
+        if expected_mesh != current_mesh:
+            raise AssertionError("Stl files are not equal")
 
     @ contextmanager
     def _temp_dir(self, test_name: str, keep_dir: bool = False) -> Iterator[None]:
@@ -249,8 +252,63 @@ class ModuleTestRunner(TestCase):
             shutil.rmtree(self.tmp_dir)
 
 
-class ScadTestCase(TestCase):
+class IntegrationTestRunner(TestRunner):
+    def __init__(self) -> None:
+        self.out_file: Path = Path()
+
+    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+        if not isinstance(test, IntegrationTest):
+            raise ValueError("Test should be of type IntegrationTest")
+        with self._temp_dir(test_name, keep_dir):
+            self.out_file = Path(test_name + self.out_file_extention)
+            self._run_openscad_command(
+                test.test_file,  self.tmp_dir.joinpath(self.out_file), test.get_cli_arg_list())
+            self._compare_output(self.expected_dir.joinpath(
+                self.out_file), self.tmp_dir.joinpath(self.out_file))
+
+
+class ModuleTestRunner(TestRunner):
+
+    test_scad_file: Path = Path("test.scad")
+
+    def __init__(self) -> None:
+
+        super().__init__()
+
+        self.tmp_dir: Path = Path()
+        self.out_file: Path = Path()
+
+    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+        if not isinstance(test, ModuleTest):
+            raise ValueError("Test should be of type ModuleTest")
+
+        with self._temp_dir(test_name, keep_dir):
+            self.out_file = Path(test_name + self.out_file_extention)
+            file_path = self._create_scadfile(test)
+            self._run_scadfile(file_path)
+            self._compare_output(self.expected_dir.joinpath(
+                self.out_file), self.tmp_dir.joinpath(self.out_file))
+
+    def _run_scadfile(self, file_path: Path) -> None:
+        self._run_openscad_command(
+            file_path, self.tmp_dir.joinpath(self.out_file))
+
+    def _create_scadfile(self, module_test: ModuleTest) -> Path:
+        file_path = self.tmp_dir.joinpath(self.test_scad_file)
+        with open(file_path, "w", encoding="utf8") as infile:
+            infile.write(module_test.get_test_file_string())
+        return file_path
+
+
+class ScadModuleTestCase(TestCase):
     _runner = ModuleTestRunner()
 
     def scad_module_test(self, module_test: ModuleTest, keep_files: bool = False) -> None:
         self._runner.Run(self.id(), module_test, keep_files)
+
+
+class ScadIntegrationTestCase(TestCase):
+    _runner = IntegrationTestRunner()
+
+    def run_test(self, int_test: IntegrationTest, keep_files: bool = False) -> None:
+        self._runner.Run(self.id(), int_test, keep_files)

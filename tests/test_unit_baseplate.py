@@ -1,7 +1,7 @@
-from openscadtestframework import ScadTestCase, Module, ModuleTest
+from openscadtestframework import ScadModuleTestCase, Module, ModuleTest
 
 
-class cutter_weight(ScadTestCase):
+class cutter_weight(ScadModuleTestCase):
 
     def test_cutter_weight(self) -> None:
         module = Module.from_file(

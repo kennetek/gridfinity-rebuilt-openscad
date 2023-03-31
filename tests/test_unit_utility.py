@@ -1,7 +1,7 @@
-from openscadtestframework import ScadTestCase, Module, ModuleTest, Cube, Square
+from openscadtestframework import ScadModuleTestCase, Module, ModuleTest, Cube, Square
 
 
-class block_base(ScadTestCase):
+class block_base(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "block_base_hole", "gridfinity-rebuilt-utility.scad")
@@ -27,7 +27,7 @@ class block_base(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class rounded_rectangle(ScadTestCase):
+class rounded_rectangle(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "rounded_rectangle", "gridfinity-rebuilt-utility.scad")
@@ -42,7 +42,7 @@ class rounded_rectangle(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class pattern_linear(ScadTestCase):
+class pattern_linear(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "pattern_linear", "gridfinity-rebuilt-utility.scad")
@@ -68,7 +68,7 @@ class pattern_linear(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class pattern_circular(ScadTestCase):
+class pattern_circular(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "pattern_circular", "gridfinity-rebuilt-utility.scad")
@@ -84,7 +84,7 @@ class pattern_circular(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class copy_mirror(ScadTestCase):
+class copy_mirror(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "copy_mirror", "gridfinity-rebuilt-utility.scad")
@@ -100,7 +100,7 @@ class copy_mirror(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class rounded_square(ScadTestCase):
+class rounded_square(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "rounded_square", "gridfinity-rebuilt-utility.scad")
@@ -113,7 +113,7 @@ class rounded_square(ScadTestCase):
         self.scad_module_test(self.module_test)
 
 
-class sweep_rounded(ScadTestCase):
+class sweep_rounded(ScadModuleTestCase):
     def setUp(self) -> None:
         self.module = Module.from_file(
             "sweep_rounded", "gridfinity-rebuilt-utility.scad")
