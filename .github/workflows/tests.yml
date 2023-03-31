@@ -37,9 +37,12 @@ jobs:
       - name: Install openscad
         run: |
           sudo apt update && sudo apt install openscad -y
-      - name: Test with unittest
+      - name: Test unittest
         run: |
-          python -m unittest discover tests/
+          python -m unittest discover tests/ -p "test_unit*.py"
+      - name: Test integrationtest
+        run: |
+          python -m unittest discover tests/ -p "test_int*.py"
       - name: Get generated testfiles on fail
         uses: actions/upload-artifact@v3
         if: failure()
@@ -61,9 +64,12 @@ jobs:
           curl.exe --output openscad.zip --url https://files.openscad.org/OpenSCAD-2021.01-x86-64.zip
           tar -xf openscad.zip
           move "openscad-2021.01" "C:\Program Files\Openscad"
-      - name: Test with unittest
+      - name: Test unittest
         run: |
-          python -m unittest discover tests/
+          python -m unittest discover tests/ -p "test_unit*.py"
+      - name: Test integrationtest
+        run: |
+          python -m unittest discover tests/ -p "test_int*.py"
       - name: Get generated testfiles on fail
         uses: actions/upload-artifact@v3
         if: failure()

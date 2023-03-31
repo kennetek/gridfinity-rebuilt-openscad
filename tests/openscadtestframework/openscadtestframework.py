@@ -227,7 +227,6 @@ class TestRunner():
     def _run_openscad_command(self, in_file: Path, out_file: Path, args: List[str] = []) -> None:
         cmd = [self._get_scad_executable(), self.output_arg,
                str(out_file), str(in_file)] + args
-        print(cmd)
         with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
             _, stderr = process.communicate()
             if process.returncode != 0:
