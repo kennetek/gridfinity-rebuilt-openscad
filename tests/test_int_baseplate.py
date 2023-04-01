@@ -1,7 +1,7 @@
 from openscadtestframework import ScadIntegrationTestCase, IntegrationTest
 
 
-class bins(ScadIntegrationTestCase):
+class baseplate(ScadIntegrationTestCase):
     def setUp(self) -> None:
         self.int_test = IntegrationTest("gridfinity-rebuilt-baseplate.scad")
 
