@@ -103,13 +103,13 @@ class ModuleBuilder():
             for line in file:
                 if not module_found:
                     if match("module " + module_name + "(.*).*{", line):
-                        open_brackets_found = open_brackets_found + 1
+                        open_brackets_found += 1
                         module_found = True
                         arguments = ModuleBuilder._get_arguments(line)
                 else:
                     o_brack, c_brack = count_curly_brackets_in_string(line)
-                    open_brackets_found = open_brackets_found + o_brack
-                    closed_brackets_found = closed_brackets_found + c_brack
+                    open_brackets_found += o_brack
+                    closed_brackets_found += c_brack
                     if open_brackets_found == closed_brackets_found:
                         break
                     content.append(line.strip("\n"))
