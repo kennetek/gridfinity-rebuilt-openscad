@@ -140,9 +140,9 @@ class IntegrationTest(ScadTest):
 
     def __init__(self, test_file: str) -> None:
         self.test_file = Path(test_file)
-        self._kwargs: Dict[str, Union[int, bool]] = {}
+        self._kwargs: Dict[str, Union[int, float,  bool]] = {}
 
-    def add_arguments(self, **kwargs: Union[int, bool]) -> None:
+    def add_arguments(self, **kwargs: Union[int, float, bool]) -> None:
         self._kwargs.update(kwargs)
 
     def get_cli_arg_list(self) -> List[str]:
