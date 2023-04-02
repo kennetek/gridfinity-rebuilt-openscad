@@ -233,6 +233,21 @@ class TestRunner():
             args = []
         cmd = [self._get_scad_executable(), self.output_arg,
                str(out_file), str(in_file)] + args
+
+        # Workaround for Windows PermissionError with shell=False
+        if system() == "Windows":
+            tmp_cmd: str = ""
+            for item in cmd:
+                tmp_cmd += item + " "
+            with Popen(tmp_cmd, stdout=PIPE, stderr=PIPE, shell=True) as process:
+                _, stderr = process.communicate()
+                if process.returncode != 0:
+                    err_mesage = stderr.decode("utf-8")
+                    raise OSError(
+                        f"openscad failed executing with message:\n{err_mesage}")
+            return
+        # End workaround
+
         with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
             _, stderr = process.communicate()
             if process.returncode != 0:
