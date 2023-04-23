@@ -61,7 +61,7 @@ style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and 
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
 scoop = 1; //[0:0.1:1]
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
-style_corners = false;
+only_corners = false;
 
 /* [Base] */
 style_hole = 3; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw
@@ -79,7 +79,6 @@ color("tomato")
 {
     gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length)
     {
-
         if (divx > 0 && divy > 0)
             cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
     }
