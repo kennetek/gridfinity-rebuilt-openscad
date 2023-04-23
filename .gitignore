@@ -6,3 +6,10 @@ stl/
 batch/
 site/
 *.json
+
+#Python related
+__pycache__/
+.mypy_cache/
+
+#exclude generated temporary test folders
+oscad_generated_test_files.*/
