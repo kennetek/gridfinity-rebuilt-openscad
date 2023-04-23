@@ -16,9 +16,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 5;  
+gridx = 2;  
 // number of bases along y-axis   
-gridy = 5;  
+gridy = 2;  
 // base unit
 length = 42;
 
