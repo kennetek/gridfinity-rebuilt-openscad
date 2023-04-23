@@ -1,0 +1,82 @@
+name: Run Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test_linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mypy pylint
+      - name: Check mypy
+        run: |
+          python -m mypy --strict .
+      - name: Check pylint
+        run: |
+          find . -type f -name "*.py" | xargs python -m pylint --disable=R,C
+
+  test_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install openscad
+        run: |
+          sudo apt update && sudo apt install openscad -y
+      - name: Test unittest
+        run: |
+          python -m unittest discover tests/ -p "test_unit*.py" -v
+      - name: Test integrationtest
+        run: |
+          python -m unittest discover tests/ -p "test_int*.py" -v
+      - name: Get generated testfiles on fail
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: generated_test_files_lnx
+          path: |
+            oscad_generated_test_files*
+
+  test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install openscad
+        run: |
+          curl.exe --output openscad.zip --url https://files.openscad.org/OpenSCAD-2021.01-x86-64.zip
+          tar -xf openscad.zip
+          move "openscad-2021.01" "C:\Program Files\Openscad"
+      - name: Test unittest
+        run: |
+          python -m unittest discover tests/ -p "test_unit*.py" -v
+      - name: Test integrationtest
+        run: |
+          python -m unittest discover tests/ -p "test_int*.py" -v
+      - name: Get generated testfiles on fail
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: generated_test_files_windows
+          path: |
+            oscad_generated_test_files*
