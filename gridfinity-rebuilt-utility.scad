@@ -103,7 +103,7 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true) {
 }
 
 module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
-    render()
+    render(convexity = 2)
     difference() {
         block_base_solid(dbnx, dbny, l, off);
         
