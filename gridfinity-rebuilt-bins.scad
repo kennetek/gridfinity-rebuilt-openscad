@@ -43,6 +43,12 @@ divx = 1;
 // number of y Divisions (set to zero to have solid bin)
 divy = 1;
 
+/* [Open ends (do not check both)] */
+// Open side of bin on x-axis
+open_end_x = false;
+// Open side of bin on y-axis
+open_end_y = false;
+
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
@@ -69,16 +75,34 @@ div_base_x = 0;
 div_base_y = 0; 
 
 
-
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+    
+    difference() {
+        
+        gridx = gridx + (open_end_x?1:0);
+        gridy = gridy + (open_end_y?1:0);
 
-    if (divx > 0 && divy > 0)
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
-}
-gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
+        union() {
+            
+            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+
+                if (divx > 0 && divy > 0)
+                cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+            }
+            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
+        }
+
+        if (open_end_x)
+            translate([(gridx/2 -1) * length, -1 * length, -10])
+                cube([1 * length, gridy * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+        if (open_end_y)
+            translate([-((gridx * length)/2), (gridy/2 -1) * length, -10])
+                cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+    }
 
 }
 
