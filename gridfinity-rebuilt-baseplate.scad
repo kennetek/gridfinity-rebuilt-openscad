@@ -151,7 +151,7 @@ module cutter_weight() {
 }
 module hole_pattern(){
     pattern_circular(4)
-    translate([d_hole/2, d_hole/2, 0]) {
+    translate([length/2-d_hole_from_side, length/2-d_hole_from_side, 0]) {
         render();
         children();
     }
@@ -184,7 +184,7 @@ module profile_skeleton() {
         difference() {
             square([l-2*r_skel+2*d_clear,l-2*r_skel+2*d_clear], center = true);
             pattern_circular(4)
-            translate([d_hole/2,d_hole/2,0])
+            translate([length/2-d_hole_from_side,length/2-d_hole_from_side,0])
             minkowski() {
                 square([l,l]);
                 circle(r_hole2+r_skel+2);
