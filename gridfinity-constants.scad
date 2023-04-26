@@ -21,7 +21,9 @@ r_hole1 = 1.5;
 // magnet hole radius
 r_hole2 = 3.25; 
 // center-to-center distance between holes
-d_hole = 26;    
+d_hole = 26;  
+// distance of hole from side of bin
+d_hole_from_side=8;
 // magnet hole depth
 h_hole = 2.4;   
 // slit depth (printer layer height)

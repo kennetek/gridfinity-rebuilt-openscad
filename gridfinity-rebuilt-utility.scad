@@ -112,8 +112,8 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
             pattern_linear(2, 2, (gx-1)*length+d_hole, (gy-1)*length+d_hole)
             block_base_hole(style_hole / p_corn, off);
             else
-            pattern_circular(abs(d_hole)<0.001?1:4) 
-            translate([d_hole/2, d_hole/2, 0])
+            pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4) 
+            translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
             block_base_hole(style_hole, off);
         }
 }
