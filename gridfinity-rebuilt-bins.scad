@@ -47,7 +47,9 @@ divy = 1;
 // Open side of bin on x-axis
 open_end_x = false;
 // Open side of bin on y-axis
-open_end_y = false;
+open_end_y_top = false;
+// Open side of bin on y-axis
+open_end_y_bottom = false;
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
@@ -80,9 +82,14 @@ div_base_y = 0;
 color("tomato") {
     
     difference() {
+
+        half_length = length/2;
         
-        gridx = gridx + (open_end_x?1:0);
-        gridy = gridy + (open_end_y?1:0);
+        gridx = gridx + (open_end_x ? 1 : 0);
+        gridy = gridy + (open_end_y_top ? 1 : 0);
+
+        // Only translate off center if the bin is open on the y axis
+        translate([0, open_end_y_top ? length/2 : 0,0])
 
         union() {
             
@@ -98,9 +105,9 @@ color("tomato") {
             translate([(gridx/2 -1) * length, -1 * length, -10])
                 cube([1 * length, gridy * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
 
-        if (open_end_y)
-            translate([-((gridx * length)/2), (gridy/2 -1) * length, -10])
-                cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+        if (open_end_y_top)
+            translate([-((gridx * length)/2), length/2 + (gridy/2 -1) * length, -10])
+                #cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
 
     }
 
