@@ -82,32 +82,54 @@ div_base_y = 0;
 color("tomato") {
     
     difference() {
-
-        half_length = length/2;
         
         gridx = gridx + (open_end_x ? 1 : 0);
-        gridy = gridy + (open_end_y_top ? 1 : 0);
 
-        // Only translate off center if the bin is open on the y axis
-        translate([0, open_end_y_top ? length/2 : 0,0])
+        // Since we chop off the top and/or bottom of the bin, we need to add 1 or 2 to the gridy
+        gridy = gridy + (open_end_y_top ? 1 : 0) + (open_end_y_bottom ? 1 : 0);
 
-        union() {
-            
-            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+        // Only translate off center if the bin is open on ONE side of the y axis
+        // when both sides are open, the bin is still centered
+        off_center_y = 
+        
+            open_end_y_top 
+                ? open_end_y_bottom 
+                    ? 0                       // both sides open 
+                    : 0.5                     // only top open
+                : open_end_y_bottom 
+                    ? -0.5                    // only bottom open
+                    : 0;                      // both sides closed
 
-                if (divx > 0 && divy > 0)
-                cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+
+        // Only translate off center if the bin is open on ONE side of the y axis
+        translate([0, off_center_y * length, 0])
+
+            union() {
+                
+                gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+
+                    if (divx > 0 && divy > 0)
+                    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+                }
+                gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
             }
-            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
-        }
 
-        if (open_end_x)
-            translate([(gridx/2 -1) * length, -1 * length, -10])
-                cube([1 * length, gridy * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+            if (open_end_x)
+                translate([(gridx/2 -1) * length, -1 * length, -10])
+                    cube([1 * length, gridy * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
 
-        if (open_end_y_top)
-            translate([-((gridx * length)/2), length/2 + (gridy/2 -1) * length, -10])
-                #cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+            y_offset = open_end_y_top && open_end_y_bottom 
+                ? (gridy/2 -1) * length               // both sides open
+                : length/2 + (gridy/2 -1) * length;   // only one side open
+
+            if (open_end_y_top)
+                translate([-((gridx * length)/2), y_offset, -10])
+                    cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+            if (open_end_y_bottom)
+                // We need to do -length because the y axis is flipped and we need to subtract the cube thickness
+                translate([-((gridx * length)/2), -y_offset - length, -10])
+                    cube([gridx * length, 1 * length, 20+height(gridz, gridz_define, style_lip, enable_zsnap)]);
 
     }
 
