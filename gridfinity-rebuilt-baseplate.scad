@@ -92,7 +92,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
-            render() {
+            render(convexity = 6) {
                 if (sm) block_base_hole(1);
 
                 if (sp == 1)
