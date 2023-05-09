@@ -1,23 +1,14 @@
 from __future__ import annotations
 import shutil
 from pathlib import Path
-from typing import Tuple, List, Union, Iterator, Dict, Any, Optional
+from typing import Tuple, List, Union, Iterator, Dict, Optional
 from re import match, search
 from subprocess import Popen, PIPE
 from unittest import TestCase
 from contextlib import contextmanager
 from platform import system
 from .mesh import Mesh
-
-
-def count_curly_brackets_in_string(input_line: str) -> Tuple[int, int]:
-    return input_line.count("{"), input_line.count("}")
-
-
-def to_scad_str(input_str: Any) -> str:
-    if isinstance(input_str, bool):
-        return str(input_str).lower()
-    return str(input_str)
+from .utils import to_scad_str, count_curly_brackets_in_string, scad_executable
 
 
 class Module():
@@ -219,19 +210,10 @@ class TestRunner():
                 return True
         return False
 
-    def _get_scad_executable(self) -> str:
-        if system() == "Linux":
-            return "openscad"
-        if system() == "Windows":
-            return r'"C:\Program Files\Openscad\openscad.exe"'
-        if system() == "Darwin":
-            return r"/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
-        raise OSError(f"Unkown OS: {system()}")
-
     def _run_openscad_command(self, in_file: Path, out_file: Path, args: Optional[List[str]] = None) -> None:
         if args is None:
             args = []
-        cmd = [self._get_scad_executable(), self.output_arg,
+        cmd = [scad_executable(), self.output_arg,
                str(out_file), str(in_file)] + args
 
         # Workaround for Windows PermissionError with shell=False
