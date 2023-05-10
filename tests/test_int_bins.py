@@ -1,10 +1,11 @@
 from unittest import TestCase, skip
-from openscadtestframework import IntegrationTest
+from openscadtestframework import IntegrationTest, OutputType
 
 
 class bins(TestCase):
     def setUp(self) -> None:
-        self.int_test = IntegrationTest("gridfinity-rebuilt-bins.scad")
+        self.int_test = IntegrationTest(
+            "gridfinity-rebuilt-bins.scad", OutputType.STL)
 
     def test_default(self) -> None:
         self.int_test.run(self.id())

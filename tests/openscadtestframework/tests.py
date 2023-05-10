@@ -1,5 +1,7 @@
 from __future__ import annotations
 import shutil
+import filecmp
+from enum import Enum
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from platform import system
@@ -8,6 +10,11 @@ from typing import List, Union, Dict, Optional, Iterator
 from .modules import Module
 from .utils import to_scad_str, scad_executable
 from .mesh import Mesh
+
+
+class OutputType(Enum):
+    SVG = 1
+    STL = 2
 
 
 class ScadTest():
@@ -22,8 +29,8 @@ class ScadTest():
 class IntegrationTest(ScadTest):
     default_args: List[str] = ["-D$fa=12", "-D$fs=2"]
 
-    def __init__(self, test_file: str) -> None:
-        super().__init__(IntegrationTestRunner())
+    def __init__(self, test_file: str, out_type: OutputType) -> None:
+        super().__init__(IntegrationTestRunner(out_type))
         self.test_file = Path(test_file)
         self._kwargs: Dict[str, Union[int, float,  bool]] = {}
 
@@ -39,8 +46,8 @@ class IntegrationTest(ScadTest):
 
 
 class ModuleTest(ScadTest):
-    def __init__(self, module_under_test: Module):
-        super().__init__(ModuleTestRunner())
+    def __init__(self, module_under_test: Module, out_type: OutputType):
+        super().__init__(ModuleTestRunner(out_type))
         self.module_under_test = module_under_test
         self.dependencies: List[Module] = []
         self.const_files: List[Path] = []
@@ -81,16 +88,26 @@ class ModuleTest(ScadTest):
 
 
 class TestRunner():
-    out_file_extention = ".stl"
+
     output_arg: str = "-o"
     expected_dir = Path.cwd().joinpath("tests/expected")
     tmp_dir_prefix = "oscad_generated_test_files."
     git_root_cmd = ["git", "rev-parse", "--show-toplevel"]
 
-    def __init__(self) -> None:
+    def __init__(self, out_type: OutputType) -> None:
         if (not self._check_if_run_on_root_repo()):
             raise OSError(
                 "Should be executed in root dir of git repo.")
+
+        if out_type == OutputType.SVG:
+            self.out_file_extention = ".svg"
+            self._compare_output = self._compare_output_svg
+        elif out_type == OutputType.STL:
+            self.out_file_extention = ".stl"
+            self._compare_output = self._compare_output_stl
+        else:
+            raise NotImplementedError(
+                f"Not implemented runner type {out_type}")
 
         self.tmp_dir: Path = Path()
 
@@ -132,11 +149,15 @@ class TestRunner():
                 raise OSError(
                     f"openscad failed executing with message:\n{err_mesage}")
 
-    def _compare_output(self, expected: Path, current: Path) -> None:
+    def _compare_output_stl(self, expected: Path, current: Path) -> None:
         expected_mesh = Mesh(expected)
         current_mesh = Mesh(current)
         if expected_mesh != current_mesh:
             raise AssertionError("Stl files are not equal")
+
+    def _compare_output_svg(self, expected: Path, current: Path) -> None:
+        if not filecmp.cmp(expected, current, shallow=False):
+            raise AssertionError("Svg files are not equal")
 
     @ contextmanager
     def _temp_dir(self, test_name: str, keep_dir: bool = False) -> Iterator[None]:
@@ -150,8 +171,8 @@ class TestRunner():
 
 
 class IntegrationTestRunner(TestRunner):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, out_type: OutputType) -> None:
+        super().__init__(out_type)
         self.out_file: Path = Path()
 
     def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
@@ -169,9 +190,8 @@ class ModuleTestRunner(TestRunner):
 
     test_scad_file: Path = Path("test.scad")
 
-    def __init__(self) -> None:
-
-        super().__init__()
+    def __init__(self, out_type: OutputType) -> None:
+        super().__init__(out_type)
 
         self.tmp_dir: Path = Path()
         self.out_file: Path = Path()

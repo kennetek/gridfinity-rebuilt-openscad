@@ -1,10 +1,11 @@
 from unittest import TestCase
-from openscadtestframework import IntegrationTest
+from openscadtestframework import IntegrationTest, OutputType
 
 
 class vase(TestCase):
     def setUp(self) -> None:
-        self.int_test = IntegrationTest("gridfinity-spiral-vase.scad")
+        self.int_test = IntegrationTest(
+            "gridfinity-spiral-vase.scad", OutputType.STL)
 
     def test_default(self) -> None:
         self.int_test.run(self.id())

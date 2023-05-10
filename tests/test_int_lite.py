@@ -1,10 +1,11 @@
 from unittest import TestCase
-from openscadtestframework import IntegrationTest
+from openscadtestframework import IntegrationTest, OutputType
 
 
 class lite(TestCase):
     def setUp(self) -> None:
-        self.int_test = IntegrationTest("gridfinity-rebuilt-lite.scad")
+        self.int_test = IntegrationTest(
+            "gridfinity-rebuilt-lite.scad", OutputType.STL)
 
     def test_default(self) -> None:
         self.int_test.run(self.id())

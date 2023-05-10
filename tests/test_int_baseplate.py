@@ -1,12 +1,13 @@
 from unittest import TestCase
-from openscadtestframework import IntegrationTest
+from openscadtestframework import IntegrationTest, OutputType
 
 
 # these tescases are all wrong, there is a bug in the baseplates which affects almost all renders
 
 class baseplate(TestCase):
     def setUp(self) -> None:
-        self.int_test = IntegrationTest("gridfinity-rebuilt-baseplate.scad")
+        self.int_test = IntegrationTest(
+            "gridfinity-rebuilt-baseplate.scad", OutputType.STL)
 
     def test_default(self) -> None:
         self.int_test.run(self.id())
