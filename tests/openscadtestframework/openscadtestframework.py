@@ -122,14 +122,18 @@ class ModuleBuilder():
 
 class ScadTest():
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, test_runner: TestRunner) -> None:
+        self._runner = test_runner
+
+    def run(self, test_id: str) -> None:
+        self._runner.Run(test_id, self)
 
 
 class IntegrationTest(ScadTest):
     default_args: List[str] = ["-D$fa=12", "-D$fs=2"]
 
     def __init__(self, test_file: str) -> None:
+        super().__init__(IntegrationTestRunner())
         self.test_file = Path(test_file)
         self._kwargs: Dict[str, Union[int, float,  bool]] = {}
 
@@ -146,6 +150,7 @@ class IntegrationTest(ScadTest):
 
 class ModuleTest(ScadTest):
     def __init__(self, module_under_test: Module):
+        super().__init__(ModuleTestRunner())
         self.module_under_test = module_under_test
         self.dependencies: List[Module] = []
         self.const_files: List[Path] = []
@@ -301,17 +306,3 @@ class ModuleTestRunner(TestRunner):
         with open(file_path, "w", encoding="utf8") as infile:
             infile.write(module_test.get_test_file_string())
         return file_path
-
-
-class ScadModuleTestCase(TestCase):
-    _runner = ModuleTestRunner()
-
-    def scad_module_test(self, module_test: ModuleTest, keep_files: bool = False) -> None:
-        self._runner.Run(self.id(), module_test, keep_files)
-
-
-class ScadIntegrationTestCase(TestCase):
-    _runner = IntegrationTestRunner()
-
-    def run_test(self, int_test: IntegrationTest, keep_files: bool = False) -> None:
-        self._runner.Run(self.id(), int_test, keep_files)
