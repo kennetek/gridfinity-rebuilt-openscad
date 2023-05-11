@@ -51,12 +51,16 @@ class ModuleTest(ScadTest):
         self.module_under_test = module_under_test
         self.dependencies: List[Module] = []
         self.const_files: List[Path] = []
+        self._global_variables: Dict[str, Union[int, float]] = {}
 
     def add_dependency(self, module: Module) -> None:
         self.dependencies.append(module)
 
     def add_arguments(self, *args: Union[int, bool, List[int]], **kwargs: Union[str, int]) -> None:
         self.module_under_test.add_call_args(*args, **kwargs)
+
+    def add_global_variable(self, name: str, value: Union[int, float]) -> None:
+        self._global_variables[name] = value
 
     def add_children(self, children: List[Module]) -> None:
         for child in children:
@@ -69,6 +73,9 @@ class ModuleTest(ScadTest):
         out_str = ""
         for const_file in self.const_files:
             out_str += "include <" + str(const_file) + ">\n"
+
+        for key, value in self._global_variables.items():
+            out_str += "$" + key + "=" + to_scad_str(value) + ";\n"
 
         out_str += self._get_call_string() + "\n"
         out_str += self.module_under_test.get_module_string() + "\n"
