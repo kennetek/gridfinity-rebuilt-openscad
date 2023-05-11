@@ -338,6 +338,14 @@ module transform_main(xlen) {
     children();
 }
 
+// Function which transforms the tab cutter to the correct position.
+//
+// type:   tab type: 
+//             -1 : Left
+//              0 : Center
+//              1 : Right
+// xlen:   length of the original tab
+// cut:    ?
 module transform_tab(type, xlen, cut) {
     mirror([0,0,type==1?1:0])
     copy_mirror([0,0,-(abs(type)-1)])

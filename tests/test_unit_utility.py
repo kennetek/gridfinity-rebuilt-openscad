@@ -160,3 +160,63 @@ class profile_cutter_tab(TestCase):
     def test_no_output(self) -> None:
         self.module_test.add_arguments(10, 0, 30)
         self.assertRaises(OSError, self.module_test.run, self.id())
+
+
+class profile_cutter(TestCase):
+    def setUp(self) -> None:
+        self.module_test = ModuleTest(Module.from_file(
+            "profile_cutter", "gridfinity-rebuilt-utility.scad"), OutputType.SVG)
+        self.module_test.add_constants_file("gridfinity-constants.scad")
+        self.module_test.add_global_variable("dh", 50)
+
+    def test_no_scoop(self) -> None:
+        self.module_test.add_arguments(40, 20, 0)
+        self.module_test.run(self.id())
+
+    def test_with_scoop(self) -> None:
+        self.module_test.add_arguments(40, 20, 1)
+        self.module_test.run(self.id())
+
+    def test_with_scoop_altenative(self) -> None:
+        self.module_test.add_arguments(20, 40, 1)
+        self.module_test.run(self.id())
+
+
+class fillet_cutter(TestCase):
+    def setUp(self) -> None:
+        self.module_test = ModuleTest(Module.from_file(
+            "fillet_cutter", "gridfinity-rebuilt-utility.scad"), OutputType.STL)
+        self.module_test.add_constants_file("gridfinity-constants.scad")
+
+    def test_no_args(self) -> None:
+        self.module_test.add_child(Cube([10, 10, 10]))
+        self.module_test.run(self.id())
+
+    def test_t(self) -> None:
+        self.module_test.add_arguments(20)
+        self.module_test.add_child(Cube([10, 10, 10]))
+        self.module_test.run(self.id())
+
+
+class transform_tab(TestCase):
+    def setUp(self) -> None:
+        self.module_test = ModuleTest(Module.from_file(
+            "transform_tab", "gridfinity-rebuilt-utility.scad"), OutputType.STL)
+        self.module_test.add_constants_file("gridfinity-constants.scad")
+        self.module_test.add_dependency(Module.from_file(
+            "copy_mirror", "gridfinity-rebuilt-utility.scad"))
+
+    def test_left(self) -> None:
+        self.module_test.add_arguments(-1, 70, 0)
+        self.module_test.add_child(Square([10, 10]))
+        self.module_test.run(self.id())
+
+    def test_center(self) -> None:
+        self.module_test.add_arguments(0, 70, 0)
+        self.module_test.add_child(Square([10, 10]))
+        self.module_test.run(self.id())
+
+    def test_right(self) -> None:
+        self.module_test.add_arguments(1, 70, 0)
+        self.module_test.add_child(Square([10, 10]))
+        self.module_test.run(self.id())
