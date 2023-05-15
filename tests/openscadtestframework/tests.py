@@ -30,7 +30,7 @@ class ScadTest():
         try:
             self._result = self._runner.run(test_id, self)
         except:
-            self._result = Result("NAN")
+            self._result = Result(Path())
             self._result.outcome = OutcomeType.NOK
             raise
 
