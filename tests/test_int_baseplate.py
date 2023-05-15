@@ -9,22 +9,30 @@ class baseplate(TestCase):
         self.int_test = IntegrationTest(
             "gridfinity-rebuilt-baseplate.scad", OutputType.STL)
 
+    def tearDown(self) -> None:
+        self.int_test.clean_up()
+
     def test_default(self) -> None:
         self.int_test.run(self.id())
+        self.int_test.stl_result.compare_with_expected(self.id())
 
     def test_fit_to_drawer(self) -> None:
         self.int_test.add_arguments(
             distancex=200, distancey=250, fitx=-0.5, fity=0.7)
         self.int_test.run(self.id())
+        self.int_test.stl_result.compare_with_expected(self.id())
 
     def test_screw_together(self) -> None:
         self.int_test.add_arguments(style_plate=3)
         self.int_test.run(self.id())
+        self.int_test.stl_result.compare_with_expected(self.id())
 
     def test_skeletonized(self) -> None:
         self.int_test.add_arguments(style_plate=2)
         self.int_test.run(self.id())
+        self.int_test.stl_result.compare_with_expected(self.id())
 
     def test_weigthed(self) -> None:
         self.int_test.add_arguments(style_plate=1)
         self.int_test.run(self.id())
+        self.int_test.stl_result.compare_with_expected(self.id())

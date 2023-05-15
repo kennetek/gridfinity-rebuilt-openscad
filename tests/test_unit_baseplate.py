@@ -13,3 +13,5 @@ class cutter_weight(TestCase):
         module_test.add_dependency(Module.from_file(
             "pattern_circular", "gridfinity-rebuilt-utility.scad"))
         module_test.run(self.id())
+        module_test.stl_result.compare_with_expected(self.id())
+        module_test.clean_up()

@@ -11,6 +11,9 @@ from .modules import Module
 from .utils import to_scad_str, scad_executable
 from .mesh import Mesh
 
+EXPECTED_DIR = Path.cwd().joinpath("tests/expected")
+TMP_DIR_PREFIX = "oscad_generated_test_files."
+
 
 class OutputType(Enum):
     SVG = 1
@@ -21,9 +24,36 @@ class ScadTest():
 
     def __init__(self, test_runner: TestRunner) -> None:
         self._runner = test_runner
+        self._result: Union[None, Result, STLResult, SVGResult] = None
 
     def run(self, test_id: str) -> None:
-        self._runner.Run(test_id, self)
+        try:
+            self._result = self._runner.run(test_id, self)
+        except:
+            self._result = Result("NAN")
+            self._result.outcome = OutcomeType.NOK
+            raise
+
+    def clean_up(self) -> None:
+        if not isinstance(self._result, Result):
+            raise ValueError(
+                "Cleanup called when no result is available. Did the test ran?")
+
+        # Keep files when result is NOK
+        if self._result.outcome == OutcomeType.OK:
+            self._runner.clean_up()
+
+    @property
+    def stl_result(self) -> STLResult:
+        if isinstance(self._result, STLResult):
+            return self._result
+        raise ValueError("No STL result available")
+
+    @property
+    def svg_result(self) -> SVGResult:
+        if isinstance(self._result, SVGResult):
+            return self._result
+        raise ValueError("No STL result available")
 
 
 class IntegrationTest(ScadTest):
@@ -97,8 +127,6 @@ class ModuleTest(ScadTest):
 class TestRunner():
 
     output_arg: str = "-o"
-    expected_dir = Path.cwd().joinpath("tests/expected")
-    tmp_dir_prefix = "oscad_generated_test_files."
     git_root_cmd = ["git", "rev-parse", "--show-toplevel"]
 
     def __init__(self, out_type: OutputType) -> None:
@@ -106,19 +134,18 @@ class TestRunner():
             raise OSError(
                 "Should be executed in root dir of git repo.")
 
-        if out_type == OutputType.SVG:
+        self._out_type = out_type
+        if self._out_type == OutputType.SVG:
             self.out_file_extention = ".svg"
-            self._compare_output = self._compare_output_svg
-        elif out_type == OutputType.STL:
+        elif self._out_type == OutputType.STL:
             self.out_file_extention = ".stl"
-            self._compare_output = self._compare_output_stl
         else:
             raise NotImplementedError(
-                f"Not implemented runner type {out_type}")
+                f"Not implemented output type {self._out_type.name}")
 
         self.tmp_dir: Path = Path()
 
-    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+    def run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> Union[None, STLResult, SVGResult]:
         raise NotImplementedError()
 
     def _check_if_run_on_root_repo(self) -> bool:
@@ -129,7 +156,10 @@ class TestRunner():
                 return True
         return False
 
-    def _run_openscad_command(self, in_file: Path, out_file: Path, args: Optional[List[str]] = None) -> None:
+    def clean_up(self) -> None:
+        self._remove_tmp_dir()
+
+    def _run_openscad_command(self, in_file: Path, out_file: Path, args: Optional[List[str]] = None) -> Union[None, STLResult, SVGResult]:
         if args is None:
             args = []
         cmd = [scad_executable(), self.output_arg,
@@ -146,35 +176,30 @@ class TestRunner():
                     err_mesage = stderr.decode("utf-8")
                     raise OSError(
                         f"openscad failed executing with message:\n{err_mesage}")
-            return
         # End workaround
+        else:
+            with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
+                _, stderr = process.communicate()
+                if process.returncode != 0:
+                    err_mesage = stderr.decode("utf-8")
+                    raise OSError(
+                        f"openscad failed executing with message:\n{err_mesage}")
 
-        with Popen(cmd, stdout=PIPE, stderr=PIPE) as process:
-            _, stderr = process.communicate()
-            if process.returncode != 0:
-                err_mesage = stderr.decode("utf-8")
-                raise OSError(
-                    f"openscad failed executing with message:\n{err_mesage}")
+        if self._out_type == OutputType.STL:
+            return STLResult(out_file)
+        if self._out_type == OutputType.SVG:
+            return SVGResult(out_file)
+        raise NotImplementedError(
+            f"Not implemented output type {self._out_type.name}")
 
-    def _compare_output_stl(self, expected: Path, current: Path) -> None:
-        expected_mesh = Mesh(expected)
-        current_mesh = Mesh(current)
-        if expected_mesh != current_mesh:
-            raise AssertionError("Stl files are not equal")
-
-    def _compare_output_svg(self, expected: Path, current: Path) -> None:
-        if not filecmp.cmp(expected, current, shallow=False):
-            raise AssertionError("Svg files are not equal")
-
-    @ contextmanager
-    def _temp_dir(self, test_name: str, keep_dir: bool = False) -> Iterator[None]:
-        self.tmp_dir = Path.cwd().joinpath(Path("oscad_generated_test_files." + test_name))
+    def _create_tmp_dir(self, test_name: str) -> None:
+        self.tmp_dir = Path.cwd().joinpath(Path(TMP_DIR_PREFIX + test_name))
         if self.tmp_dir.exists():
-            shutil.rmtree(self.tmp_dir)
+            self._remove_tmp_dir()
         self.tmp_dir.mkdir()
-        yield
-        if not keep_dir:
-            shutil.rmtree(self.tmp_dir)
+
+    def _remove_tmp_dir(self) -> None:
+        shutil.rmtree(self.tmp_dir)
 
 
 class IntegrationTestRunner(TestRunner):
@@ -182,15 +207,13 @@ class IntegrationTestRunner(TestRunner):
         super().__init__(out_type)
         self.out_file: Path = Path()
 
-    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+    def run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> Union[None, STLResult, SVGResult]:
         if not isinstance(test, IntegrationTest):
             raise ValueError("Test should be of type IntegrationTest")
-        with self._temp_dir(test_name, keep_dir):
-            self.out_file = Path(test_name + self.out_file_extention)
-            self._run_openscad_command(
-                test.test_file,  self.tmp_dir.joinpath(self.out_file), test.get_cli_arg_list())
-            self._compare_output(self.expected_dir.joinpath(
-                self.out_file), self.tmp_dir.joinpath(self.out_file))
+
+        self._create_tmp_dir(test_name)
+        return self._run_openscad_command(
+            test.test_file,  self.tmp_dir.joinpath(test_name + self.out_file_extention), test.get_cli_arg_list())
 
 
 class ModuleTestRunner(TestRunner):
@@ -201,25 +224,67 @@ class ModuleTestRunner(TestRunner):
         super().__init__(out_type)
 
         self.tmp_dir: Path = Path()
-        self.out_file: Path = Path()
 
-    def Run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> None:
+    def run(self, test_name: str, test: ScadTest, keep_dir: bool = False) -> Union[None, STLResult, SVGResult]:
         if not isinstance(test, ModuleTest):
             raise ValueError("Test should be of type ModuleTest")
 
-        with self._temp_dir(test_name, keep_dir):
-            self.out_file = Path(test_name + self.out_file_extention)
-            file_path = self._create_scadfile(test)
-            self._run_scadfile(file_path)
-            self._compare_output(self.expected_dir.joinpath(
-                self.out_file), self.tmp_dir.joinpath(self.out_file))
+        self._create_tmp_dir(test_name)
+        file_path = self._create_scadfile(test)
+        return self._run_scadfile(file_path, self.tmp_dir.joinpath(test_name + self.out_file_extention))
 
-    def _run_scadfile(self, file_path: Path) -> None:
-        self._run_openscad_command(
-            file_path, self.tmp_dir.joinpath(self.out_file))
+    def _run_scadfile(self, file_path: Path, output_path: Path) -> Union[None, STLResult, SVGResult]:
+        return self._run_openscad_command(
+            file_path, output_path)
 
     def _create_scadfile(self, module_test: ModuleTest) -> Path:
         file_path = self.tmp_dir.joinpath(self.test_scad_file)
         with open(file_path, "w", encoding="utf8") as infile:
             infile.write(module_test.get_test_file_string())
         return file_path
+
+
+class OutcomeType(Enum):
+    OK = 0
+    NOK = 1
+
+
+class Result():
+    def __init__(self, path: Path):
+        self.path = path
+
+        self.outcome = OutcomeType.OK
+
+    def compare_with_expected(self, test_id: str) -> None:
+        raise NotImplementedError()
+
+
+class STLResult(Result):
+    def __init__(self, path: Path):
+        super().__init__(path)
+        self.mesh = Mesh(path)
+
+    def compare_with_expected(self, test_id: str) -> None:
+        expected_path = EXPECTED_DIR.joinpath(test_id + ".stl")
+        expected_mesh = Mesh(expected_path)
+        if self.mesh != expected_mesh:
+            self.outcome = OutcomeType.NOK
+            raise AssertionError("Stl files are not equal")
+
+    @property
+    def total_z(self) -> float:
+        return 0
+
+    def total_x(self) -> float:
+        return 0
+
+    def total_y(self) -> float:
+        return 0
+
+
+class SVGResult(Result):
+    def compare_with_expected(self, test_id: str) -> None:
+        expected_path = EXPECTED_DIR.joinpath(test_id + ".svg")
+        if not filecmp.cmp(expected_path, self.path, shallow=False):
+            self.outcome = OutcomeType.NOK
+            raise AssertionError("Svg files are not equal")
