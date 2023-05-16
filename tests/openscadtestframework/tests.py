@@ -3,10 +3,9 @@ import shutil
 import filecmp
 from enum import Enum
 from subprocess import Popen, PIPE
-from contextlib import contextmanager
 from platform import system
 from pathlib import Path
-from typing import List, Union, Dict, Optional, Iterator
+from typing import List, Union, Dict, Optional
 from .modules import Module
 from .utils import to_scad_str, scad_executable
 from .mesh import Mesh
