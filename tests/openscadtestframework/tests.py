@@ -4,7 +4,6 @@ import filecmp
 from enum import Enum
 from pathlib import Path
 from typing import List, Union, Dict, Optional
-from re import search
 from open3d import io, geometry  # type: ignore
 from .modules import Module
 from .utils import to_scad_str
