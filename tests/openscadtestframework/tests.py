@@ -263,13 +263,15 @@ class STLResult(Result):
 
     @property
     def total_z(self) -> float:
-        return 0
+        return float(self.mesh.get_axis_aligned_bounding_box().get_extent()[2])
 
+    @property
     def total_x(self) -> float:
-        return 0
+        return float(self.mesh.get_axis_aligned_bounding_box().get_extent()[0])
 
+    @property
     def total_y(self) -> float:
-        return 0
+        return float(self.mesh.get_axis_aligned_bounding_box().get_extent()[1])
 
 
 class SVGResult(Result):
