@@ -174,7 +174,6 @@ module profile_wall_sub() {
         translate([r_base-d_clear,$dh,0])
         mirror([1,0,0]) 
         profile_base();
-        square([d_wall,0]);
     }
 }
 
