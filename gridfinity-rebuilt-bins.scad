@@ -43,6 +43,16 @@ divx = 1;
 // number of y Divisions (set to zero to have solid bin)
 divy = 1;
 
+/* [Open ends (do not check both)] */
+// Open top side of bin on x-axis
+open_end_x_top = false;
+// Open bottom side of bin on x-axis
+open_end_x_bottom = false;
+// Open top side of bin on y-axis
+open_end_y_top = false;
+// Open bottom side of bin on y-axis
+open_end_y_bottom = false;
+
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
@@ -69,16 +79,89 @@ div_base_x = 0;
 div_base_y = 0; 
 
 
-
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+    
+    difference() {
+        
+        // Since we chop off the top and/or bottom of the bin, we need to add 1 or 2 to the gridx and gridy
+        gridx = gridx + (open_end_x_top ? 1 : 0) + (open_end_x_bottom ? 1 : 0);
+        gridy = gridy + (open_end_y_top ? 1 : 0) + (open_end_y_bottom ? 1 : 0);
 
-    if (divx > 0 && divy > 0)
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
-}
-gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
+        // Only translate off center if the bin is open on ONE side of the x axis
+        // when both sides are open, the bin is still centered
+        off_center_x = 
+        
+            open_end_x_top 
+                ? open_end_x_bottom 
+                    ? 0                       // both sides open 
+                    : 0.5                     // only top open
+                : open_end_x_bottom 
+                    ? -0.5                    // only bottom open
+                    : 0;                      // both sides closed
+
+        // Only translate off center if the bin is open on ONE side of the y axis
+        // when both sides are open, the bin is still centered
+        off_center_y = 
+        
+            open_end_y_top 
+                ? open_end_y_bottom 
+                    ? 0                       // both sides open 
+                    : 0.5                     // only top open
+                : open_end_y_bottom 
+                    ? -0.5                    // only bottom open
+                    : 0;                      // both sides closed
+
+
+        // Only translate off center if the bin is open on ONE side of the y axis
+        translate([ off_center_x * length, off_center_y * length, 0])
+
+            union() {
+                
+                gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+
+                    if (divx > 0 && divy > 0)
+                    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+                }
+                gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
+            }
+
+
+            largest_grid_side = max(gridx, gridy);
+
+
+            // OPEN SIDES ON X AXIS ////////////////////////////
+            x_offset = open_end_x_top && open_end_x_bottom 
+                ? (gridx/2 -1) * length               // both sides open
+                : length/2 + (gridx/2 -1) * length;   // only one side open
+
+
+            if (open_end_x_top)
+                translate([x_offset, -((largest_grid_side * length)/2), -10])
+                    cube([length, largest_grid_side * length, 20 + height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+            if (open_end_x_bottom)
+                // We need to do -length because the x axis is flipped and we need to subtract the cube thickness
+                translate([-x_offset - length, -((largest_grid_side * length)/2), -10])
+                    cube([length, largest_grid_side * length, 20 + height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+
+            // OPEN SIDES ON Y AXIS ////////////////////////////
+            y_offset = open_end_y_top && open_end_y_bottom 
+                ? (gridy/2 -1) * length               // both sides open
+                : length/2 + (gridy/2 -1) * length;   // only one side open
+
+            if (open_end_y_top)
+                translate([-((largest_grid_side * length)/2), y_offset, -10])
+                    cube([largest_grid_side * length, length, 20 + height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+            if (open_end_y_bottom)
+                // We need to do -length because the y axis is flipped and we need to subtract the cube thickness
+                translate([-((largest_grid_side * length)/2), -y_offset - length, -10])
+                    cube([largest_grid_side * length, length, 20 + height(gridz, gridz_define, style_lip, enable_zsnap)]);
+
+    }
 
 }
 
