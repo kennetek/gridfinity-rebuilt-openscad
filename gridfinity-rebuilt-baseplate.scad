@@ -1,4 +1,5 @@
 include <gridfinity-rebuilt-utility.scad>
+include <standard.scad>
 
 // ===== INFORMATION ===== //
 /*
@@ -18,9 +19,7 @@ $fs = 0.25;
 // number of bases along x-axis
 gridx = 5;  
 // number of bases along y-axis   
-gridy = 5;  
-// base unit
-length = 42;
+gridy = 5; 
 
 /* [Screw Together Settings - Defaults work for M3 and 4-40] */
 // screw diameter
@@ -61,7 +60,7 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 screw_together = (style_plate == 3 || style_plate == 4);
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
+gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
@@ -92,7 +91,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
         
         pattern_linear(gx, gy, length) {
-            render() {
+            render(convexity = 6) {
                 if (sm) block_base_hole(1);
 
                 if (sp == 1)
@@ -151,7 +150,7 @@ module cutter_weight() {
 }
 module hole_pattern(){
     pattern_circular(4)
-    translate([d_hole/2, d_hole/2, 0]) {
+    translate([l_grid/2-d_hole_from_side, l_grid/2-d_hole_from_side, 0]) {
         render();
         children();
     }
@@ -179,12 +178,12 @@ module cutter_counterbore(){
 }
 
 module profile_skeleton() {
-    l = length-2*r_c2-2*r_c1; 
+    l = l_grid-2*r_c2-2*r_c1; 
     minkowski() { 
         difference() {
             square([l-2*r_skel+2*d_clear,l-2*r_skel+2*d_clear], center = true);
             pattern_circular(4)
-            translate([d_hole/2,d_hole/2,0])
+            translate([l_grid/2-d_hole_from_side,l_grid/2-d_hole_from_side,0])
             minkowski() {
                 square([l,l]);
                 circle(r_hole2+r_skel+2);
@@ -202,10 +201,10 @@ module cutter_screw_together(gx, gy, off) {
     
     module screw(a, b) {
         copy_mirror([1,0,0])
-        translate([a*length/2, 0, -off/2])
-        pattern_linear(1, b, 1, length)
+        translate([a*l_grid/2, 0, -off/2])
+        pattern_linear(1, b, 1, l_grid)
         pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
         rotate([0,90,0])
-        cylinder(h=length/2, d=d_screw, center = true);
+        cylinder(h=l_grid/2, d=d_screw, center = true);
     }
 }

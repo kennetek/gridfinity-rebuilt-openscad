@@ -20,9 +20,7 @@ gridx = 3;
 // number of bases along y-axis   
 gridy = 3;  
 // bin height. See bin height information and "gridz_define" below.  
-gridz = 6;   
-// base unit
-length = 42;
+gridz = 6;
 
 /* [Compartments] */
 // number of X Divisions
@@ -58,7 +56,7 @@ bottom_layer = 1;
 
 // Input all the cutter types in here
 color("tomato")
-gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole, only_corners) {
+gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, div_base_x, div_base_y, style_hole, only_corners) {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
 
