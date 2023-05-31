@@ -33,9 +33,9 @@ n_screws = 1; // [1:3]
 
 
 /* [Fit to Drawer] */
-// minimum l_grid of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
+// minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
 distancex = 0;
-// minimum l_grid of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
+// minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
 distancey = 0;
 
 // where to align extra space along x
