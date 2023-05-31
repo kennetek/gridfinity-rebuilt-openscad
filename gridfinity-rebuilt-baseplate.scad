@@ -92,7 +92,6 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         
         pattern_linear(gx, gy, length) {
             render(convexity = 6) {
-                if (sm) block_base_hole(1);
 
                 if (sp == 1)
                     translate([0,0,-off])

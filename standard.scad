@@ -79,6 +79,3 @@ r_cb = 2.75;
 h_cb = 3;
 // minimum baseplate thickness (when skeletonized)
 h_skel = 1; 
-
-// Prime numbers
-p_corn = 401; 
