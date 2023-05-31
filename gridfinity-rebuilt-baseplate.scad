@@ -1,5 +1,5 @@
 include <gridfinity-rebuilt-utility.scad>
-include <gridfinity-constants.scad>
+include <standard.scad>
 
 // ===== INFORMATION ===== //
 /*
