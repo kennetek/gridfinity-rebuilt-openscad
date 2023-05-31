@@ -33,9 +33,7 @@ gridx = 5;
 // number of bases along y-axis   
 gridy = 5;  
 // bin height. See bin height information and "gridz_define" below.  
-gridz = 6;   
-// base unit
-length = 42;
+gridz = 6;
 
 /* [Compartments] */
 // number of X Divisions (set to zero to have solid bin)
@@ -73,12 +71,12 @@ div_base_y = 0;
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, length) {
+gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal) {
 
     if (divx > 0 && divy > 0)
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
 }
-gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole*(style_corners?p_corn:1));
 
 }
 

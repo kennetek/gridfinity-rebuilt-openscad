@@ -15,6 +15,8 @@ r_fo1 = 8.5;
 r_fo2 = 3.2;
 // outside radii 3
 r_fo3 = 1.6; 
+// length of a grid unit
+l_grid = 42;
 
 // screw hole radius
 r_hole1 = 1.5;  

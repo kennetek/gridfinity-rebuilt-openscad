@@ -1,4 +1,5 @@
 include <gridfinity-rebuilt-utility.scad>
+include <gridfinity-constants.scad>
 
 // ===== INFORMATION ===== //
 /*
@@ -18,9 +19,7 @@ $fs = 0.25;
 // number of bases along x-axis
 gridx = 5;  
 // number of bases along y-axis   
-gridy = 5;  
-// base unit
-length = 42;
+gridy = 5; 
 
 /* [Screw Together Settings - Defaults work for M3 and 4-40] */
 // screw diameter
@@ -34,9 +33,9 @@ n_screws = 1; // [1:3]
 
 
 /* [Fit to Drawer] */
-// minimum length of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
+// minimum l_grid of baseplate along x (leave zero to ignore, will automatically fill area if gridx is zero)
 distancex = 0;
-// minimum length of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
+// minimum l_grid of baseplate along y (leave zero to ignore, will automatically fill area if gridy is zero)
 distancey = 0;
 
 // where to align extra space along x
@@ -61,7 +60,7 @@ style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
 screw_together = (style_plate == 3 || style_plate == 4);
 
 color("tomato") 
-gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
+gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
@@ -143,15 +142,15 @@ module cutter_weight() {
         translate([0,10,0])
         linear_extrude(bp_rcut_depth*2,center=true)
         union() {
-            square([bp_rcut_width, bp_rcut_length], center=true);
-            translate([0,bp_rcut_length/2,0])
+            square([bp_rcut_width, bp_rcut_l_grid], center=true);
+            translate([0,bp_rcut_l_grid/2,0])
             circle(d=bp_rcut_width);
         }
     }
 }
 module hole_pattern(){
     pattern_circular(4)
-    translate([length/2-d_hole_from_side, length/2-d_hole_from_side, 0]) {
+    translate([l_grid/2-d_hole_from_side, l_grid/2-d_hole_from_side, 0]) {
         render();
         children();
     }
@@ -179,12 +178,12 @@ module cutter_counterbore(){
 }
 
 module profile_skeleton() {
-    l = length-2*r_c2-2*r_c1; 
+    l = l_grid-2*r_c2-2*r_c1; 
     minkowski() { 
         difference() {
             square([l-2*r_skel+2*d_clear,l-2*r_skel+2*d_clear], center = true);
             pattern_circular(4)
-            translate([length/2-d_hole_from_side,length/2-d_hole_from_side,0])
+            translate([l_grid/2-d_hole_from_side,l_grid/2-d_hole_from_side,0])
             minkowski() {
                 square([l,l]);
                 circle(r_hole2+r_skel+2);
@@ -202,10 +201,10 @@ module cutter_screw_together(gx, gy, off) {
     
     module screw(a, b) {
         copy_mirror([1,0,0])
-        translate([a*length/2, 0, -off/2])
-        pattern_linear(1, b, 1, length)
+        translate([a*l_grid/2, 0, -off/2])
+        pattern_linear(1, b, 1, l_grid)
         pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
         rotate([0,90,0])
-        cylinder(h=length/2, d=d_screw, center = true);
+        cylinder(h=l_grid/2, d=d_screw, center = true);
     }
 }
