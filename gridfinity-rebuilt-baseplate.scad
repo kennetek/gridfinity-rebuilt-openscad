@@ -142,8 +142,8 @@ module cutter_weight() {
         translate([0,10,0])
         linear_extrude(bp_rcut_depth*2,center=true)
         union() {
-            square([bp_rcut_width, bp_rcut_l_grid], center=true);
-            translate([0,bp_rcut_l_grid/2,0])
+            square([bp_rcut_width, bp_rcut_length], center=true);
+            translate([0,bp_rcut_length/2,0])
             circle(d=bp_rcut_width);
         }
     }
