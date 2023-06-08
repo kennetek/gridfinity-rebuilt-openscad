@@ -101,7 +101,7 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
                 difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l) 
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
-                pattern_linear(2, 2, (gx-1)*length+d_hole, (gy-1)*length+d_hole)
+                pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
                 block_base_hole(style_hole, off);
             }
         }
