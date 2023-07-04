@@ -80,13 +80,16 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false, with_brim=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
     dbny = 1/(dy==0 ? len(dbnyt) > 0 ? dbnyt[0] : 1 : round(dy));
     xx = gx*l-0.5;
     yy = gy*l-0.5;
+    
+    if (with_brim)
+    brim(gx*l/2, gy*l/2)
     
     if (final_cut)
     translate([0,0,h_base])
@@ -457,3 +460,10 @@ module sweep_rounded(w=10, h=10) {
     }
 }
 
+module brim(x, y, height=0.3, diameter=10) {
+    linear_extrude(height)
+    pattern_circular(2)
+    copy_mirror()
+    translate([x, y])
+    circle(diameter);
+}

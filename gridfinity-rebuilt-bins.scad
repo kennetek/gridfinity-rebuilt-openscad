@@ -65,6 +65,8 @@ style_hole = 3; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes -
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0; 
+// add brim in the corner to help with warping/lifting
+with_brim = false;
 
 
 
@@ -76,7 +78,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
     if (divx > 0 && divy > 0)
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners, with_brim=with_brim);
 
 }
 
