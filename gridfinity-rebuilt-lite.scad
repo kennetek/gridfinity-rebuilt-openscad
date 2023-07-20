@@ -33,7 +33,8 @@ divy = 2;
 enable_zsnap = false;
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
-
+// generate tabs on the lid to help align stacked bins
+stacking_tabs = false;
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]

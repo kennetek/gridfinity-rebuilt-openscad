@@ -136,6 +136,8 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
         if ($style_lip == 0) profile_wall(h);
         else profile_wall2(h);
     }
+
+    if ((style_lip == 0) && stacking_tabs) generate_tabs();
 }
 // Function to include in the custom() module to individually slice bins
 // Will try to clamp values to fit inside the provided base size
@@ -623,4 +625,36 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
 
+}
+
+module lip_tab(x, y) {
+    // I can't figure out what the wall thickness is, I'll assume 2.15
+
+    wall_thickness = 2.15;
+
+    // how much of the first outer bevel sits "above" the lip when these mate properly
+    // This is an odd unit of measure.
+    percent_over = .33;
+    distance_offset = (1 - percent_over) * wall_thickness;
+
+    rot = (x == $gxx) ? 180 : ((x == 0) ? 0 : ((y == $gyy) ? 270 : 90));
+
+    translate(
+        [(x * l_grid) - ((l_grid * $gxx / 2)),
+         (y * l_grid) - ((l_grid * $gyy / 2)),
+         $dh + h_lip + distance_offset]) {
+        rotate([0, 0, rot]) {
+            difference() {
+                translate([d_clear, 2 * r_c2, 0])
+                    rotate([90, 0, 0])
+                    hull() {
+                    cube([r_f1, r_f1, 4 * r_c2]);
+                    translate([wall_thickness - d_clear - r_f1, 0]) cube([r_f1, r_f1, 4 * r_c2]);
+                    translate([wall_thickness - d_clear - r_f1, h_base - distance_offset - r_f1]) cube([r_f1, r_f1, 4 * r_c2]);
+                    translate([r_f1, h_base - distance_offset - r_f1]) cylinder(r=r_f1, h=4* r_c2);
+                }
+                gridfinityBase(2, 2, l_grid, 1, 1, 0, 0.5, false);
+            }
+        }
+    }
 }
