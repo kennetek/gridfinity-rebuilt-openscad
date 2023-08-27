@@ -137,7 +137,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
         else profile_wall2(h);
     }
 
-    if ((style_lip == 0) && stacking_tabs) generate_tabs();
+    if ((style_lip == 0) && stacking_tabs) generate_tabs(h);
 }
 // Function to include in the custom() module to individually slice bins
 // Will try to clamp values to fit inside the provided base size
@@ -627,33 +627,47 @@ module profile_cutter_tab(h, tab, ang) {
 
 }
 
-module lip_tab(x, y) {
-    // I can't figure out what the wall thickness is, I'll assume 2.15
+module generate_tabs(height_mm) {
+    if ($gxx > 1) {
+        for (xtab=[1:$gxx-1]) {
+            lip_tab(xtab, 0, height_mm);
+            lip_tab(xtab, $gyy, height_mm);
+        }
+    }
 
-    wall_thickness = 2.15;
+    if ($gyy > 1) {
+        for (ytab=[1:$gyy-1]) {
+            lip_tab(0, ytab, height_mm);
+            lip_tab($gxx, ytab, height_mm);
+        }
+    }
+}
 
-    // how much of the first outer bevel sits "above" the lip when these mate properly
-    // This is an odd unit of measure.
-    percent_over = .33;
-    distance_offset = (1 - percent_over) * wall_thickness;
-
-    rot = (x == $gxx) ? 180 : ((x == 0) ? 0 : ((y == $gyy) ? 270 : 90));
+module lip_tab(x, y, height_mm) {
+    //Calculate rotation of lip based on which edge it is on
+    rot = (x == $gxx) ? 0 : ((x == 0) ? 180 : ((y == $gyy) ? 90 : 270));
+    wall_thickness = r_base-r_c2+d_clear*2-r_c1;
 
     translate(
         [(x * l_grid) - ((l_grid * $gxx / 2)),
          (y * l_grid) - ((l_grid * $gyy / 2)),
-         $dh + h_lip + distance_offset]) {
-        rotate([0, 0, rot]) {
-            difference() {
-                translate([d_clear, 2 * r_c2, 0])
-                    rotate([90, 0, 0])
-                    hull() {
-                    cube([r_f1, r_f1, 4 * r_c2]);
-                    translate([wall_thickness - d_clear - r_f1, 0]) cube([r_f1, r_f1, 4 * r_c2]);
-                    translate([wall_thickness - d_clear - r_f1, h_base - distance_offset - r_f1]) cube([r_f1, r_f1, 4 * r_c2]);
-                    translate([r_f1, h_base - distance_offset - r_f1]) cylinder(r=r_f1, h=4* r_c2);
+         $dh+h_base]) {
+        rotate([0, 0, rot])
+        translate([-r_base-d_clear,-r_base,0]) {
+            //Extrude the wall profile in circle; same as you would at a corner of bin
+            //Intersection - limit it to the section where the lip would not interfere with the base
+            intersection() {
+                translate([wall_thickness, -r_base*1.5, 0]) cube([wall_thickness, r_base*5, (h_lip)*5]);
+                translate([0,0,-$dh]) union() {
+                    rotate_extrude(angle=90) profile_wall(height_mm);
+                    translate([0, r_base*2, 0]) rotate_extrude(angle=-90) profile_wall(height_mm);
                 }
-                gridfinityBase(2, 2, l_grid, 1, 1, 0, 0.5, false);
+            }
+            //Fill the gap between rotational extrusions (think of it as the gap between bins, if this was multiple bins instead of tabs)
+            difference() {
+                translate([wall_thickness, 0, -h_lip*0.5]) cube([(r_base-wall_thickness)-r_f1, r_base*2, h_lip*1.5]);
+                cylinder(h=h_lip*3, r=r_base-r_f1, center=true);
+                translate([0, r_base*2, 0]) cylinder(h=h_lip*3, r=r_base-r_f1, center=true);
             }
         }
     }
