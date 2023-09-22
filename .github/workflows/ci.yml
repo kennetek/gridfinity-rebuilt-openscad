@@ -1,0 +1,34 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+
+jobs:
+  Test:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+    - name: 💾 Check out repository
+      uses: actions/checkout@v3
+
+    - name: 🪝 Cache pre-commit hooks
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pre-commit
+        key: "pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml')
+          }}"
+
+    - name: ✨ Install pre-commit
+      shell: bash
+      run: python3 -m pip install pre-commit
+
+    - name: 🔥 Test
+      run: pre-commit run --all-files
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
