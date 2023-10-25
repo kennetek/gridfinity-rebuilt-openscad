@@ -256,7 +256,7 @@ module block_cutter(x,y,w,h,t,s) {
     translate([0,ylen/2,h_base+h_bot])
     rotate([90,0,-90]) {
     
-    if (!zsmall && xlen - d_tabw > 4*r_f2 && t != 0) {
+    if (!zsmall && xlen - d_tabw > 4*r_f2 && (t != 0 && t != 5)) {
         fillet_cutter(3,"bisque")
         difference() {
             transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0)
