@@ -48,10 +48,12 @@ cdivx = 0;
 cdivy = 0;
 // orientation
 c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
-// radius of cylindrical cut outs
-r = 10;
+// diameter of cylindrical cut outs
+cd = 10;
 // cylinder height
-ch = 10;
+ch = 1;
+// spacing to lid
+c_depth = 1;
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
@@ -95,10 +97,22 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
             : (c_orientation == 1)
                 ? [90,0,0]
                 : [0,0,0];
-        cut_move(x=0, y=0, w=gridx, h=gridy)
-            pattern_linear(x=cdivx, y=cdivy, sx=42*gridx/cdivx, sy=42*gridy/cdivy)
-                    rotate(rotation)
-                        cylinder(r=r, h=ch, center=true);
+        
+        gridx_mm = gridx*l_grid;
+        gridy_mm = gridy*l_grid;
+        padding = 2;
+        cutout_x = [gridx_mm-d_wall*2];
+        cutout_y = [gridy_mm-d_wall*2];
+        
+        cut_move(x=0, y=0, w=gridx, h=gridy) {
+            translate([0,0,-c_depth]) {
+                rounded_rectangle(cutout_x, cutout_y, c_depth*2, r_base);
+            
+            pattern_linear(x=cdivx, y=cdivy, sx=(gridx_mm - 2)/cdivx, sy=(gridy_mm - 2)/cdivy)
+                rotate(rotation)
+                        cylinder(r=cd/2, h=ch*2, center=true);
+            }
+        }
     }
 }
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
