@@ -80,7 +80,6 @@ gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_co
 
 }
 
-
 // ===== EXAMPLES ===== //
 
 // 3x3 even spaced grid
@@ -155,4 +154,28 @@ gridfinityInit(gx, gy, height(6), 0, 42) {
     cut(j*gx/(i+1),gy-i-1,gx/(i+1),1,0);
 }
 gridfinityBase(gx, gy, 42, 0, 0, 1);
+*/
+
+// Clear front bin, 3 x 1 x 6, perfect for a microscope slide.
+// Needs supports to hold up the label bar, because there is no front to build off.
+/*
+glassz = 25.2; // size of the microscope glass.
+glassx = 76.5; 
+glassy = 1.25;
+gx = 2;  
+dx = 3;
+difference() {
+    union() {
+        gridfinityInit(gx, gridy, height(gridz, gridz_define, enable_lip, enable_zsnap), height_internal, length) {
+
+            cutEqual(n_divx = dx, n_divy = divy, style_tab = style_tab, enable_scoop = enable_scoop);
+        }
+        gridfinityBase(gx, gridy, length, div_base_x, div_base_y, style_hole);
+    }
+    translate([-glassx/2, length/2 - glassy*2 + 0.00, 2.9]) cube([glassx, glassy + 0.02, glassz+5]);
+    translate([-(glassx-5)/2, length/2 - glassy, 2.9]) cube([glassx-5, glassy*3+0.02, glassz+5]);
+    // chamfer to make it easier to slide the glass in.
+    translate([-glassx/2 - 1, length/2 - glassy*2 + 0.00, 1.9]) rotate([0,10,0]) cube([5, glassy + 0.02, 10]);
+    mirror([1,0,0]) translate([-glassx/2 - 1, length/2 - glassy*2 + 0.00, 1.9]) rotate([0,10,0]) cube([5, glassy + 0.02, 10]);
+}
 */
