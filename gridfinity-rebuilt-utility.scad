@@ -118,9 +118,13 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
         block_base_solid(dbnx, dbny, l, off);
         
         if (style_hole > 0)
-            pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4) 
-            translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-            block_base_hole(style_hole, off);
+            pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
+            if (style_hole == 4)
+                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, h_slit*2])
+                refined_hole();
+            else
+                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
+                block_base_hole(style_hole, off);
         }
 }
 
@@ -158,6 +162,39 @@ module block_base_hole(style_hole, o=0) {
         }
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
+    }
+}
+
+
+module refined_hole() {
+    /**
+    * Refined hole based on Printables @grizzie17's Gridfinity Refined
+    * https://www.printables.com/model/413761-gridfinity-refined
+    */
+
+    // Meassured magnet hole diameter to be 5.86mm (meassured in fusion360
+    r = r_hole2-0.32;
+
+    // Magnet height
+    m = 2;
+    mh = m-0.1;
+
+    // Poke through - For removing a magnet using a toothpick
+    ptl = h_slit*3; // Poke Through Layers
+    pth = mh+ptl; // Poke Through Height
+    ptr = 2.5; // Poke Through Radius
+
+    union() {
+        hull() {
+            // Magnet hole - smaller than the magnet to keep it squeezed
+            translate([10, -r, 0]) cube([1, r*2, mh]);
+            cylinder(1.9, r=r);
+        }
+        hull() {
+            // Poke hole
+            translate([-9+5.60, -ptr/2, -ptl]) cube([1, ptr, pth]);
+            translate([-12.53+5.60, 0, -ptl]) cylinder(pth, d=ptr);
+        }
     }
 }
 
