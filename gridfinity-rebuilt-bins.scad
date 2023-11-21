@@ -92,27 +92,8 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
     
     } else if (cdivx > 0 && cdivy > 0) {
-        rotation = (c_orientation == 0)
-            ? [0,90,0]
-            : (c_orientation == 1)
-                ? [90,0,0]
-                : [0,0,0];
         
-        gridx_mm = gridx*l_grid;
-        gridy_mm = gridy*l_grid;
-        padding = 2;
-        cutout_x = [gridx_mm-d_wall*2];
-        cutout_y = [gridy_mm-d_wall*2];
-        
-        cut_move(x=0, y=0, w=gridx, h=gridy) {
-            translate([0,0,-c_depth]) {
-                rounded_rectangle(cutout_x, cutout_y, c_depth*2, r_base);
-            
-            pattern_linear(x=cdivx, y=cdivy, sx=(gridx_mm - 2)/cdivx, sy=(gridy_mm - 2)/cdivy)
-                rotate(rotation)
-                        cylinder(r=cd/2, h=ch*2, center=true);
-            }
-        }
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation);
     }
 }
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
