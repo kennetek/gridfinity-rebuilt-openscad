@@ -53,7 +53,7 @@ style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: 
 enable_magnet = true;
 
 // hole styles
-style_hole = 2; // [0:none, 1:contersink, 2:counterbore]
+style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
