@@ -79,7 +79,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
 
     offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearence-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-bp_xy_clearence-diy)/2*fity*-1;
-    
+
     difference() {
         translate([offsetx,offsety,h_base])
         mirror([0,0,1])

@@ -131,6 +131,6 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                     translate([0,0,0])
                     rounded_rectangle(gridx*1000, gridy*1000, 5, r_f2);
             }
-    
+
     }
 }
