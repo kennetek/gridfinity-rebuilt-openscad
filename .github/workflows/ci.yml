@@ -27,7 +27,7 @@ jobs:
       run: python3 -m pip install pre-commit
 
     - name: 🔥 Test
-      run: pre-commit run --all-files
+      run: pre-commit run --show-diff-on-failure --all-files
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
