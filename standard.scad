@@ -69,6 +69,8 @@ bp_rcut_width = 8.5;
 bp_rcut_length = 4.25;
 // Baseplate bottom cutout rounded thingy depth
 bp_rcut_depth = 2;
+// Baseplate clearence offset
+bp_xy_clearence = 0.5;
 // countersink diameter for baseplate
 d_cs = 2.5;
 // radius of cutout for skeletonized baseplate

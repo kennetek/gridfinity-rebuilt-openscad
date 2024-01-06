@@ -22,6 +22,39 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
     cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
 }
 
+// Creates equally divided cylindrical cutouts
+//
+// n_divx: number of x cutouts
+// n_divy: number of y cutouts
+//         set n_div values to 0 for a solid bin
+// cylinder_diameter: diameter of cutouts
+// cylinder_height: height of cutouts
+// coutout_depth: offset from top to solid part of container
+// orientation: orientation of cylinder cutouts (0 = x direction, 1 = y direction, 2 = z direction)
+module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, coutout_depth=0, orientation=0) {
+    rotation = (orientation == 0)
+            ? [0,90,0]
+            : (orientation == 1)
+                ? [90,0,0]
+                : [0,0,0];
+
+    gridx_mm = $gxx*l_grid;
+    gridy_mm = $gyy*l_grid;
+    padding = 2;
+    cutout_x = gridx_mm - d_wall*2;
+    cutout_y = gridy_mm - d_wall*2;
+    
+    cut_move(x=0, y=0, w=$gxx, h=$gyy) {
+        translate([0,0,-coutout_depth]) {
+            rounded_rectangle(cutout_x, cutout_y, coutout_depth*2, r_base);
+        
+        pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - 2)/n_divx, sy=(gridy_mm - 2)/n_divy)
+            rotate(rotation)
+                    cylinder(r=cylinder_diameter/2, h=cylinder_height*2, center=true);
+        }
+    }
+}
+
 // initialize gridfinity
 module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid) {
     $gxx = gx;

@@ -1,7 +1,7 @@
 ## Introduction
 Gridfinity rebuilt aims to remake the brilliant Gridfinity project from [Zack Freedman](https://www.youtube.com/c/ZackFreedman/about) in a more robust and open-source way than the original Fusion 360 files. Many major CAD suites struggle with making parametric models constructed from linear patterns, due to changing fillet edges and seams. Thus, a pure mathematical approach using OpenSCAD can allow a single solution for all possible bin variants.
 
-The project has expanded into more eccentric models that use modules from the original generator. This wiki aims to document these modules in great detail.
+The [project](https://github.com/kennetek/gridfinity-rebuilt-openscad/) has expanded into more eccentric models that use modules from the original generator. This wiki aims to document these modules in great detail.
 
 Models are generated subtractively. First, the solid bin and bases are constructed, and then the compartments and holes are removed. This allows for internal fillets that nearly match the originals. However, they are not exactly perfect. There are some fillets that are too small and too difficult to be worth implementing, as most printers do not have a high enough resolution for it to matter.
 
