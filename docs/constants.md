@@ -1,6 +1,6 @@
 # gridfinity-rebuilt-constants
 
-This file contains dimensions that are critical to the constructiuon of the other models, but are not values that often need to be changed. Thus, they were outsourced to this file such that the rest of the files would retain parity. All values here have the same range, this is positive real numbers. Some can be zero, but that may result in strange or invalid geometry, 
+This file contains dimensions that are critical to the constructiuon of the other models, but are not values that often need to be changed. Thus, they were outsourced to this file such that the rest of the files would retain parity. All values here have the same range, this is positive real numbers. Some can be zero, but that may result in strange or invalid geometry,
 
 Parameter | Description
 --- | ------
@@ -19,12 +19,12 @@ h_hole| magnet hole depth
 h_slit| slit depth (printer layer height)
 r_f1| top edge fillet radius
 r_f2 | internal fillet radius
-d_div | width of divider between compartments 
+d_div | width of divider between compartments
 d_wall| minimum wall thickness
-d_clear| tolerance fit factor 
-d_tabh| height of tab (yaxis, measured from inner wall)  
-d_tabw| maximum width of tab 
-a_tab| angle of tab   
+d_clear| tolerance fit factor
+d_tabh| height of tab (yaxis, measured from inner wall)
+d_tabw| maximum width of tab
+a_tab| angle of tab
 bp_h_bot| Baseplate bottom part height (part added with weigthed=true)
 bp_cut_size| Baseplate bottom cutout rectangle size
 bp_cut_depth| Baseplate bottom cutout rectangle depth

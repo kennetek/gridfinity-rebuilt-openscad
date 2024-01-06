@@ -16,10 +16,10 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 3;  
-// number of bases along y-axis   
-gridy = 3;  
-// bin height. See bin height information and "gridz_define" below.  
+gridx = 3;
+// number of bases along y-axis
+gridy = 3;
+// bin height. See bin height information and "gridz_define" below.
 gridz = 6;
 
 /* [Compartments] */
@@ -47,7 +47,7 @@ only_corners = false;
 // number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
-div_base_y = 0; 
+div_base_y = 0;
 // thickness of bottom layer
 bottom_layer = 1;
 
@@ -62,8 +62,7 @@ gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_gri
 
 // ===== CONSTRUCTION ===== //
 
-
-module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole, only_corners) { 
+module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole, only_corners) {
     union() {
         difference() {
             union() {
@@ -132,6 +131,6 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                     translate([0,0,0])
                     rounded_rectangle(gridx*1000, gridy*1000, 5, r_f2);
             }
-    
+
     }
 }

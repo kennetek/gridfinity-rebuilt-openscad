@@ -15,7 +15,7 @@ distancex | { n>0 \| n∈R } | minimum length of baseplate along x <br>alternati
 distancey | { n>0 \| n∈R } | minimum length of baseplate along y <br>alternatively, how large is the drawer along y <br>(leave zero to ignore)
 fitx | { -1<=n<=1 \| n∈R } | alignment factor for extra space along x axis
 fity | { -1<=n<=1 \| n∈R } | alignment factor for extra space along y axis
-style_plate | { 0, 1, 2 } | the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed) 
+style_plate | { 0, 1, 2 } | the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed)
 enable_magnet | boolean | toggle hole for magnet on top
 style_hole | { 0, 1, 2 } | the style of holes underneath the baseplate, if applicable <br>     • (0) none <br>     • (1) countersink <br>     • (2) counterbore
 
@@ -23,7 +23,7 @@ style_hole | { 0, 1, 2 } | the style of holes underneath the baseplate, if appli
 
 ### gridfinityBaseplate
 
-Generates a baseplate to use with gridfinity bins. 
+Generates a baseplate to use with gridfinity bins.
 
 ** `gridfinityBaseplate(gridx, gridy, length, distancex, distancey, style_plate, enable_magnet, style_hole)` **
 
@@ -36,6 +36,6 @@ distancex | { n>0 \| n∈R } | minimum length of baseplate along x <br>alternati
 distancey | { n>0 \| n∈R } | minimum length of baseplate along y <br>alternatively, how large is the drawer along y <br>(leave zero to ignore)
 fitx | { -1<=n<=1 \| n∈R } | alignment factor for extra space along x axis
 fity | { -1<=n<=1 \| n∈R } | alignment factor for extra space along y axis
-style_plate | { 0, 1, 2 } | the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed) 
+style_plate | { 0, 1, 2 } | the style of baseplate <br>     • (0) thin (minimum material, only outline) <br>     • (1) weighted (thick with space for tire iron) <br>     • (2) skeletonized (thick, center hollowed)
 enable_magnet | boolean | toggle hole for magnet on top
 style_hole | { 0, 1, 2 } | the style of holes underneath the baseplate, if applicable <br>     • (0) none <br>     • (1) countersink <br>     • (2) counterbore

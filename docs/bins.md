@@ -1,6 +1,6 @@
 # gridfinity-rebuilt-bins
 
-Generates stock bins, with a great number of variations. 
+Generates stock bins, with a great number of variations.
 
 ![Bin](images/custom_dimension.gif)
 
@@ -8,13 +8,13 @@ Generates stock bins, with a great number of variations.
 
 Parameter | Range | Description
 --- | ----- | ---
-gridx | { n>0 \| n∈R } | number of bases along the x-axis  
-gridy | { n>0 \| n∈R } | number of bases along the y-axis  
-gridz | { n>0 \| n∈R } | bin height. See bin height information and "gridz_define" below.  
+gridx | { n>0 \| n∈R } | number of bases along the x-axis
+gridy | { n>0 \| n∈R } | number of bases along the y-axis
+gridz | { n>0 \| n∈R } | bin height. See bin height information and "gridz_define" below.
 length | { n>0 \| n∈R } | length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)
 divx | { n>0 \| n∈Z }  | number of compartments along X
 divy | { n>0 \| n∈Z }  | number of compartments along Y
-scoop | n>0 \| n∈R | controls the fillet on the bottom of the compartment for easy <br> item removal. 0 is disabled, 1 is full, any other real number will <br> scale from full. 
+scoop | n>0 \| n∈R | controls the fillet on the bottom of the compartment for easy <br> item removal. 0 is disabled, 1 is full, any other real number will <br> scale from full.
 enable_zsnap | boolean | automatically snap the bin size to the nearest 7mm increment. <br> default: true
 style_lip | {0, 1, 2} | if you are not stacking the bin, you can disable the top lip <br> to save space. <br>     • (0) Regular lip <br>     • (1) Subtract lip to save space <br>     • (2) Disable lip while retaining height
 gridz_define | { n>0 \| n∈R } | determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters
@@ -32,14 +32,14 @@ div_base_y | { n>=0 \| n∈Z } | number of divisions per 1 unit of base along th
 
 ### gridfinityInit
 
-Initializes the top part of the bin (walls and solid section). All bins have to use this module, and have the compartments cut out from it. 
+Initializes the top part of the bin (walls and solid section). All bins have to use this module, and have the compartments cut out from it.
 
 ** `gridfinityInit (gridx, gridy, height, height_internal, length)` **
 
 Parameter | Range | Description
 --- | ----- | ---
-gridx | { n>0 \| n∈R } | number of bases along the x-axis  
-gridy | { n>0 \| n∈R } | number of bases along the y-axis  
+gridx | { n>0 \| n∈R } | number of bases along the x-axis
+gridy | { n>0 \| n∈R } | number of bases along the y-axis
 height | { n>0 \| n∈R } | height of the bin, in millimeters (but not exactly). <br> See the `height()` function for more info.
 height_internal | { n>0 \| n∈R } | height of the internal block. <br> Can be lower than bin height to save filament on custom bins. <br> default of 0 means use the calculated height.
 length | { n>0 \| n∈R } | length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)
@@ -55,13 +55,13 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 
 ### height
 
-Calculates the proper height for bins. 
- 
+Calculates the proper height for bins.
+
 ** `height (gridz, gridz_define, style_lip, enable_zsnap)` **
 
 Parameter | Range | Description
 --- | ----- | ---
-gridz | { n>0 \| n∈R } | bin height. See bin height information and "gridz_define" below.  
+gridz | { n>0 \| n∈R } | bin height. See bin height information and "gridz_define" below.
 gridz_define | { n>0 \| n∈R } | determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in millimeters <br>     • (2) gridz is the overall external height of the bin in millimeters
 style_lip | {0, 1, 2} | if you are not stacking the bin, you can disable the top lip <br> to save space. <br>     • (0) Regular lip <br>     • (1) Subtract lip to save space <br>     • (2) Disable lip while retaining height
 enable_zsnap | boolean | automatically snap the bin size to the nearest 7mm increment. <br> default: true
@@ -71,12 +71,12 @@ enable_zsnap | boolean | automatically snap the bin size to the nearest 7mm incr
 height(6);
 
 // Example: height for a bin that can fit (at maximum) a 30mm high object inside
-height(30, 1, 0, false); 
+height(30, 1, 0, false);
 ```
 
 ---
 
-### gridfinityBase 
+### gridfinityBase
 
 Generates the bases for bins. Has various different hole styles, and can be subdivided.
 
@@ -84,8 +84,8 @@ Generates the bases for bins. Has various different hole styles, and can be subd
 
 Parameter | Range | Description
 --- | ----- | ---
-gridx | { n>0 \| n∈R } | number of bases along the x-axis  
-gridy | { n>0 \| n∈R } | number of bases along the y-axis 
+gridx | { n>0 \| n∈R } | number of bases along the x-axis
+gridy | { n>0 \| n∈R } | number of bases along the y-axis
 length | { n>0 \| n∈R } | length of one unit of the base. default: 42
 div_base_x | { n>=0 \| n∈Z } | number of divisions per 1 unit of base along the X axis. <br>(default 1, only use integers. 0 means automatically guess the division)
 div_base_y | { n>=0 \| n∈Z } | number of divisions per 1 unit of base along the Y axis. <br>(default 1, only use integers. 0 means automatically guess the division)
@@ -100,7 +100,7 @@ gridfinityBase(3, 3, 42, 0, 0, 1);
 
 ### cutEqual
 
-Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments. 
+Generates the "traditional" bin cutters. It is a utility function that creates evenly distributed compartments.
 
 ** `cutEqual (n_divx, n_divy, style_tab, scoop_weight)` **
 
@@ -137,8 +137,8 @@ s | n>0 \| n∈R | controls the fillet on the bottom of the compartment for easy
 
 ```
 // Example:
-// this cuts two compartments that are both 1 wide and 2 high. 
-// One is on the bottom left, and the other is at the top right. 
+// this cuts two compartments that are both 1 wide and 2 high.
+// One is on the bottom left, and the other is at the top right.
 gridfinityInit(3, 3, height(6), 0, 42) {
     cut(0, 0, 1, 2, 0, 1);
     cut(2, 1, 1, 2, 0, 1);

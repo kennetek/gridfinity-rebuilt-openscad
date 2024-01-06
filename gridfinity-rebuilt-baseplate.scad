@@ -17,9 +17,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 5;  
-// number of bases along y-axis   
-gridy = 5; 
+gridx = 5;
+// number of bases along y-axis
+gridy = 5;
 
 /* [Screw Together Settings - Defaults work for M3 and 4-40] */
 // screw diameter
@@ -50,7 +50,7 @@ fity = 0; // [-1:0.1:1]
 style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
 
 // enable magnet hole
-enable_magnet = true; 
+enable_magnet = true;
 
 // hole styles
 style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
@@ -59,19 +59,19 @@ style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 screw_together = (style_plate == 3 || style_plate == 4);
 
-color("tomato") 
+color("tomato")
 gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
 
 module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
-    
+
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
 
-    gx = gridx == 0 ? floor(dix/length) : gridx; 
-    gy = gridy == 0 ? floor(diy/length) : gridy; 
+    gx = gridx == 0 ? floor(dix/length) : gridx;
+    gy = gridy == 0 ? floor(diy/length) : gridy;
     dx = max(gx*length-bp_xy_clearence, dix);
     dy = max(gy*length-bp_xy_clearence, diy);
 
@@ -79,27 +79,27 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
 
     offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearence-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-bp_xy_clearence-diy)/2*fity*-1;
-    
+
     difference() {
         translate([offsetx,offsety,h_base])
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
-        
+
         gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
-        
+
         translate([offsetx,offsety,h_base-0.6])
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
-        
+
         pattern_linear(gx, gy, length) {
             render(convexity = 6) {
 
                 if (sp == 1)
                     translate([0,0,-off])
                     cutter_weight();
-                else if (sp == 2 || sp == 3) 
+                else if (sp == 2 || sp == 3)
                     linear_extrude(10*(h_base+off), center = true)
                     profile_skeleton();
-                else if (sp == 4) 
+                else if (sp == 4)
                     translate([0,0,-5*(h_base+off)])
                     rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
 
@@ -113,12 +113,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
                 }
             }
         }
-        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);    
+        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);
     }
 
 }
 
-function calculate_off(sp, sm, sh) = 
+function calculate_off(sp, sm, sh) =
     screw_together
         ? 6.75
         :sp==0
@@ -156,10 +156,10 @@ module hole_pattern(){
 }
 
 module cutter_countersink(){
-    cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);     
+    cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
     translate([0,0,d_cs])
     mirror([0,0,1])
-    hull() { 
+    hull() {
         cylinder(h = d_cs+10, r=r_hole1+d_clear);
         translate([0,0,d_cs])
         cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
@@ -171,14 +171,14 @@ module cutter_counterbore(){
     difference() {
         cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
         copy_mirror([0,1,0])
-        translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit]) 
+        translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit])
         cube([r_cb*3,r_cb*3, 10]);
     }
 }
 
 module profile_skeleton() {
-    l = l_grid-2*r_c2-2*r_c1; 
-    minkowski() { 
+    l = l_grid-2*r_c2-2*r_c1;
+    minkowski() {
         difference() {
             square([l-2*r_skel+2*d_clear,l-2*r_skel+2*d_clear], center = true);
             pattern_circular(4)
@@ -186,7 +186,7 @@ module profile_skeleton() {
             minkowski() {
                 square([l,l]);
                 circle(r_hole2+r_skel+2);
-           } 
+           }
         }
         circle(r_skel);
     }
@@ -197,7 +197,7 @@ module cutter_screw_together(gx, gy, off) {
     screw(gx, gy);
     rotate([0,0,90])
     screw(gy, gx);
-    
+
     module screw(a, b) {
         copy_mirror([1,0,0])
         translate([a*l_grid/2, 0, -off/2])
