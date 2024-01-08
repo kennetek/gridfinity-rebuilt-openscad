@@ -184,9 +184,7 @@ module block_base_solid(dbnx, dbny, l, o) {
 module block_base_hole(style_hole, o=0, chamfer=0.0) {
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
-
     hole_h = h_hole-o+(style_hole==3?h_slit:0);
-
     union() {
         difference() {
             cylinder(h = 2*(hole_h), r=r2, center=true);
