@@ -72,6 +72,8 @@ style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and 
 scoop = 1; //[0:0.1:1]
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
+// chamfer out magnet holes for easier magnet insertion
+chamfer_holes = true;
 
 /* [Base] */
 style_hole = 4; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit, 4: Gridfinity Refined hole - no glue needed]
@@ -96,7 +98,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners, chamfer_holes=chamfer_holes);
 }
 
 
