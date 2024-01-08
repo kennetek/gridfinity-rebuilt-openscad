@@ -113,7 +113,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false, chamfer_holes=false) {
+module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false, hole_chamfer=0.0) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -133,19 +133,19 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
         if(only_corners) {
                 difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-                block_base(gx, gy, l, dbnx, dbny, 0, off, chamfer_holes);
+                block_base(gx, gy, l, dbnx, dbny, 0, off, hole_chamfer);
                 pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
-                block_base_hole(style_hole, off, chamfer_holes);
+                block_base_hole(style_hole, off, hole_chamfer);
             }
         }
         else {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-            block_base(gx, gy, l, dbnx, dbny, style_hole, off, chamfer_holes);
+            block_base(gx, gy, l, dbnx, dbny, style_hole, off, hole_chamfer);
         }
     }
 }
 
-module block_base(gx, gy, l, dbnx, dbny, style_hole, off, chamfer_holes) {
+module block_base(gx, gy, l, dbnx, dbny, style_hole, off, hole_chamfer) {
     render(convexity = 2)
     difference() {
         block_base_solid(dbnx, dbny, l, off);
@@ -157,7 +157,7 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off, chamfer_holes) {
                 refined_hole();
             else
                 translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-                block_base_hole(style_hole, off, chamfer_holes);
+                block_base_hole(style_hole, off, hole_chamfer);
         }
 }
 
@@ -181,7 +181,7 @@ module block_base_solid(dbnx, dbny, l, o) {
     }
 }
 
-module block_base_hole(style_hole, o=0, chamfer=true) {
+module block_base_hole(style_hole, o=0, chamfer=0.0) {
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
 
@@ -199,10 +199,10 @@ module block_base_hole(style_hole, o=0, chamfer=true) {
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
         // generate an offset pyramid for a 0.4mm chamfer
-        if (chamfer)
+        if (chamfer>0)
         translate([0, 0, (hole_h-0.01)])
         difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r1 = r2 + 0.4, r2 = 0.0001, center=true);
+            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r1 = r2 + chamfer, r2 = 0.0001, center=true);
             translate([0, 0, (hole_h)/2])
             cylinder(h = hole_h, r=r2,center=true);
         }
