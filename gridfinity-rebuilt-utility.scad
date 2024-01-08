@@ -181,12 +181,15 @@ module block_base_solid(dbnx, dbny, l, o) {
     }
 }
 
-module block_base_hole(style_hole, o=0) {
+module block_base_hole(style_hole, o=0, chamfer=true) {
     r1 = r_hole1-o/2;
     r2 = r_hole2-o/2;
+
+    hole_h = h_hole-o+(style_hole==3?h_slit:0);
+
     union() {
         difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r=r2, center=true);
+            cylinder(h = 2*(hole_h), r=r2, center=true);
 
             if (style_hole==3)
             copy_mirror([0,1,0])
@@ -195,9 +198,16 @@ module block_base_hole(style_hole, o=0) {
         }
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
+        // generate an offset pyramid for a 0.4mm chamfer
+        if (chamfer)
+        translate([0, 0, (hole_h-0.01)])
+        difference() {
+            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r1 = r2 + 0.4, r2 = 0.0001, center=true);
+            translate([0, 0, (hole_h)/2])
+            cylinder(h = hole_h, r=r2,center=true);
+        }
     }
 }
-
 
 module refined_hole() {
     /**
