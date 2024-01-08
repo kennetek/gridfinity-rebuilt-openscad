@@ -196,7 +196,7 @@ module block_base_hole(style_hole, o=0, chamfer=0.0) {
         }
         if (style_hole > 1)
         cylinder(h = 2*h_base-o, r = r1, center=true);
-        // generate an offset pyramid for a 0.4mm chamfer
+        // generate an offset cone for a 0.4mm chamfer
         if (chamfer>0)
         translate([0, 0, (hole_h-0.01)])
         difference() {
