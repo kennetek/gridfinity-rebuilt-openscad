@@ -200,7 +200,7 @@ module block_base_hole(style_hole, o=0, chamfer=0.0) {
         if (chamfer>0)
         translate([0, 0, (hole_h-0.01)])
         difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r1 = r2 + chamfer, r2 = 0.0001, center=true);
+            cylinder(h = 2*hole_h, r1 = r2 + chamfer, r2 = 0.0001, center=true);
             translate([0, 0, (hole_h)/2])
             cylinder(h = hole_h, r=r2,center=true);
         }
