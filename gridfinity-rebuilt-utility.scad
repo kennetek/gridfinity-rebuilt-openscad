@@ -153,10 +153,10 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
         if (style_hole > 0)
             pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
             if (style_hole == 4)
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, h_slit*2])
+                translate([l*dbnx/2-d_hole_from_side, l*dbny/2-d_hole_from_side, h_slit*2])
                 refined_hole();
             else
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
+                translate([l*dbnx/2-d_hole_from_side, l*dbny/2-d_hole_from_side, 0])
                 block_base_hole(style_hole, off);
         }
 }
