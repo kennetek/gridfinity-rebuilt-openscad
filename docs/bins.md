@@ -43,6 +43,7 @@ gridy | { n>0 \| n∈R } | number of bases along the y-axis
 height | { n>0 \| n∈R } | height of the bin, in millimeters (but not exactly). <br> See the `height()` function for more info.
 height_internal | { n>0 \| n∈R } | height of the internal block. <br> Can be lower than bin height to save filament on custom bins. <br> default of 0 means use the calculated height.
 length | { n>0 \| n∈R } | length of one unit of the base. <br> default: 42 (The Answer to the Ultimate Question of Life, <br>the Universe, and Everything.)
+style_lip | {0, 1, 2} | if you are not stacking the bin, you can disable the top lip <br> to save space. <br>     • (0) Regular lip <br>     • (1) Subtract lip to save space <br>     • (2) Disable lip while retaining height
 
 ```
 // Example: generate a 3x3x6 bin with a 42mm unit size
