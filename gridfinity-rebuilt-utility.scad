@@ -140,11 +140,27 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
 
         if(only_corners) {
-                difference(){
+            difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
-                pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
-                block_base_hole(style_hole, off);
+                if (style_hole == 4) {
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    refined_hole();
+                    mirror([1, 0, 0])
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    refined_hole();
+                    mirror([0, 1, 0]) {
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        refined_hole();
+                        mirror([1, 0, 0])
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        refined_hole();
+                    }
+                }
+                else {
+                    pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
+                    block_base_hole(style_hole, off);
+                }
             }
         }
         else {
