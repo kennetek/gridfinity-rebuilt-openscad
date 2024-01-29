@@ -72,13 +72,13 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
 
     gx = gridx == 0 ? floor(dix/length) : gridx;
     gy = gridy == 0 ? floor(diy/length) : gridy;
-    dx = max(gx*length-bp_xy_clearence, dix);
-    dy = max(gy*length-bp_xy_clearence, diy);
+    dx = max(gx*length-bp_xy_clearance, dix);
+    dy = max(gy*length-bp_xy_clearance, diy);
 
     off = calculate_off(sp, sm, sh);
 
-    offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearence-dix)/2*fitx*-1;
-    offsety = diy < dy ? 0 : (gy*length-bp_xy_clearence-diy)/2*fity*-1;
+    offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearance-dix)/2*fitx*-1;
+    offsety = diy < dy ? 0 : (gy*length-bp_xy_clearance-diy)/2*fity*-1;
 
     difference() {
         translate([offsetx,offsety,h_base])
