@@ -66,7 +66,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
     union() {
         difference() {
             union() {
-                gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length)
+                gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length, sl=style_lip)
                 children();
                 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, only_corners=only_corners);
             }
@@ -89,7 +89,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                 }
 
                 translate([0,0,-4*h_base])
-                gridfinityInit(gridx, gridy, height(20,0), 0, length)
+                gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
                 children();
             }
 
@@ -100,7 +100,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                     difference() {
                         union() {
 
-                            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length)
+                            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length, sl=style_lip)
                             children();
                         }
 
@@ -120,7 +120,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
 
 
                             translate([0,0,-4*h_base])
-                            gridfinityInit(gridx, gridy, height(20,0), 0, length)
+                            gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
                             children();
                         }
 
