@@ -54,6 +54,8 @@ cd = 10;
 ch = 1;
 // spacing to lid
 c_depth = 1;
+// chamfer around the top rim of the holes
+c_chamfer = 0.5;
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
