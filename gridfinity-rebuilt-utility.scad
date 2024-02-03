@@ -22,6 +22,7 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
     cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
 }
 
+
 // Creates equally divided cylindrical cutouts
 //
 // n_divx: number of x cutouts
@@ -89,11 +90,44 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 //      0:full, 1:auto, 2:left, 3:center, 4:right, 5:none
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else.
 // s:   toggle the rounded back corner that allows for easy removal
+
+/*
 module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s);
 }
+*/
+module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
+    translate([0,0,-$dh-h_base])
+    cut_move(x,y,w,h)
+    block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);
+}
+
+
+// cuts equally sized bins over a given length at a specified position
+module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, style_tab=5, scoop=1, tab_width=d_tabw, tab_height=d_tabh) {
+    // Calculate width and height of each bin based on total length and number of bins
+    bin_width = len_x / bins_x;
+    bin_height = len_y / bins_y;
+    
+    // Loop through each bin position in x and y direction
+    for (i = [0:bins_x-1]) {
+        for (j = [0:bins_y-1]) {
+            // Calculate the starting position for each bin
+            // Adjust position by adding pos_x and pos_y to shift the entire grid of bins as needed
+            bin_start_x = pos_x + i * bin_width;
+            bin_start_y = pos_y + j * bin_height;
+            
+            // Call the cut module to create each bin with calculated position and dimensions
+            // Pass through the style_tab and scoop parameters
+            cut(bin_start_x, bin_start_y, bin_width, bin_height, style_tab, scoop, tab_width=tab_width, tab_height=tab_height);
+        }
+    }
+}
+
+
+
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
@@ -301,9 +335,9 @@ module cut_move_unsafe(x, y, w, h) {
     children();
 }
 
-module block_cutter(x,y,w,h,t,s) {
+module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
 
-    v_len_tab = d_tabh;
+    v_len_tab = tab_height;
     v_len_lip = d_wall2-d_wall+1.2;
     v_cut_tab = d_tabh - (2*r_f1)/tan(a_tab);
     v_cut_lip = d_wall2-d_wall-d_clear;
@@ -329,10 +363,10 @@ module block_cutter(x,y,w,h,t,s) {
     translate([0,ylen/2,h_base+h_bot])
     rotate([90,0,-90]) {
 
-    if (!zsmall && xlen - d_tabw > 4*r_f2 && (t != 0 && t != 5)) {
+    if (!zsmall && xlen - tab_width > 4*r_f2 && (t != 0 && t != 5)) {
         fillet_cutter(3,"bisque")
         difference() {
-            transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0)
+            transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0, tab_width)
             translate([ycutlast?v_cut_lip:0,0])
             profile_cutter(height-h_bot, ylen/2, s);
 
@@ -347,7 +381,7 @@ module block_cutter(x,y,w,h,t,s) {
         if (t != 0 && t != 5)
         fillet_cutter(2,"indigo")
         difference() {
-            transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0)
+            transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1)?v_cut_lip:0), tab_width)
             difference() {
                 intersection() {
                     profile_cutter(height-h_bot, ylen-extent, s);
@@ -416,12 +450,12 @@ module transform_main(xlen) {
     children();
 }
 
-module transform_tab(type, xlen, cut) {
+module transform_tab(type, xlen, cut, tab_width=d_tabw) {
     mirror([0,0,type==1?1:0])
     copy_mirror([0,0,-(abs(type)-1)])
     translate([0,0,-(xlen)/2])
     translate([0,0,r_f2])
-    linear_extrude((xlen-d_tabw-abs(cut))/(1-(abs(type)-1))-2*r_f2)
+    linear_extrude((xlen-tab_width-abs(cut))/(1-(abs(type)-1))-2*r_f2)
     children();
 }
 
