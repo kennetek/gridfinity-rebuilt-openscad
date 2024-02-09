@@ -67,7 +67,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
     color("tomato") {
     difference() {
         color("firebrick")
-        block_bottom(h0==0?$dh-0.1:h0, gx, gy, l);
+        block_bottom(h0==0 ? $dh-1.3 : h0, gx, gy, l);
         children();
     }
     color("royalblue")
