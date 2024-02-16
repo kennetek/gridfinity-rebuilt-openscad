@@ -119,7 +119,7 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
     // Calculate width and height of each bin based on total length and number of bins
     bin_width = len_x / bins_x;
     bin_height = len_y / bins_y;
-    
+
     // Loop through each bin position in x and y direction
     for (i = [0:bins_x-1]) {
         for (j = [0:bins_y-1]) {
@@ -127,7 +127,7 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
             // Adjust position by adding pos_x and pos_y to shift the entire grid of bins as needed
             bin_start_x = pos_x + i * bin_width;
             bin_start_y = pos_y + j * bin_height;
-            
+
             // Call the cut module to create each bin with calculated position and dimensions
             // Pass through the style_tab and scoop parameters
             cut(bin_start_x, bin_start_y, bin_width, bin_height, style_tab, scoop, tab_width=tab_width, tab_height=tab_height);
