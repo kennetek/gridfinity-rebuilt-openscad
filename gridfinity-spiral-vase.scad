@@ -216,7 +216,7 @@ module block_magnet_blank(o = 0, half = true) {
 module block_base_blank(o = 0) {
     mirror([0,0,1]) {
         hull() {
-            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3/2);
+            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3);
             rounded_square(l_grid-o-0.05-2*r_c2, h_base-r_c1, r_fo2/2);
         }
         hull() {
