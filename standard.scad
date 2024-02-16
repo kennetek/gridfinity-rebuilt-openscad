@@ -14,7 +14,7 @@ r_fo1 = 8.5;
 // outside radii 2
 r_fo2 = 3.2;
 // outside radii 3
-r_fo3 = 1.6;
+r_fo3 = 1.6 / 2;
 // length of a grid unit
 l_grid = 42;
 

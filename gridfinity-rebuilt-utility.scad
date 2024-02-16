@@ -228,7 +228,7 @@ module block_base_solid(dbnx, dbny, l, o) {
     mirror([0,0,1])
     union() {
         hull() {
-            rounded_rectangle(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3/2);
+            rounded_rectangle(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3);
             rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2/2);
         }
         translate([0,0,oo])
