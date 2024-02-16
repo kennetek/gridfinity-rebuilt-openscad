@@ -12,7 +12,7 @@ h_bot = 2.2;
 // outside radii 1
 r_fo1 = 8.5;
 // outside radii 2
-r_fo2 = 3.2;
+r_fo2 = 3.2 / 2;
 // outside radii 3
 r_fo3 = 1.6 / 2;
 // length of a grid unit
