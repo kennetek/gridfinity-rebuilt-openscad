@@ -97,13 +97,6 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else.
 // s:   toggle the rounded back corner that allows for easy removal
 
-/*
-module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
-    translate([0,0,-$dh-h_base])
-    cut_move(x,y,w,h)
-    block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s);
-}
-*/
 module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
@@ -112,6 +105,16 @@ module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
 
 
 // cuts equally sized bins over a given length at a specified position
+// bins_x:  number of bins along x-axis
+// bins_y:  number of bins along y-axis
+// len_x:   length (in gridfinity bases) along x-axis that the bins_x will fill
+// len_y:   length (in gridfinity bases) along y-axis that the bins_y will fill
+// pos_x:   start x position of the bins (left side)
+// pos_y:   start y position of the bins (bottom side)
+// style_tab:   Style of the tab used on the bins
+// scoop:   Weight of the scoop on the bottom of the bins
+// tab_width:   Width of the tab on the bins, in mm.
+// tab_height:  How far the tab will stick out over the bin, in mm. Default tabs fit 12mm labels, but for narrow bins can take up too much space over the opening. This setting allows 'slimmer' tabs for use with thinner labels, so smaller/narrower bins can be labeled and still keep a reasonable opening at the top. NOTE: The measurement is not 1:1 in mm, so a '3.5' value does not guarantee a tab that fits 3.5mm label tape. Use the 'measure' tool after rendering to check the distance between faces to guarantee it fits your needs.
 module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, style_tab=5, scoop=1, tab_width=d_tabw, tab_height=d_tabh) {
     // Calculate width and height of each bin based on total length and number of bins
     bin_width = len_x / bins_x;
@@ -131,9 +134,6 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
         }
     }
 }
-
-
-
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
@@ -361,7 +361,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
 
     v_len_tab = tab_height;
     v_len_lip = d_wall2-d_wall+1.2;
-    v_cut_tab = d_tabh - (2*r_f1)/tan(a_tab);
+    v_cut_tab = tab_height - (2*r_f1)/tan(a_tab);
     v_cut_lip = d_wall2-d_wall-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
