@@ -10,7 +10,7 @@ r_c2 = 2.4;
 // bottom thiccness of bin
 h_bot = 2.2;
 // outside radii 1
-r_fo1 = 8.5;
+r_fo1 = 7.5 / 2;
 // outside radii 2
 r_fo2 = 3.2 / 2;
 // outside radii 3

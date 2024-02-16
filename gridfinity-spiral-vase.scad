@@ -63,7 +63,6 @@ style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
 // tab angle
 a_tab = 40;
 
-
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
@@ -79,11 +78,13 @@ x_l = l_grid/2;
 dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+h_base : gridz-(enable_lip?3.8:0);
 d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-h_base;
 
+d_fo1 = 2*r_fo1;
+
 f2c = sqrt(2)*(sqrt(2)-1); // fillet to chamfer ratio
-me = ((gridx*l_grid-0.5)/n_divx)-nozzle*4-r_fo1-12.7-4;
+me = ((gridx*l_grid-0.5)/n_divx)-nozzle*4-d_fo1-12.7-4;
 m = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
 d_ramp = f2c*(l_grid*((d_height-2)/7+1)/12-r_f2)+d_wall2;
-d_edge = ((gridx*l_grid-0.5)/n_divx-d_tabw-r_fo1)/2;
+d_edge = ((gridx*l_grid-0.5)/n_divx-d_tabw-d_fo1)/2;
 n_st = gridz <= 3 ? 6 : d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab;
 
 n_x = (n_st==0?1:n_divx);
@@ -108,7 +109,7 @@ module gridfinityVase() {
 
                 if (n_st != 6)
                 transform_style()
-                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-r_fo1:d_tabw)-nozzle*4)
+                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
                 block_tab_base(-nozzle*sqrt(2));
             }
 
@@ -120,7 +121,7 @@ module gridfinityVase() {
             }
 
             if (enable_funnel && gridz > 3)
-            pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
+            pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-d_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
             transform_funnel()
             block_funnel_outside();
 
@@ -129,12 +130,12 @@ module gridfinityVase() {
             block_divider();
 
             if (n_divx < 1)
-            pattern_linear(n_st == 0 ? n_divx>1 ? n_divx-1 : gridx-1 : 1, 1, (gridx*l_grid-r_fo1)/((n_divx>1 ? n_divx : gridx)))
+            pattern_linear(n_st == 0 ? n_divx>1 ? n_divx-1 : gridx-1 : 1, 1, (gridx*l_grid-d_fo1)/((n_divx>1 ? n_divx : gridx)))
             block_tabsupport();
         }
 
         if (enable_funnel && gridz > 3)
-        pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-r_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
+        pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-d_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
         transform_funnel()
         block_funnel_inside();
 
@@ -160,7 +161,7 @@ module gridfinityBaseVase() {
         intersection() {
             block_base_blank(0);
             translate([0,0,-h_base-1])
-            rounded_rectangle(l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10, r_fo1/2+0.001);
+            rounded_rectangle(l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10, r_fo1+0.001);
         }
         translate([0,0,0.01])
         difference() {
@@ -222,7 +223,7 @@ module block_base_blank(o = 0) {
         hull() {
             rounded_square(l_grid-o-0.05-2*r_c2, r_c2, r_fo2);
             mirror([0,0,1])
-            rounded_square(l_grid-o-0.05, d_bottom, r_fo1/2);
+            rounded_square(l_grid-o-0.05, d_bottom, r_fo1);
         }
     }
 }
@@ -314,7 +315,7 @@ module block_divider() {
         // divider slices cut to tabs
         if (n_st == 0)
         transform_style()
-        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-r_fo1:d_tabw)-nozzle*4)
+        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
         block_tab_base(-nozzle*sqrt(2));
     }
 }
@@ -390,7 +391,7 @@ module block_vase_base() {
     translate([shiftauto(i,n_x)*d_edge + shift*d_edge,0,0])
     intersection() {
         block_vase();
-        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-r_fo1:d_tabw)
+        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)
         profile_tab();
     }
 }
@@ -430,7 +431,7 @@ module block_inset() {
 }
 
 module block_inset_sub(x, y, ang) {
-    translate([0,(gridy*l_grid-0.5)/2+r_fo1/2,0])
+    translate([0,(gridy*l_grid-0.5)/2+r_fo1,0])
     mirror([0,1,0])
     linear_extrude(y,center=true)
     polygon([[-x,0],[x,0],[0,x*tan(ang)]]);
@@ -449,7 +450,7 @@ module block_flushscoop() {
     linear_extrude(d_height)
     union() {
         copy_mirror([1,0,0])
-        polygon([[0,0],[gridx*l_grid/2-r_fo1/2,0],[gridx*l_grid/2-r_fo1/2,1],[gridx*l_grid/2-r_fo1/2-r_c1*5,d_wall2-nozzle*2+1],[0,d_wall2-nozzle*2+1]]);
+        polygon([[0,0],[gridx*l_grid/2-r_fo1,0],[gridx*l_grid/2-r_fo1,1],[gridx*l_grid/2-r_fo1-r_c1*5,d_wall2-nozzle*2+1],[0,d_wall2-nozzle*2+1]]);
     }
 
     transform_scoop()
@@ -483,7 +484,7 @@ module block_tabscoop(a=m, b=0, c=0, d=-1) {
 }
 
 module transform_vtab(a=0,b=1) {
-    transform_vtab_base(gridx*l_grid/b-0.5-r_fo1+a)
+    transform_vtab_base(gridx*l_grid/b-0.5-d_fo1+a)
     children();
 }
 

@@ -166,12 +166,12 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
 
     if (final_cut)
     translate([0,0,h_base])
-    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1/2+0.001);
+    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1+0.001);
 
     intersection(){
         if (final_cut)
         translate([0,0,-1])
-        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1/2+0.001);
+        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
 
         if(only_corners) {
             difference(){
@@ -235,7 +235,7 @@ module block_base_solid(dbnx, dbny, l, o) {
         hull() {
             rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2);
             mirror([0,0,1])
-            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1/2);
+            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1);
         }
     }
 }
