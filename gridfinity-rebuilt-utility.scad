@@ -258,6 +258,16 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
     }
 }
 
+/**
+ * @brief A single Gridfinity base.
+ * @param gx
+ * @param gy
+ * @param l
+ * @param dbnx
+ * @param dbny
+ * @param style_hole
+ * @param off
+ */
 module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
     render(convexity = 2)
     difference() {
@@ -274,6 +284,14 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
         }
 }
 
+/**
+ * @brief A gridfinity base with no holes.
+ * @details Used as the "base" with holes removed from it later.
+ * @param dbnx
+ * @param dbny
+ * @param l
+ * @param o
+ */
 module block_base_solid(dbnx, dbny, l, o) {
     xx = dbnx*l-0.05;
     yy = dbny*l-0.05;
