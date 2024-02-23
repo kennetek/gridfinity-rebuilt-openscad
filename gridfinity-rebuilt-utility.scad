@@ -1,13 +1,67 @@
-// UTILITY FILE, DO NOT EDIT
-// EDIT OTHER FILES IN REPO FOR RESULTS
+/**
+ * @file gridfinity-rebuilt-utility.scad
+ * @brief UTILITY FILE, DO NOT EDIT
+ *        EDIT OTHER FILES IN REPO FOR RESULTS
+ */
 
 include <standard.scad>
 
 // ===== User Modules ===== //
 
 // functions to convert gridz values to mm values
-function hf (z, d, l) = ((d==0)?z*7:(d==1)?h_bot+z+h_base:z-((l==1)?h_lip:0))+(l==2?h_lip:0);
-function height (z,d=0,l=0,s=true) = (s?((abs(hf(z,d,l))%7==0)?hf(z,d,l):hf(z,d,l)+7-abs(hf(z,d,l))%7):hf(z,d,l))-h_base;
+
+/**
+ * @Summary Convert a number from Gridfinity values to mm.
+ * @details Also can include lip when working with height values.
+ * @param gridfinityUnit Gridfinity is normally on a base 7 system.
+ * @param includeLipHeight Include the lip height as well.
+ * @returns The final value in mm.
+ */
+function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
+    gridfinityUnit*7 + (includeLipHeight ? h_lip : 0);
+
+/**
+ * @Summary Height in mm including fixed heights.
+ * @details Also can include lip when working with height values.
+ * @param mmHeight Height without other values.
+ * @param includeLipHeight Include the lip height as well.
+ * @returns The final value in mm.
+ */
+function includingFixedHeights(mmHeight, includeLipHeight = false) =
+    mmHeight + h_bot + h_base + (includeLipHeight ? h_lip : 0);
+
+/**
+ * @brief Three Functions in One. For height calculations.
+ * @param z Height value
+ * @param gridz_define As explained in gridfinity-rebuilt-bins.scad
+ * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
+ * @returns Height in mm
+ */
+function hf (z, gridz_define, style_lip) =
+        gridz_define==0 ? fromGridfinityUnits(z, style_lip==2) :
+        gridz_define==1 ? includingFixedHeights(z, style_lip==2) :
+        z + ( // Just use z (possibly adding/subtracting lip)
+            style_lip==1 ? -h_lip :
+            style_lip==2 ? h_lip : 0
+        )
+    ;
+
+/**
+ * @brief Calculates the proper height for bins. Three Functions in One.
+ * @param z Height value
+ * @param d gridz_define as explained in gridfinity-rebuilt-bins.scad
+ * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
+ * @param enable_zsnap Automatically snap the bin size to the nearest 7mm increment.
+ * @returns Height in mm
+ */
+function height (z,d=0,l=0,enable_zsnap=true) =
+    (
+    enable_zsnap ? (
+        (abs(hf(z,d,l))%7==0) ? hf(z,d,l) :
+        hf(z,d,l)+7-abs(hf(z,d,l))%7
+    )
+    :hf(z,d,l)
+    ) -h_base;
 
 // Creates equally divided cutters for the bin
 //
