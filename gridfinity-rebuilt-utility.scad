@@ -659,22 +659,133 @@ module pattern_circular(n=2) {
     children();
 }
 
-module sweep_rounded(w=10, h=10) {
-    union() pattern_circular(2) {
-        copy_mirror([1,0,0])
-        translate([w/2,h/2,0])
-        rotate_extrude(angle = 90, convexity = 4)
-        children();
+/**
+ * @brief Unity (no change) affine transformation matrix.
+ * @details For use with multmatrix transforms.
+ */
+unity_matrix = [
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+];
 
-        translate([w/2,0,0])
-        rotate([90,0,0])
-        linear_extrude(height = h, center = true)
-        children();
+/**
+ * @brief Get the magnitude of a 2d or 3d vector
+ * @param vector A 2d or 3d vectorm
+ * @returns Magnitude of the vector.
+ */
+ function vector_magnitude(vector) =
+    sqrt(vector.x^2 + vector.y^2 + (len(vector) == 3 ? vector.z^2 : 0));
 
-        rotate([0,0,90])
-        translate([h/2,0,0])
-        rotate([90,0,0])
-        linear_extrude(height = w, center = true)
-        children();
+/**
+ * @brief Convert a 2d or 3d vector into a unit vector
+ * @returns The unit vector.  Where total magnitude is 1.
+ */
+function vector_as_unit(vector) = vector / vector_magnitude(vector);
+
+/**
+ * @brief Convert a 2d vector into an angle.
+ * @details Just a wrapper around atan2.
+ * @param A 2d vectorm
+ * @returns Angle of the vector.
+ */
+function atanv(vector) = atan2(vector.y, vector.x);
+
+/**
+ * @brief Affine transformation matrix for 2d rotation on the X,Y plane.
+ * @param angle The angle to rotate things by
+ * @returns an Affine transformation matrix for use with `multmatrix()`
+ */
+function affine_rotation(angle) = [
+    [cos(angle), 0, sin(angle), 0],
+    [0, 1, 0, 0],
+    [-sin(angle), 0, cos(angle), 0],
+    [0, 0, 0, 1]
+];
+
+
+/**
+ * @brief Affine transformation matrix for 2d translation on the X,Y plane.
+ * @param vector 2d Vector to translate by.
+ * @returns an Affine transformation matrix for use with `multmatrix()`
+ */
+function affine_translation(vector) = [
+    [1, 0, 0, vector.y],
+    [0, 1, 0, 0],
+    [0, 0, 1, vector.x],
+    [0, 0, 0, 1]
+];
+
+/**
+ * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
+ *        Centered on origin.
+ */
+module sweep_rounded(width=10, length=10) {
+    half_width = width/2;
+    half_length = length/2;
+    path_points = [
+        [-half_width, half_length],  //Start
+        [half_width, half_length], // Over
+        [half_width, -half_length], //Down
+        [-half_width, -half_length], // Back over
+        [-half_width, half_length]  // Up to start
+    ];
+    path_vectors = [
+        path_points[1] - path_points[0],
+        path_points[2] - path_points[1],
+        path_points[3] - path_points[2],
+        path_points[4] - path_points[3],
+    ];
+    // These contain the translations, but not the rotations
+    // OpenSCAD requires this hacky for loop to get accumulate to work!
+    first_translation = affine_translation(path_points[0]);
+    affine_translations = concat([first_translation], [
+        for (i = 0, a = first_translation;
+            i < len(path_vectors);
+            a=a * affine_translation(path_vectors[i]), i=i+1)
+        a * affine_translation(path_vectors[i])
+    ]);
+    
+    // Affine matrix to rotate around X axis
+    rot_x = 90;
+    x_matrix = [
+        [1, 0, 0, 0],
+        [0, cos(rot_x), -sin(rot_x), 0],
+        [0, sin(rot_x), cos(rot_x), 0],
+        [0, 0, 0, 1]
+    ];
+    
+    // Affine matrix to rotate around Z axis
+    z_rot = 90;
+    z_matrix = [
+        [cos(z_rot), -sin(z_rot), 0, 0],
+        [sin(z_rot), cos(z_rot), 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ];
+
+    // Bring extrusion to the xy plane
+    affine_matrix = z_matrix * x_matrix;
+    
+    walls = [
+        for (i = [0 : len(path_vectors) - 1])
+        affine_matrix * affine_translations[i]
+        * affine_rotation(atanv(path_vectors[i]))
+    ];
+    
+    union()
+    {
+        for (i = [0 : len(walls) - 1]){
+            multmatrix(walls[i])
+            linear_extrude(vector_magnitude(path_vectors[i]))
+            children();
+            
+            // Rounded Corners
+            multmatrix(walls[i]
+                *x_matrix*x_matrix*x_matrix *z_matrix*z_matrix*z_matrix*z_matrix)
+            rotate_extrude(angle = 90, convexity = 4)
+            children();
+        }
     }
 }
