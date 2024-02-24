@@ -125,7 +125,6 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
     $dh = h;
     $dh0 = h0;
     $style_lip = sl;
-    color("tomato") {
     difference() {
         color("firebrick")
         block_bottom(h0==0?$dh-0.1:h0, gx, gy, l);
@@ -133,9 +132,8 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
     }
     color("royalblue")
     block_wall(gx, gy, l) {
-        if ($style_lip == 0) profile_wall();
-        else profile_wall2();
-    }
+        if ($style_lip == 0) profile_wall(h);
+        else profile_wall2(h);
     }
 }
 // Function to include in the custom() module to individually slice bins
@@ -362,51 +360,74 @@ module refined_hole() {
     }
 }
 
-module profile_wall_sub_sub() {
+/**
+ * @brief Stacking lip based on https://gridfinity.xyz/specification/
+ * @details Also includes a support base.
+ */
+module stacking_lip() {
+    // Technique: Descriptive constant names are useful, but can be unweildy.
+    // Use abbreviations if they are going to be re-used repeatedly in a small piece of code.
+    inner_slope = stacking_lip_inner_slope_height_mm;
+    wall_height = stacking_lip_wall_height_mm;
+
+    support_wall = stacking_lip_support_wall_height_mm;
+    s_total = stacking_lip_support_height_mm;
+
     polygon([
-        [0,0],
-        [d_wall/2,0],
-        [d_wall/2,$dh-1.2-d_wall2+d_wall/2],
-        [d_wall2-d_clear,$dh-1.2],
-        [d_wall2-d_clear,$dh+h_base],
-        [0,$dh+h_base]
+        [0, 0], // Inner tip
+        [inner_slope, inner_slope], // Go out 45 degrees
+        [inner_slope, inner_slope+wall_height], // Vertical increase
+        [stacking_lip_depth, stacking_lip_height], // Go out 45 degrees
+        [stacking_lip_depth, -s_total], // Down to support bottom
+        [0, -support_wall], // Up and in
+        [0, 0] // Close the shape. Tehcnically not needed.
     ]);
 }
 
-module profile_wall_sub() {
-    difference() {
-        profile_wall_sub_sub();
-        color("red")
-        offset(delta = d_clear)
-        translate([r_base-d_clear,$dh,0])
-        mirror([1,0,0])
-        profile_base();
+/**
+ * @brief Stacking lip with a rounded top.
+ */
+module stacking_lip_rounded_top() {
+    radius_center_y = h_lip - r_f1;
+
+    union() {
+        // Create rounded top
+        intersection() {
+            translate([0, radius_center_y, 0])
+            square([stacking_lip_depth, stacking_lip_height]);
+            offset(r = r_f1)
+            offset(delta = -r_f1)
+            stacking_lip();
+        }
+        // Remove pointed top
+        difference(){
+            stacking_lip();
+            translate([0, radius_center_y, 0])
+            square([stacking_lip_depth*2, stacking_lip_height*2]);
+        }
     }
 }
 
-module profile_wall() {
-    translate([r_base,0,0])
-    mirror([1,0,0])
-    difference() {
-        profile_wall_sub();
-        difference() {
-            translate([0, $dh+h_base-d_clear*sqrt(2), 0])
-            circle(r_base/2);
-            offset(r = r_f1)
-            offset(delta = -r_f1)
-            profile_wall_sub();
-        }
-        // remove any negtive geometry in edge cases
-        mirror([0,1,0])
-        square(100*l_grid);
+/**
+ * @brief External wall profile, with a stacking lip.
+ * @details The "1.4" constant is to match old behavior.
+ */
+module profile_wall(height_mm) {
+    assert(is_num(height_mm))
+    translate([1.4, 0, 0]){
+        translate([0, height_mm, 0])
+        stacking_lip_rounded_top();
+        translate([stacking_lip_depth-d_wall/2, 0, 0])
+        square([d_wall/2, height_mm]);
     }
 }
 
 // lipless profile
-module profile_wall2() {
+module profile_wall2(height_mm) {
+    assert(is_num(height_mm))
     translate([r_base,0,0])
     mirror([1,0,0])
-    square([d_wall,$dh]);
+    square([d_wall, height_mm]);
 }
 
 module block_wall(gx, gy, l) {
