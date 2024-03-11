@@ -55,6 +55,25 @@ h_lip = 3.548;
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div;
 
+// Stacking Lip
+// Based on https://gridfinity.xyz/specification/
+stacking_lip_inner_slope_height_mm = 0.7;
+stacking_lip_wall_height_mm = 1.8;
+stacking_lip_outer_slope_height_mm = 1.9;
+stacking_lip_depth =
+    stacking_lip_inner_slope_height_mm +
+    stacking_lip_outer_slope_height_mm;
+stacking_lip_height =
+    stacking_lip_inner_slope_height_mm +
+    stacking_lip_wall_height_mm +
+    stacking_lip_outer_slope_height_mm;
+
+// Extracted from `profile_wall_sub_sub`.
+stacking_lip_support_wall_height_mm = 1.2;
+stacking_lip_support_height_mm =
+    stacking_lip_support_wall_height_mm + d_wall2;
+
+
 // Baseplate constants
 
 // Baseplate bottom part height (part added with weigthed=true)
