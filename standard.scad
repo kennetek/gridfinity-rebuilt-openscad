@@ -1,8 +1,6 @@
 
 // height of the base
 h_base = 5;
-// outside rounded radius of bin
-r_base = 4;
 // lower base chamfer "radius"
 r_c1 = 0.8;
 // upper base chamfer "radius"
@@ -17,6 +15,11 @@ r_fo2 = 3.2 / 2;
 r_fo3 = 1.6 / 2;
 // length of a grid unit
 l_grid = 42;
+
+
+// Outside rounded radius of bin
+// Per spec, matches radius of upper base section.
+r_base = r_fo1;
 
 // screw hole radius
 r_hole1 = 1.5;
