@@ -412,11 +412,11 @@ module stacking_lip_chamfered() {
 
 /**
  * @brief External wall profile, with a stacking lip.
- * @details The "1.4" constant is to match old behavior.
+ * @details Translated so a 90 degree rotation produces the expected outside radius.
  */
 module profile_wall(height_mm) {
     assert(is_num(height_mm))
-    translate([1.4, 0, 0]){
+    translate([r_base - stacking_lip_depth, 0, 0]){
         translate([0, height_mm, 0])
         stacking_lip_chamfered();
         translate([stacking_lip_depth-d_wall/2, 0, 0])
