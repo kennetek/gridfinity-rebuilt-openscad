@@ -385,9 +385,11 @@ module stacking_lip() {
 }
 
 /**
- * @brief Stacking lip with a rounded top.
+ * @brief Stacking lip with a with a chamfered (rounded) top.
+ * @details Based on https://gridfinity.xyz/specification/
+ *          Also includes a support base.
  */
-module stacking_lip_rounded_top() {
+module stacking_lip_chamfered() {
     radius_center_y = h_lip - r_f1;
 
     union() {
@@ -416,7 +418,7 @@ module profile_wall(height_mm) {
     assert(is_num(height_mm))
     translate([1.4, 0, 0]){
         translate([0, height_mm, 0])
-        stacking_lip_rounded_top();
+        stacking_lip_chamfered();
         translate([stacking_lip_depth-d_wall/2, 0, 0])
         square([d_wall/2, height_mm]);
     }
