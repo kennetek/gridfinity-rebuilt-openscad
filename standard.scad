@@ -1,8 +1,6 @@
 
 // height of the base
 h_base = 5;
-// outside rounded radius of bin
-r_base = 4;
 // lower base chamfer "radius"
 r_c1 = 0.8;
 // upper base chamfer "radius"
@@ -17,6 +15,11 @@ r_fo2 = 3.2 / 2;
 r_fo3 = 1.6 / 2;
 // length of a grid unit
 l_grid = 42;
+
+
+// Outside rounded radius of bin
+// Per spec, matches radius of upper base section.
+r_base = r_fo1;
 
 // screw hole radius
 r_hole1 = 1.5;
@@ -54,6 +57,25 @@ h_lip = 3.548;
 
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div;
+
+// Stacking Lip
+// Based on https://gridfinity.xyz/specification/
+stacking_lip_inner_slope_height_mm = 0.7;
+stacking_lip_wall_height_mm = 1.8;
+stacking_lip_outer_slope_height_mm = 1.9;
+stacking_lip_depth =
+    stacking_lip_inner_slope_height_mm +
+    stacking_lip_outer_slope_height_mm;
+stacking_lip_height =
+    stacking_lip_inner_slope_height_mm +
+    stacking_lip_wall_height_mm +
+    stacking_lip_outer_slope_height_mm;
+
+// Extracted from `profile_wall_sub_sub`.
+stacking_lip_support_wall_height_mm = 1.2;
+stacking_lip_support_height_mm =
+    stacking_lip_support_wall_height_mm + d_wall2;
+
 
 // Baseplate constants
 
