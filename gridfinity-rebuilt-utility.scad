@@ -5,6 +5,7 @@
  */
 
 include <standard.scad>
+use <generic-helpers.scad>
 
 // ===== User Modules ===== //
 
@@ -622,61 +623,4 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
 
-}
-
-// ==== Utilities =====
-
-function clp(x,a,b) = min(max(x,a),b);
-
-module rounded_rectangle(length, width, height, rad) {
-    linear_extrude(height)
-    offset(rad)
-    offset(-rad)
-    square([length,width], center = true);
-}
-
-module rounded_square(length, height, rad) {
-    rounded_rectangle(length, length, height, rad);
-}
-
-module copy_mirror(vec=[0,1,0]) {
-    children();
-    if (vec != [0,0,0])
-    mirror(vec)
-    children();
-}
-
-module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
-    yy = sy <= 0 ? sx : sy;
-    translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
-    for (i = [1:ceil(x)])
-    for (j = [1:ceil(y)])
-    translate([(i-1)*sx,(j-1)*yy,0])
-    children();
-}
-
-module pattern_circular(n=2) {
-    for (i = [1:n])
-    rotate(i*360/n)
-    children();
-}
-
-module sweep_rounded(w=10, h=10) {
-    union() pattern_circular(2) {
-        copy_mirror([1,0,0])
-        translate([w/2,h/2,0])
-        rotate_extrude(angle = 90, convexity = 4)
-        children();
-
-        translate([w/2,0,0])
-        rotate([90,0,0])
-        linear_extrude(height = h, center = true)
-        children();
-
-        rotate([0,0,90])
-        translate([h/2,0,0])
-        rotate([90,0,0])
-        linear_extrude(height = w, center = true)
-        children();
-    }
 }
