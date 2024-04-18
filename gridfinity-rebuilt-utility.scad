@@ -225,7 +225,7 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
         translate([0,0,-1])
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
 
-        if(only_corners) {
+        if((style_hole != 0) && (only_corners)) {
             difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
