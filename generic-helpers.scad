@@ -144,26 +144,8 @@ module sweep_rounded(width=10, length=10) {
         a * affine_translate([path_vectors[i].y, 0, path_vectors[i].x])
     ]);
 
-    // Affine matrix to rotate around X axis
-    rot_x = 90;
-    x_matrix = [
-        [1, 0, 0, 0],
-        [0, cos(rot_x), -sin(rot_x), 0],
-        [0, sin(rot_x), cos(rot_x), 0],
-        [0, 0, 0, 1]
-    ];
-
-    // Affine matrix to rotate around Z axis
-    z_rot = 90;
-    z_matrix = [
-        [cos(z_rot), -sin(z_rot), 0, 0],
-        [sin(z_rot), cos(z_rot), 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-    ];
-
     // Bring extrusion to the xy plane
-    affine_matrix = z_matrix * x_matrix;
+    affine_matrix = affine_rotate([90, 0, 90]);
 
     walls = [
         for (i = [0 : len(path_vectors) - 1])
@@ -179,8 +161,7 @@ module sweep_rounded(width=10, length=10) {
             children();
 
             // Rounded Corners
-            multmatrix(walls[i]
-                *x_matrix*x_matrix*x_matrix *z_matrix*z_matrix*z_matrix*z_matrix)
+            multmatrix(walls[i] * affine_rotate([-90, 0, 0]))
             rotate_extrude(angle = 90, convexity = 4)
             children();
         }
