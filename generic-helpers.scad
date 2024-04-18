@@ -103,14 +103,14 @@ function affine_rotate(angle_vector) =
     _affine_rotate_z(angle_vector.z) * _affine_rotate_y(angle_vector.y) * _affine_rotate_x(angle_vector.x);
 
 /**
- * @brief Affine transformation matrix for 2d translation on the X,Y plane.
- * @param vector 2d Vector to translate by.
- * @returns an Affine transformation matrix for use with `multmatrix()`
+ * @brief Affine transformation matrix equivalent of `translate`
+ * @param vector @see `translate`
+ * @returns An affine transformation matrix for use with `multmatrix()`
  */
-function affine_translation(vector) = [
-    [1, 0, 0, vector.y],
-    [0, 1, 0, 0],
-    [0, 0, 1, vector.x],
+function affine_translate(vector) = [
+    [1, 0, 0, vector.x],
+    [0, 1, 0, vector.y],
+    [0, 0, 1, vector.z],
     [0, 0, 0, 1]
 ];
 
@@ -136,12 +136,12 @@ module sweep_rounded(width=10, length=10) {
     ];
     // These contain the translations, but not the rotations
     // OpenSCAD requires this hacky for loop to get accumulate to work!
-    first_translation = affine_translation(path_points[0]);
+    first_translation = affine_translate([path_points[0].y, 0,path_points[0].x]);
     affine_translations = concat([first_translation], [
         for (i = 0, a = first_translation;
             i < len(path_vectors);
-            a=a * affine_translation(path_vectors[i]), i=i+1)
-        a * affine_translation(path_vectors[i])
+            a=a * affine_translate([path_vectors[i].y, 0, path_vectors[i].x]), i=i+1)
+        a * affine_translate([path_vectors[i].y, 0, path_vectors[i].x])
     ]);
 
     // Affine matrix to rotate around X axis
