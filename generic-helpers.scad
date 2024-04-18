@@ -71,18 +71,36 @@ function vector_as_unit(vector) = vector / vector_magnitude(vector);
  */
 function atanv(vector) = atan2(vector.y, vector.x);
 
-/**
- * @brief Affine transformation matrix for 2d rotation on the X,Y plane.
- * @param angle The angle to rotate things by
- * @returns an Affine transformation matrix for use with `multmatrix()`
- */
-function affine_rotation(angle) = [
-    [cos(angle), 0, sin(angle), 0],
-    [0, 1, 0, 0],
-    [-sin(angle), 0, cos(angle), 0],
+function _affine_rotate_x(angle_x) = [
+    [1,  0, 0, 0],
+    [0, cos(angle_x), -sin(angle_x), 0],
+    [0, sin(angle_x), cos(angle_x), 0],
     [0, 0, 0, 1]
 ];
 
+function _affine_rotate_y(angle_y) = [
+    [cos(angle_y),  0, sin(angle_y), 0],
+    [0, 1, 0, 0],
+    [-sin(angle_y), 0, cos(angle_y), 0],
+    [0, 0, 0, 1]
+];
+
+function _affine_rotate_z(angle_z) = [
+    [cos(angle_z), -sin(angle_z), 0, 0],
+    [sin(angle_z), cos(angle_z), 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1]
+];
+
+
+/**
+ * @brief Affine transformation matrix equivalent of `rotate`
+ * @param angle_vector @see `rotate`
+ * @details Equivalent to `rotate([0, angle, 0])`
+ * @returns An affine transformation matrix for use with `multmatrix()`
+ */
+function affine_rotate(angle_vector) =
+    _affine_rotate_z(angle_vector.z) * _affine_rotate_y(angle_vector.y) * _affine_rotate_x(angle_vector.x);
 
 /**
  * @brief Affine transformation matrix for 2d translation on the X,Y plane.
@@ -150,7 +168,7 @@ module sweep_rounded(width=10, length=10) {
     walls = [
         for (i = [0 : len(path_vectors) - 1])
         affine_matrix * affine_translations[i]
-        * affine_rotation(atanv(path_vectors[i]))
+        * affine_rotate([0, atanv(path_vectors[i]), 0])
     ];
 
     union()
