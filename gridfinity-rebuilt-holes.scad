@@ -7,6 +7,70 @@ include <standard.scad>
 use <generic-helpers.scad>
 
 /**
+ * @brief Wave generation function for wrapping a circle.
+ * @param t An angle of the circle.  Between 0 and 360 degrees.
+ * @param count The number of **full** waves in a 360 degree circle.
+ * @param range **Half** the difference between minimum and maximum values.
+ * @param vertical_offset A simple offset.
+ * @details
+ *    If plotted on an x/y graph this produces a standard sin wave.
+ *    Range only seems weird because it describes half a wave.
+ *    Mapped by doing [sin(t), cost(t)] * wave_function(...).
+ *    When wrapping a circle:
+ *      Final Outer radius is (wave_vertical_offset + wave_range).
+ *      Final Inner radius is (wave_vertical_offset - wave_range).
+ */
+function wave_function(t, count, range, vertical_offset) =
+    (sin(t * count) * range) + vertical_offset;
+
+/**
+ * @brief A circle with crush ribs to give a tighter press fit.
+ * @details Extrude and use as a negative modifier.
+ *          Idea based on Slant3D's video at 5:20 https://youtu.be/Bd7Yyn61XWQ?t=320
+ *          Implementaiton is completely different.
+ *          Important: Lower ribs numbers just result in a deformed circle.
+ * @param outer_radius Final outer radius.
+ * @param inner_radius Final inner radius.
+ * @param ribs Number of crush ribs the circle has.
+**/
+module ribbed_circle(outer_radius, inner_radius, ribs) {
+    assert(outer_radius > 0, "outer_radius must be positive");
+    assert(inner_radius > 0, "inner_radius must be positive");
+    assert(ribs > 0, "ribs must be positive");
+    assert(outer_radius > inner_radius, "outer_radius must be larger than inner_radius");
+
+    wave_range = (outer_radius - inner_radius) / 2;
+    wave_vertical_offset = inner_radius + wave_range;
+
+    // Circe with a wave wrapped around it
+    wrapped_circle = [ for (i = [0:360])
+        [sin(i), cos(i)] * wave_function(i, ribs, wave_range, wave_vertical_offset)
+    ];
+
+    polygon(wrapped_circle);
+}
+
+
+/**
+ * @brief A cylinder with crush ribs to give a tighter press fit.
+ * @details To be used as the negative for a hole.
+ * @see ribbed_circle
+ * @param outer_radius Outer Radius of the crush ribs.
+ * @param inner_radius Inner Radius of the crush ribs.
+ * @param height Cylinder's height.
+ * @param ribs Number of crush ribs.
+ */
+module ribbed_cylinder(outer_radius, inner_radius, height, ribs) {
+    assert(height > 0, "height must be positive");
+    linear_extrude(height)
+    ribbed_circle(
+        outer_radius,
+        inner_radius,
+        ribs
+    );
+}
+
+/**
  * @brief Make a magnet hole printable without suports.
  * @see https://www.youtube.com/watch?v=W8FbHTcB05w
  * @param screw_radius Radius of the screw hole.
@@ -84,11 +148,11 @@ module block_base_hole(hole_options, o=0) {
     if(refined_hole) {
         assert(!magnet_hole, "magnet_hole is not compatible with refined_hole");
     }
-    assert(crush_ribs == false && chamfer == false, "crush_ribs and chamfer are not supported yet");
+    assert(chamfer == false, "chamfer is not supported yet");
 
     screw_radius = SCREW_HOLE_RADIUS - (o/2);
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
-//    magnet_inner_radius =  // Not Implemented Yet
+    magnet_inner_radius = MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS - (o/2);
     screw_depth = h_base-o;
     // If using supportless / printable mode, need to add an additional layer, so it can be removed later
     magnet_depth = MAGNET_HOLE_DEPTH - o + (supportless ? LAYER_HEIGHT : 0);
@@ -101,7 +165,7 @@ module block_base_hole(hole_options, o=0) {
         if(magnet_hole) {
             difference() {
                 if(crush_ribs) {
-                    // Not Implemented Yet
+                    ribbed_cylinder(magnet_radius, magnet_inner_radius, magnet_depth, MAGNET_HOLE_CRUSH_RIB_COUNT);
                 } else {
                     cylinder(h = magnet_depth, r=magnet_radius);
                 }

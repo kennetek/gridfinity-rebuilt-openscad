@@ -43,6 +43,13 @@ REFINED_HOLE_HEIGHT = MAGNET_HEIGHT - 0.1;
 // How many layers are between a Gridfinity Refined Hole and the bottom
 REFINED_HOLE_BOTTOM_LAYERS = 2;
 
+// Experimentally chosen for a press fit.
+MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS = 5.9 / 2;
+// Mostly arbitrarily chosen.
+// 30 ribs does not print with a 0.4mm nozzle.
+// Anything 5 or under produces a hole that is not round.
+MAGNET_HOLE_CRUSH_RIB_COUNT = 8;
+
 // ****************************************
 
 // top edge fillet radius
