@@ -70,19 +70,53 @@ module ribbed_cylinder(outer_radius, inner_radius, height, ribs) {
     );
 }
 
+
 /**
- * @brief Make a magnet hole printable without suports.
+ * @brief Make a hole printable without suports.
  * @see https://www.youtube.com/watch?v=W8FbHTcB05w
- * @param screw_radius Radius of the screw hole.
- * @param magnet_radius Radius of the magnet hole.
- * @param magnet_depth Depth of the magnet hole.
+ * @param inner_radius Radius of the inner hole.
+ * @param outer_radius Radius of the outer hole.
+ * @param outer_depth Depth of the magnet hole.
  * @details This is the negative designed to be cut out of the magnet hole.
  *          Use it with `difference()`.
  */
-module make_magnet_hole_printable(screw_radius, magnet_radius, magnet_depth) {
-    copy_mirror([0,1,0]) {
-        translate([-1.5*magnet_radius, screw_radius+0.1, magnet_depth - LAYER_HEIGHT])
-        cube([magnet_radius*3, magnet_radius*3, 10]);
+module make_hole_printable(inner_radius, outer_radius, outer_depth) {
+    assert(inner_radius > 0, "inner_radius must be positive");
+    assert(outer_radius > 0, "outer_radius must be positive");
+    assert(outer_depth > 2*LAYER_HEIGHT, str("outer_depth must be at least ", 2*LAYER_HEIGHT));
+    tollerance = 0.001;  // To make sure the top layer is fully removed
+
+    translation_matrix = affine_translate([
+        -outer_radius,
+        inner_radius,
+        outer_depth - 2*LAYER_HEIGHT
+    ]);
+    second_translation_matrix = translation_matrix * affine_translate([0, 0, LAYER_HEIGHT]);
+
+    cube_dimensions = [
+        outer_radius*2,
+        outer_radius - inner_radius,
+        LAYER_HEIGHT + tollerance
+    ];
+
+    union(){
+        union() {
+            multmatrix(translation_matrix)
+            cube(cube_dimensions);
+            multmatrix(affine_rotate([0, 0, 180]) * translation_matrix)
+            cube(cube_dimensions);
+        }
+        //2nd level
+        union() {
+            multmatrix(second_translation_matrix)
+            cube(cube_dimensions);
+            multmatrix(affine_rotate([0, 0, 90]) * second_translation_matrix)
+            cube(cube_dimensions);
+            multmatrix(affine_rotate([0, 0, 180]) * second_translation_matrix)
+            cube(cube_dimensions);
+            multmatrix(affine_rotate([0, 0, 270]) * second_translation_matrix)
+            cube(cube_dimensions);
+        }
     }
 }
 
@@ -175,8 +209,10 @@ module block_base_hole(hole_options, o=0) {
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
     magnet_inner_radius = MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS - (o/2);
     screw_depth = h_base-o;
-    // If using supportless / printable mode, need to add an additional layer, so it can be removed later
-    magnet_depth = MAGNET_HOLE_DEPTH - o + (supportless ? LAYER_HEIGHT : 0);
+    // If using supportless / printable mode, need to add two additional layers, so they can be removed later.
+    supportless_additional_depth = 2* LAYER_HEIGHT;
+    magnet_depth = MAGNET_HOLE_DEPTH - o +
+        (supportless ? supportless_additional_depth : 0);
 
     union() {
         if(refined_hole) {
@@ -192,7 +228,7 @@ module block_base_hole(hole_options, o=0) {
                 }
 
                 if(supportless) {
-                    make_magnet_hole_printable(screw_radius, magnet_radius, magnet_depth);
+                    make_hole_printable(screw_radius, magnet_radius, magnet_depth);
                 }
             }
 
