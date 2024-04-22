@@ -50,6 +50,9 @@ MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS = 5.9 / 2;
 // Anything 5 or under produces a hole that is not round.
 MAGNET_HOLE_CRUSH_RIB_COUNT = 8;
 
+MAGNET_HOLE_CHAMFER_ADDITIONAL_RADIUS = 0.8;
+MAGNET_HOLE_CHAMFER_ANGLE = 45;
+
 // ****************************************
 
 // top edge fillet radius
