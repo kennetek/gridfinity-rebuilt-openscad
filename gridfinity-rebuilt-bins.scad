@@ -72,17 +72,30 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
 scoop = 1; //[0:0.1:1]
-// only cut magnet/screw holes at the corners of the bin to save uneccesary print time
-only_corners = false;
 
 /* [Base] */
-style_hole = 4; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit, 4: Gridfinity Refined hole - no glue needed]
 // number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0;
 
+/* [Base Hole Options] */
+// only cut magnet/screw holes at the corners of the bin to save uneccesary print time
+only_corners = false;
+//Use gridfinity refined hole style. Not compatible with magnet_holes!
+refined_hole = true;
+// Base will have holes for 6mm Diameter x 2mm high magnets.
+magnet_holes = false;
+// Base will have holes for M3 screws.
+screw_holes = false;
+// Magnet holes will have crush ribs to hold the magnet.
+crush_ribs = false;
+// Magnet holes will have a chamfer to ease insertion.
+chamfer_magnet_holes = false;
+// Allows printing screw holes with magnet holes without using supports.
+printable_magnet_hole_top = false;
 
+hole_options = bundle_hole_options(refined_hole, magnet_holes, screw_holes, crush_ribs, chamfer_magnet_holes, printable_magnet_hole_top);
 
 // ===== IMPLEMENTATION ===== //
 
@@ -98,7 +111,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners);
 }
 
 

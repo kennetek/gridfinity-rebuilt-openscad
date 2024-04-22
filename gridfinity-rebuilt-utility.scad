@@ -210,7 +210,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, l, dx, dy, hole_options, off=0, final_cut=true, only_corners=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -239,14 +239,14 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
                             (gy/2) * l_grid - d_hole_from_side,
                             0
                         ])
-                        block_base_hole(style_hole, off);
+                        block_base_hole(hole_options, off);
                     }
                 }
             }
         }
         else {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-            block_base(gx, gy, l, dbnx, dbny, style_hole, off);
+            block_base(gx, gy, l, dbnx, dbny, hole_options, off);
         }
     }
 }
@@ -258,17 +258,17 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
  * @param l
  * @param dbnx
  * @param dbny
- * @param style_hole @see block_base_hole.style_hole
+ * @param hole_options @see block_base_hole.hole_options
  * @param off
  */
-module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
+module block_base(gx, gy, l, dbnx, dbny, hole_options, off) {
     render(convexity = 2)
     difference() {
         block_base_solid(dbnx, dbny, l, off);
 
         pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
         translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-        block_base_hole(style_hole, off);
+        block_base_hole(hole_options, off);
     }
 }
 

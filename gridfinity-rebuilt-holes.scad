@@ -7,6 +7,22 @@ include <standard.scad>
 use <generic-helpers.scad>
 
 /**
+ * @brief Make a magnet hole printable without suports.
+ * @see https://www.youtube.com/watch?v=W8FbHTcB05w
+ * @param screw_radius Radius of the screw hole.
+ * @param magnet_radius Radius of the magnet hole.
+ * @param magnet_depth Depth of the magnet hole.
+ * @details This is the negative designed to be cut out of the magnet hole.
+ *          Use it with `difference()`.
+ */
+module make_magnet_hole_printable(screw_radius, magnet_radius, magnet_depth) {
+    copy_mirror([0,1,0]) {
+        translate([-1.5*magnet_radius, screw_radius+0.1, magnet_depth - LAYER_HEIGHT])
+        cube([magnet_radius*3, magnet_radius*3, 10]);
+    }
+}
+
+/**
 * @brief Refined hole based on Printables @grizzie17's Gridfinity Refined
 * @details Magnet is pushed in from +X direction, and held in by friction.
 *          Small slit on the bottom allows removing the magnet.
@@ -38,25 +54,37 @@ module refined_hole() {
 }
 
 /**
- * @brief A single magnet/screw hole.  To be cut out of the base.
- * @pram style_hole Determines the type of hole that will be generated.
- * @param o Offset
- * @details
- *      - 0: No holes. Does nothing.
- *      - 1: Magnet holes only
- *      - 2: Magnet and screw holes - no printable slit.
- *      - 3: Magnet and screw holes - printable slit.
- *      - 4: Gridfinity Refined hole - no glue needed.
+ * @brief Create an options list used to configure bin holes.
+ * @param refined_hole Use gridfinity refined hole type.  Not compatible with "magnet_hole".
+ * @param magnet_hole Create a hole for a 6mm magnet.
+ * @param screw_hole Create a hole for a M3 screw.
+ * @param crush_ribs If the magnet hole should have crush ribs for a press fit.
+ * @param chamfer Add a chamfer to the magnet hole.
+ * @param supportless If the magnet hole should be printed in such a way that the screw hole does not require supports.
  */
-module block_base_hole(style_hole, o=0) {
-    assert(style_hole >= 0 && style_hole <= 4, "Unhandled Hole Style");
+function bundle_hole_options(refined_hole=true, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
+    [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];
 
-    refined_hole = style_hole == 4;
-    magnet_hole = style_hole == 1 || style_hole == 2 || style_hole == 3;
-    screw_hole = style_hole == 2 || style_hole == 3;
-    crush_ribs = false; // Not Implemented Yet
-    chamfer = false;  // Not Implemented Yet
-    supportless = style_hole==3;
+/**
+ * @brief A single magnet/screw hole.  To be cut out of the base.
+ * @details Supports multiple options that can be mixed and matched.
+ * @pram hole_options @see bundle_hole_options
+ * @param o Offset
+ */
+module block_base_hole(hole_options, o=0) {
+    // Destructure the options
+    refined_hole = hole_options[0];
+    magnet_hole = hole_options[1];
+    screw_hole = hole_options[2];
+    crush_ribs = hole_options[3];
+    chamfer = hole_options[4];
+    supportless = hole_options[5];
+
+    // Validate said options
+    if(refined_hole) {
+        assert(!magnet_hole, "magnet_hole is not compatible with refined_hole");
+    }
+    assert(crush_ribs == false && chamfer == false, "crush_ribs and chamfer are not supported yet");
 
     screw_radius = SCREW_HOLE_RADIUS - (o/2);
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
@@ -69,22 +97,22 @@ module block_base_hole(style_hole, o=0) {
         if(refined_hole) {
             refined_hole();
         }
+
         if(magnet_hole) {
             difference() {
-                if(crush_ribs){
+                if(crush_ribs) {
                     // Not Implemented Yet
                 } else {
                     cylinder(h = magnet_depth, r=magnet_radius);
                 }
 
                 if(supportless) {
-                    copy_mirror([0,1,0])
-                    translate([-1.5*magnet_radius, screw_radius+0.1,magnet_depth])
-                    cube([magnet_radius*3,magnet_radius*3, 10]);
+                    make_magnet_hole_printable(screw_radius, magnet_radius, magnet_depth);
                 }
-                if(chamfer) {
-                    // Not Implemented Yet
-                }
+            }
+
+            if(chamfer) {
+                 // Not Implemented Yet
             }
         }
 
@@ -96,4 +124,11 @@ module block_base_hole(style_hole, o=0) {
 
 //$fa = 8;
 //$fs = 0.25;
-//block_base_hole(4);
+//block_base_hole(bundle_hole_options(
+//    refined_hole=true,
+//    magnet_hole=false,
+//    screw_hole=false,
+//    supportless=false,
+//    crush_ribs=false,
+//    chamfer=false
+//));
