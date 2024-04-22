@@ -232,16 +232,16 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
                 if (style_hole == 4) {
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, LAYER_HEIGHT*REFINED_HOLE_BOTTOM_LAYERS])
                     refined_hole();
                     mirror([1, 0, 0])
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, LAYER_HEIGHT*REFINED_HOLE_BOTTOM_LAYERS])
                     refined_hole();
                     mirror([0, 1, 0]) {
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, LAYER_HEIGHT*REFINED_HOLE_BOTTOM_LAYERS])
                         refined_hole();
                         mirror([1, 0, 0])
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, LAYER_HEIGHT*REFINED_HOLE_BOTTOM_LAYERS])
                         refined_hole();
                     }
                 }
@@ -259,13 +259,13 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
 }
 
 /**
- * @brief A single Gridfinity base.
+ * @brief A single Gridfinity base.  With holes (if set).
  * @param gx
  * @param gy
  * @param l
  * @param dbnx
  * @param dbny
- * @param style_hole
+ * @param style_hole @see block_base_hole.style_hole
  * @param off
  */
 module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
@@ -276,7 +276,7 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
         if (style_hole > 0)
             pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
             if (style_hole == 4)
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, h_slit*2])
+                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, LAYER_HEIGHT*REFINED_HOLE_BOTTOM_LAYERS])
                 refined_hole();
             else
                 translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])

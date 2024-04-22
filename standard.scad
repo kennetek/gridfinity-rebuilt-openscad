@@ -21,10 +21,16 @@ l_grid = 42;
 // Per spec, matches radius of upper base section.
 r_base = r_fo1;
 
-// screw hole radius
-r_hole1 = 1.5;
-// magnet hole radius
-r_hole2 = 3.25;
+// ****************************************
+// Magnet / Screw Hole Constants
+// ****************************************
+LAYER_HEIGHT = 0.2;
+MAGNET_HEIGHT = 2;
+
+SCREW_HOLE_RADIUS = 3 / 2;
+MAGNET_HOLE_RADIUS = 6.5 / 2;
+MAGNET_HOLE_DEPTH = MAGNET_HEIGHT + (LAYER_HEIGHT * 2);
+
 // center-to-center distance between holes
 d_hole = 26;
 // distance of hole from side of bin
@@ -33,6 +39,15 @@ d_hole_from_side=8;
 h_hole = 2.4;
 // slit depth (printer layer height)
 h_slit = 0.2;
+
+// Meassured diameter in Fusion360.
+// Smaller than the magnet to keep it squeezed.
+REFINED_HOLE_RADIUS = 5.86 / 2;
+REFINED_HOLE_HEIGHT = MAGNET_HEIGHT - 0.1;
+// How many layers are between a Gridfinity Refined Hole and the bottom
+REFINED_HOLE_BOTTOM_LAYERS = 2;
+
+// ****************************************
 
 // top edge fillet radius
 r_f1 = 0.6;
