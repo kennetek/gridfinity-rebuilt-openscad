@@ -37,24 +37,63 @@ module refined_hole() {
     }
 }
 
+/**
+ * @brief A single magnet/screw hole.  To be cut out of the base.
+ * @pram style_hole Determines the type of hole that will be generated.
+ * @param o Offset
+ * @details
+ *      - 0: No holes. Does nothing.
+ *      - 1: Magnet holes only
+ *      - 2: Magnet and screw holes - no printable slit.
+ *      - 3: Magnet and screw holes - printable slit.
+ *      - 4: Gridfinity Refined hole - no glue needed.
+ */
 module block_base_hole(style_hole, o=0) {
-    r1 = SCREW_HOLE_RADIUS-o/2;
-    r2 = MAGNET_HOLE_RADIUS-o/2;
-    union() {
-        difference() {
-            cylinder(h = 2*(MAGNET_HOLE_DEPTH-o+(style_hole==3?h_slit:0)), r=r2, center=true);
+    assert(style_hole >= 0 && style_hole <= 4, "Unhandled Hole Style");
 
-            if (style_hole==3)
-            copy_mirror([0,1,0])
-            translate([-1.5*r2,r1+0.1,MAGNET_HOLE_DEPTH-o])
-            cube([r2*3,r2*3, 10]);
+    refined_hole = style_hole == 4;
+    magnet_hole = style_hole == 1 || style_hole == 2 || style_hole == 3;
+    screw_hole = style_hole == 2 || style_hole == 3;
+    crush_ribs = false; // Not Implemented Yet
+    chamfer = false;  // Not Implemented Yet
+    supportless = style_hole==3;
+
+    screw_radius = SCREW_HOLE_RADIUS - (o/2);
+    magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
+//    magnet_inner_radius =  // Not Implemented Yet
+    screw_depth = h_base-o;
+    // If using supportless / printable mode, need to add an additional layer, so it can be removed later
+    magnet_depth = MAGNET_HOLE_DEPTH - o + (supportless ? LAYER_HEIGHT : 0);
+
+    union() {
+        if(refined_hole) {
+            refined_hole();
         }
-        if (style_hole > 1)
-        cylinder(h = 2*h_base-o, r = r1, center=true);
+        if(magnet_hole) {
+            difference() {
+                if(crush_ribs){
+                    // Not Implemented Yet
+                } else {
+                    cylinder(h = magnet_depth, r=magnet_radius);
+                }
+
+                if(supportless) {
+                    copy_mirror([0,1,0])
+                    translate([-1.5*magnet_radius, screw_radius+0.1,magnet_depth])
+                    cube([magnet_radius*3,magnet_radius*3, 10]);
+                }
+                if(chamfer) {
+                    // Not Implemented Yet
+                }
+            }
+        }
+
+        if(screw_hole) {
+            cylinder(h = screw_depth, r = screw_radius);
+        }
     }
 }
 
 //$fa = 8;
 //$fs = 0.25;
-//block_base_hole(0);
-//refined_hole();
+//block_base_hole(4);
