@@ -35,10 +35,6 @@ MAGNET_HOLE_DEPTH = MAGNET_HEIGHT + (LAYER_HEIGHT * 2);
 d_hole = 26;
 // distance of hole from side of bin
 d_hole_from_side=8;
-// magnet hole depth
-h_hole = 2.4;
-// slit depth (printer layer height)
-h_slit = 0.2;
 
 // Meassured diameter in Fusion360.
 // Smaller than the magnet to keep it squeezed.

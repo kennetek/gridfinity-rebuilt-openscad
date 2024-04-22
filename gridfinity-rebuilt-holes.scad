@@ -17,22 +17,23 @@ module refined_hole() {
 
     // Poke through - For removing a magnet using a toothpick
     ptl = refined_offset + LAYER_HEIGHT; // Additional layer just in case
-    poke_through_height = REFINED_HOLE_HEIGHT+ptl; // Poke Through Height
-    poke_hole_radius = 2.5; // Poke Through Radius
+    poke_through_height = REFINED_HOLE_HEIGHT + ptl;
+    poke_hole_radius = 2.5;
     magic_constant = 5.60;
     poke_hole_center = [-12.53 + magic_constant, 0, -ptl];
 
+    translate([0, 0, refined_offset])
     union() {
-        hull() {
-            // Magnet hole - smaller than the magnet to keep it squeezed
-            translate([10, -REFINED_HOLE_RADIUS, 0]) cube([1, REFINED_HOLE_RADIUS*2, REFINED_HOLE_HEIGHT]);
-            cylinder(1.9, r=REFINED_HOLE_RADIUS);
-        }
-        hull() {
-            // Poke hole
-            translate([-9+magic_constant, -poke_hole_radius/2, -ptl]) cube([1, poke_hole_radius, poke_through_height]);
-            translate(poke_hole_center) cylinder(poke_through_height, d=poke_hole_radius);
-        }
+        // Magnet hole
+        translate([0, -REFINED_HOLE_RADIUS, 0])
+        cube([11, REFINED_HOLE_RADIUS*2, REFINED_HOLE_HEIGHT]);
+        cylinder(REFINED_HOLE_HEIGHT, r=REFINED_HOLE_RADIUS);
+
+        // Poke hole
+        translate([poke_hole_center.x, -poke_hole_radius/2, poke_hole_center.z])
+        cube([10 - magic_constant, poke_hole_radius, poke_through_height]);
+        translate(poke_hole_center)
+        cylinder(poke_through_height, d=poke_hole_radius);
     }
 }
 
