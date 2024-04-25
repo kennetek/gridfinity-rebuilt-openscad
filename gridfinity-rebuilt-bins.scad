@@ -92,10 +92,11 @@ screw_holes = false;
 crush_ribs = false;
 // Magnet holes will have a chamfer to ease insertion.
 chamfer_magnet_holes = false;
-// Allows printing screw holes with magnet holes without using supports.
-printable_magnet_hole_top = false;
+chamfer_magnet_holes = true;
+// Screw holes and magnet holes will be printed so supports are not needed.
+printable_hole_top = true;
 
-hole_options = bundle_hole_options(refined_hole, magnet_holes, screw_holes, crush_ribs, chamfer_magnet_holes, printable_magnet_hole_top);
+hole_options = bundle_hole_options(refined_hole, magnet_holes, screw_holes, crush_ribs, chamfer_magnet_holes, printable_hole_top);
 
 // ===== IMPLEMENTATION ===== //
 

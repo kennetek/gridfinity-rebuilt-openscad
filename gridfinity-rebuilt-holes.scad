@@ -106,7 +106,7 @@ module make_hole_printable(inner_radius, outer_radius, outer_depth) {
             multmatrix(affine_rotate([0, 0, 180]) * translation_matrix)
             cube(cube_dimensions);
         }
-        //2nd level
+        // 2nd level
         union() {
             multmatrix(second_translation_matrix)
             cube(cube_dimensions);
@@ -238,7 +238,13 @@ module block_base_hole(hole_options, o=0) {
         }
 
         if(screw_hole) {
-            cylinder(h = screw_depth, r = screw_radius);
+            difference() {
+                cylinder(h = screw_depth, r = screw_radius);
+                if(supportless) {
+                    rotate([0, 0, 90])
+                    make_hole_printable(screw_radius/2, screw_radius, screw_depth);
+                }
+            }
         }
     }
 }
