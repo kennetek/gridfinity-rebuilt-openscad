@@ -263,12 +263,17 @@ module block_base_hole(hole_options, o=0) {
 
 //$fa = 8;
 //$fs = 0.25;
+
+if(!is_undef(test_options)){
+    block_base_hole(test_options);
+}
+
 //block_base_hole(bundle_hole_options(
 //    refined_hole=false,
 //    magnet_hole=true,
 //    screw_hole=true,
 //    supportless=true,
-//    crush_ribs=true,
-//    chamfer=true
+//    crush_ribs=false,
+//    chamfer=false
 //));
 //make_hole_printable(1, 3, 0);
