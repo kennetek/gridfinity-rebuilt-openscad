@@ -50,7 +50,6 @@ module ribbed_circle(outer_radius, inner_radius, ribs) {
     polygon(wrapped_circle);
 }
 
-
 /**
  * @brief A cylinder with crush ribs to give a tighter press fit.
  * @details To be used as the negative for a hole.
@@ -70,52 +69,64 @@ module ribbed_cylinder(outer_radius, inner_radius, height, ribs) {
     );
 }
 
-
 /**
  * @brief Make a hole printable without suports.
  * @see https://www.youtube.com/watch?v=W8FbHTcB05w
  * @param inner_radius Radius of the inner hole.
  * @param outer_radius Radius of the outer hole.
- * @param outer_depth Depth of the magnet hole.
+ * @param outer_height Height of the outer hole.
+ * @param layers Number of layers to make printable.
  * @details This is the negative designed to be cut out of the magnet hole.
  *          Use it with `difference()`.
+ *          Special handling is done to support a single layer,
+ *          and because the last layer (unless there is only one) has a different shape.
  */
-module make_hole_printable(inner_radius, outer_radius, outer_depth) {
+module make_hole_printable(inner_radius, outer_radius, outer_height, layers=2) {
     assert(inner_radius > 0, "inner_radius must be positive");
     assert(outer_radius > 0, "outer_radius must be positive");
-    assert(outer_depth > 2*LAYER_HEIGHT, str("outer_depth must be at least ", 2*LAYER_HEIGHT));
-    tollerance = 0.001;  // To make sure the top layer is fully removed
+    assert(layers > 0);
 
-    translation_matrix = affine_translate([
-        -outer_radius,
-        inner_radius,
-        outer_depth - 2*LAYER_HEIGHT
-    ]);
-    second_translation_matrix = translation_matrix * affine_translate([0, 0, LAYER_HEIGHT]);
+    tollerance = 0.01;  // Ensure everything is fully removed.
+    height_adjustment = outer_height - (layers * LAYER_HEIGHT);
 
-    cube_dimensions = [
-        outer_radius*2,
-        outer_radius - inner_radius,
-        LAYER_HEIGHT + tollerance
+    // Needed, since the last layer should not be used for calculations,
+    // unless there is a single layer.
+    calculation_layers = max(layers-1, 1);
+
+    cube_height = LAYER_HEIGHT + 2*tollerance;
+    inner_diameter = 2*(inner_radius+tollerance);
+    outer_diameter = 2*(outer_radius+tollerance);
+    per_layer_difference = (outer_diameter-inner_diameter) / calculation_layers;
+
+    initial_matrix = affine_translate([0, 0, cube_height/2-tollerance + height_adjustment]);
+
+    // Produces data in the form [affine_matrix, [cube_dimensions]]
+    // If layers > 1, the last item produced has an invalid "affine_matrix.y", because it is beyond calculation_layers.
+    // That is handled in a special case to avoid doing a check every loop.
+    cutout_information = [
+        for(i=0; i <= layers; i=i+1)
+        [
+            initial_matrix * affine_translate([0, 0, (i-1)*LAYER_HEIGHT]) *
+                affine_rotate([0, 0, is_even(i) ? 90 : 0]),
+            [outer_diameter-per_layer_difference*(i-1),
+                outer_diameter-per_layer_difference*i,
+                cube_height]
+        ]
     ];
 
-    union(){
-        union() {
-            multmatrix(translation_matrix)
-            cube(cube_dimensions);
-            multmatrix(affine_rotate([0, 0, 180]) * translation_matrix)
-            cube(cube_dimensions);
+    difference() {
+        translate([0, 0, layers*cube_height/2 + height_adjustment])
+        cube([outer_diameter+tollerance, outer_diameter+tollerance, layers*cube_height], center = true);
+
+        for (i = [1 : calculation_layers]){
+            data = cutout_information[i];
+            multmatrix(data[0])
+            cube(data[1], center = true);
         }
-        // 2nd level
-        union() {
-            multmatrix(second_translation_matrix)
-            cube(cube_dimensions);
-            multmatrix(affine_rotate([0, 0, 90]) * second_translation_matrix)
-            cube(cube_dimensions);
-            multmatrix(affine_rotate([0, 0, 180]) * second_translation_matrix)
-            cube(cube_dimensions);
-            multmatrix(affine_rotate([0, 0, 270]) * second_translation_matrix)
-            cube(cube_dimensions);
+        if(layers > 1) {
+            data = cutout_information[len(cutout_information)-1];
+            multmatrix(data[0])
+            cube([data[1].x, data[1].x, data[1].z], center = true);
         }
     }
 }
@@ -209,10 +220,10 @@ module block_base_hole(hole_options, o=0) {
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
     magnet_inner_radius = MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS - (o/2);
     screw_depth = h_base-o;
-    // If using supportless / printable mode, need to add two additional layers, so they can be removed later.
-    supportless_additional_depth = 2* LAYER_HEIGHT;
+    // If using supportless / printable mode, need to add additional layers, so they can be removed later.
+    supportless_additional_layers = screw_hole ? 2 : 3;
     magnet_depth = MAGNET_HOLE_DEPTH - o +
-        (supportless ? supportless_additional_depth : 0);
+        (supportless ? supportless_additional_layers*LAYER_HEIGHT : 0);
 
     union() {
         if(refined_hole) {
@@ -228,7 +239,8 @@ module block_base_hole(hole_options, o=0) {
                 }
 
                 if(supportless) {
-                    make_hole_printable(screw_radius, magnet_radius, magnet_depth);
+                    make_hole_printable(
+                    screw_hole ? screw_radius : 1, magnet_radius, magnet_depth, supportless_additional_layers);
                 }
             }
 
@@ -242,7 +254,7 @@ module block_base_hole(hole_options, o=0) {
                 cylinder(h = screw_depth, r = screw_radius);
                 if(supportless) {
                     rotate([0, 0, 90])
-                    make_hole_printable(screw_radius/2, screw_radius, screw_depth);
+                    make_hole_printable(0.5, screw_radius, screw_depth, 3);
                 }
             }
         }
@@ -259,3 +271,4 @@ module block_base_hole(hole_options, o=0) {
 //    crush_ribs=true,
 //    chamfer=true
 //));
+//make_hole_printable(1, 3, 0);
