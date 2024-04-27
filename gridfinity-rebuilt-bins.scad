@@ -89,9 +89,8 @@ magnet_holes = false;
 // Base will have holes for M3 screws.
 screw_holes = false;
 // Magnet holes will have crush ribs to hold the magnet.
-crush_ribs = false;
+crush_ribs = true;
 // Magnet holes will have a chamfer to ease insertion.
-chamfer_magnet_holes = false;
 chamfer_magnet_holes = true;
 // Screw holes and magnet holes will be printed so supports are not needed.
 printable_hole_top = true;
