@@ -77,5 +77,11 @@ class TestHoleCutouts(unittest.TestCase):
         self.scad_runner.create_image(self.scad_runner.TOP_ANGLE_CAMERA,
             test_args, Path('all_hole_options.png'))
 
+    def test_no_hole(self):
+        test_args = set_variable_argument('test_options',
+            'bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=true, chamfer=true, supportless=true)')
+        self.scad_runner.create_image(self.scad_runner.TOP_ANGLE_CAMERA,
+            test_args, Path('no_hole.png'))
+
 if __name__ == '__main__':
     unittest.main()
