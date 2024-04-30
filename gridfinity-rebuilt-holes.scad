@@ -217,8 +217,8 @@ module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_a
  * @param magnet_hole Create a hole for a 6mm magnet.
  * @param screw_hole Create a hole for a M3 screw.
  * @param crush_ribs If the magnet hole should have crush ribs for a press fit.
- * @param chamfer Add a chamfer to the magnet hole.
- * @param supportless If the magnet hole should be printed in such a way that the screw hole does not require supports.
+ * @param chamfer Add a chamfer to the magnet/screw hole.
+ * @param supportless If the magnet/screw hole should be printed in such a way that the screw hole does not require supports.
  */
 function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
     [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];

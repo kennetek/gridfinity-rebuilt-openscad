@@ -32,109 +32,109 @@ class TestBinHoles(unittest.TestCase):
 
     def test_no_holes(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = False
-        vars["screw_hole"] = False
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('no_holes.png'))
 
     def test_refined_holes(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = True
-        vars["magnet_hole"] = False
-        vars["screw_hole"] = False
+        vars["refined_holes"] = True
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('refined_holes.png'))
 
     def test_refined_and_screw_holes(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = True
-        vars["magnet_hole"] = False
-        vars["screw_hole"] = True
+        vars["refined_holes"] = True
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = True
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('refined_and_screw_holes.png'))
 
     def test_screw_holes_plain(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = False
-        vars["screw_hole"] = True
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = True
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('screw_holes_plain.png'))
 
     def test_screw_holes_printable(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = False
-        vars["screw_hole"] = True
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = True
         vars["printable_hole_top"] = True
         self.scad_runner.create_image(self.camera_args, [], Path('screw_holes_printable.png'))
 
     def test_magnet_holes_plain(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = False
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = False
         vars["crush_ribs"] = False
-        vars["chamfer_magnet_holes"] = False
+        vars["chamfer_holes"] = False
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_holes_plain.png'))
 
     def test_magnet_holes_chamfered(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = False
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = False
         vars["crush_ribs"] = False
-        vars["chamfer_magnet_holes"] = True
+        vars["chamfer_holes"] = True
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_holes_chamfered.png'))
 
     def test_magnet_holes_printable(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = False
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = False
         vars["crush_ribs"] = False
-        vars["chamfer_magnet_holes"] = False
+        vars["chamfer_holes"] = False
         vars["printable_hole_top"] = True
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_holes_printable.png'))
 
     def test_magnet_holes_with_crush_ribs(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = False
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = False
         vars["crush_ribs"] = True
-        vars["chamfer_magnet_holes"] = False
+        vars["chamfer_holes"] = False
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_holes_with_crush_ribs.png'))
 
     def test_magnet_and_screw_holes_plain(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = True
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = True
         vars["crush_ribs"] = False
-        vars["chamfer_magnet_holes"] = False
+        vars["chamfer_holes"] = False
         vars["printable_hole_top"] = False
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_and_screw_holes_plain.png'))
 
     def test_magnet_and_screw_holes_printable(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = True
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = True
         vars["crush_ribs"] = False
-        vars["chamfer_magnet_holes"] = False
+        vars["chamfer_holes"] = False
         vars["printable_hole_top"] = True
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_and_screw_holes_printable.png'))
 
     def test_magnet_and_screw_holes_all(self):
         vars = self.scad_runner.parameters
-        vars["refined_hole"] = False
-        vars["magnet_hole"] = True
-        vars["screw_hole"] = True
+        vars["refined_holes"] = False
+        vars["magnet_holes"] = True
+        vars["screw_holes"] = True
         vars["crush_ribs"] = True
-        vars["chamfer_magnet_holes"] = True
+        vars["chamfer_holes"] = True
         vars["printable_hole_top"] = True
         self.scad_runner.create_image(self.camera_args, [], Path('magnet_and_screw_holes_all.png'))
 

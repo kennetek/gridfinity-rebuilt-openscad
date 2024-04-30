@@ -83,19 +83,19 @@ div_base_y = 0;
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
 //Use gridfinity refined hole style. Not compatible with magnet_holes!
-refined_hole = true;
+refined_holes = true;
 // Base will have holes for 6mm Diameter x 2mm high magnets.
 magnet_holes = false;
 // Base will have holes for M3 screws.
 screw_holes = false;
 // Magnet holes will have crush ribs to hold the magnet.
 crush_ribs = true;
-// Magnet holes will have a chamfer to ease insertion.
-chamfer_magnet_holes = true;
-// Screw holes and magnet holes will be printed so supports are not needed.
+// Magnet/Screw holes will have a chamfer to ease insertion.
+chamfer_holes = true;
+// Magnet/Screw holes will be printed so supports are not needed.
 printable_hole_top = true;
 
-hole_options = bundle_hole_options(refined_hole, magnet_holes, screw_holes, crush_ribs, chamfer_magnet_holes, printable_hole_top);
+hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 
 // ===== IMPLEMENTATION ===== //
 
