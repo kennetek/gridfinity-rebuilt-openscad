@@ -220,7 +220,7 @@ module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_a
  * @param chamfer Add a chamfer to the magnet hole.
  * @param supportless If the magnet hole should be printed in such a way that the screw hole does not require supports.
  */
-function bundle_hole_options(refined_hole=true, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
+function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
     [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];
 
 /**
@@ -230,6 +230,8 @@ function bundle_hole_options(refined_hole=true, magnet_hole=false, screw_hole=fa
  * @param o Offset
  */
 module block_base_hole(hole_options, o=0) {
+    assert(is_list(hole_options));
+
     // Destructure the options
     refined_hole = hole_options[0];
     magnet_hole = hole_options[1];

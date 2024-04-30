@@ -1,5 +1,6 @@
 include <gridfinity-rebuilt-utility.scad>
 include <standard.scad>
+use <gridfinity-rebuilt-holes.scad>
 
 // ===== INFORMATION ===== //
 /*
@@ -57,7 +58,6 @@ style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 
 
 // ===== IMPLEMENTATION ===== //
-screw_together = (style_plate == 3 || style_plate == 4);
 
 color("tomato")
 gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
@@ -75,7 +75,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     dx = max(gx*length-bp_xy_clearance, dix);
     dy = max(gy*length-bp_xy_clearance, diy);
 
-    off = calculate_off(sp, sm, sh);
+    off = calculate_offset(sp, sm, sh);
 
     offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearance-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-bp_xy_clearance-diy)/2*fity*-1;
@@ -85,7 +85,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
         mirror([0,0,1])
         rounded_rectangle(dx, dy, h_base+off, r_base);
 
-        gridfinityBase(gx, gy, length, 1, 1, 0, 0.5, false);
+        gridfinityBase(gx, gy, length, 1, 1, bundle_hole_options(), 0.5, false);
 
         translate([offsetx,offsety,h_base-0.6])
         rounded_rectangle(dx*2, dy*2, h_base*2, r_base);
@@ -105,33 +105,38 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
 
 
                 hole_pattern(){
-                    if (sm) block_base_hole(1);
+                    if (sm) {
+                        mirror([0, 0, 1])
+                        block_base_hole(bundle_hole_options(magnet_hole=true));
+                    }
 
-                    translate([0,0,-off])
+                    translate([0,0,-off-TOLLERANCE])
                     if (sh == 1) cutter_countersink();
                     else if (sh == 2) cutter_counterbore();
                 }
             }
         }
-        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);
+        screw_together = sp == 3 || sp == 4;
+        if (screw_together) cutter_screw_together(gx, gy, off);
     }
 
 }
 
-function calculate_off(sp, sm, sh) =
-    screw_together
-        ? 6.75
-        :sp==0
-            ?0
-            : sp==1
-                ?bp_h_bot
-                :h_skel + (sm
-                    ?h_hole
-                    : 0)+(sh==0
-                        ? d_screw
-                        : sh==1
-                            ?d_cs
-                            :h_cb);
+function calculate_offset(style_plate, enable_magnet, style_hole) =
+    assert(style_plate >=0 && style_plate <=4)
+    let (screw_together = style_plate == 3 || style_plate == 4)
+    screw_together ? 6.75 :
+    style_plate==0 ? 0 :
+    style_plate==1 ? bp_h_bot :
+    calculate_offset_skeletonized(enable_magnet, style_hole);
+
+function calculate_offset_skeletonized(enable_magnet, style_hole) =
+    h_skel + (enable_magnet ? MAGNET_HOLE_DEPTH : 0) +
+    (
+        style_hole==0 ? d_screw :
+        style_hole==1 ? BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS : // Only works because countersink is at 45 degree angle!
+        BASEPLATE_SCREW_COUNTERBORE_HEIGHT
+    );
 
 module cutter_weight() {
     union() {
@@ -156,23 +161,19 @@ module hole_pattern(){
 }
 
 module cutter_countersink(){
-    cylinder(r = r_hole1+d_clear, h = 100*h_base, center = true);
-    translate([0,0,d_cs])
-    mirror([0,0,1])
-    hull() {
-        cylinder(h = d_cs+10, r=r_hole1+d_clear);
-        translate([0,0,d_cs])
-        cylinder(h=d_cs+10, r=r_hole1+d_clear+d_cs);
-    }
+    screw_hole(SCREW_HOLE_RADIUS + d_clear, 2*h_base,
+        false, BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS);
 }
 
 module cutter_counterbore(){
-    cylinder(h=100*h_base, r=r_hole1+d_clear, center=true);
-    difference() {
-        cylinder(h = 2*(h_cb+0.2), r=r_cb, center=true);
-        copy_mirror([0,1,0])
-        translate([-1.5*r_cb,r_hole1+d_clear+0.1,h_cb-h_slit])
-        cube([r_cb*3,r_cb*3, 10]);
+    screw_radius = SCREW_HOLE_RADIUS + d_clear;
+    counterbore_height = BASEPLATE_SCREW_COUNTERBORE_HEIGHT + 2*LAYER_HEIGHT;
+    union(){
+        cylinder(h=2*h_base, r=screw_radius);
+        difference() {
+            cylinder(h = counterbore_height, r=BASEPLATE_SCREW_COUNTERBORE_RADIUS);
+            make_hole_printable(screw_radius, BASEPLATE_SCREW_COUNTERBORE_RADIUS, counterbore_height);
+        }
     }
 }
 
@@ -185,7 +186,7 @@ module profile_skeleton() {
             translate([l_grid/2-d_hole_from_side,l_grid/2-d_hole_from_side,0])
             minkowski() {
                 square([l,l]);
-                circle(r_hole2+r_skel+2);
+                circle(MAGNET_HOLE_RADIUS+r_skel+2);
            }
         }
         circle(r_skel);

@@ -21,6 +21,10 @@ l_grid = 42;
 // Per spec, matches radius of upper base section.
 r_base = r_fo1;
 
+// Tollerance to make sure cuts don't leave a sliver behind,
+// and that items are properly connected to each other.
+TOLLERANCE = 0.01;
+
 // ****************************************
 // Magnet / Screw Hole Constants
 // ****************************************
@@ -50,9 +54,14 @@ MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS = 5.9 / 2;
 // Anything 5 or under produces a hole that is not round.
 MAGNET_HOLE_CRUSH_RIB_COUNT = 8;
 
+// Radius to add when chamfering magnet and screw holes.
 CHAMFER_ADDITIONAL_RADIUS = 0.8;
 CHAMFER_ANGLE = 45;
 
+// When countersinking the baseplate, how much to add to the screw radius.
+BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS = 5/2;
+BASEPLATE_SCREW_COUNTERBORE_RADIUS = 5.5/2;
+BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
 // ****************************************
 
 // top edge fillet radius
@@ -114,13 +123,7 @@ bp_rcut_length = 4.25;
 bp_rcut_depth = 2;
 // Baseplate clearance offset
 bp_xy_clearance = 0.5;
-// countersink diameter for baseplate
-d_cs = 2.5;
 // radius of cutout for skeletonized baseplate
 r_skel = 2;
-// baseplate counterbore radius
-r_cb = 2.75;
-// baseplate counterbore depth
-h_cb = 3;
 // minimum baseplate thickness (when skeletonized)
 h_skel = 1;
