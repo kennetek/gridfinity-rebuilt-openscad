@@ -272,7 +272,7 @@ module block_base_hole(hole_options, o=0) {
             }
 
             if(chamfer) {
-                 cone(magnet_radius + CHAMFER_ADDITIONAL_RADIUS, CHAMFER_ANGLE, magnet_depth);
+                 cone(magnet_radius + CHAMFER_ADDITIONAL_RADIUS, CHAMFER_ANGLE, MAGNET_HOLE_DEPTH - o);
             }
         }
         if(screw_hole) {
