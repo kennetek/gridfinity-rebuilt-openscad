@@ -1,5 +1,5 @@
 """
-Tests for gridfinity-rebuilt-bins.scad
+Tests for gridfinity-spiral-vase.scad
 @Copyright Arthur Moore 2024 MIT License
 """
 
