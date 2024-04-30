@@ -15,7 +15,7 @@ $fa = 8;
 $fs = 0.25;
 
 /* [Bin or Base] */
-type = 0; // [0:bin, 1:base]
+type = 1; // [0:bin, 1:base]
 
 /* [Printer Settings] */
 // extrusion width (walls will be twice this size)
@@ -202,15 +202,17 @@ module gridfinityBaseVase() {
 }
 
 module block_magnet_blank(o = 0, half = true) {
+    magnet_radius = MAGNET_HOLE_RADIUS + o;
+
     translate([d_hole/2,d_hole/2,-h_base+0.1])
     difference() {
         hull() {
-            cylinder(r = r_hole2+o, h = h_hole*2, center = true);
-            cylinder(r = (r_hole2+o)-(h_base+0.1-h_hole), h = (h_base+0.1)*2, center = true);
+            cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
+            cylinder(r = magnet_radius-(h_base+0.1-MAGNET_HOLE_DEPTH), h = (h_base+0.1)*2, center = true);
         }
         if (half)
         mirror([0,0,1])
-        cylinder(r=(r_hole2+o)*2, h = (h_base+0.1)*4);
+        cylinder(r=magnet_radius*2, h = (h_base+0.1)*4);
     }
 }
 
