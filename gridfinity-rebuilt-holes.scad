@@ -185,6 +185,33 @@ module cone(bottom_radius, angle, max_height=0) {
 }
 
 /**
+ * @brief Create a screw hole
+ * @param radius Radius of the hole.
+ * @param height Height of the hole.
+ * @param supportless If the hole is designed to be printed without supports.
+ * @param chamfer_radius If the hole should be chamfered, then how much should be added to radius.  0 means don't chamfer
+ * @param chamfer_angle If the hole should be chamfered, then what angle should it be chamfered at.  Ignored if chamfer_radius is 0.
+ */
+module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_angle = 45) {
+    assert(radius > 0);
+    assert(height > 0);
+    assert(chamfer_radius >= 0);
+
+    union(){
+        difference() {
+            cylinder(h = height, r = radius);
+            if (supportless) {
+                rotate([0, 0, 90])
+                make_hole_printable(0.5, radius, height, 3);
+            }
+        }
+        if (chamfer_radius > 0) {
+            cone(radius + chamfer_radius, chamfer_angle, height);
+        }
+    }
+}
+
+/**
  * @brief Create an options list used to configure bin holes.
  * @param refined_hole Use gridfinity refined hole type.  Not compatible with "magnet_hole".
  * @param magnet_hole Create a hole for a 6mm magnet.
@@ -245,18 +272,12 @@ module block_base_hole(hole_options, o=0) {
             }
 
             if(chamfer) {
-                 cone(magnet_radius + MAGNET_HOLE_CHAMFER_ADDITIONAL_RADIUS, MAGNET_HOLE_CHAMFER_ANGLE, magnet_depth);
+                 cone(magnet_radius + CHAMFER_ADDITIONAL_RADIUS, CHAMFER_ANGLE, magnet_depth);
             }
         }
-
         if(screw_hole) {
-            difference() {
-                cylinder(h = screw_depth, r = screw_radius);
-                if(supportless) {
-                    rotate([0, 0, 90])
-                    make_hole_printable(0.5, screw_radius, screw_depth, 3);
-                }
-            }
+            screw_hole(screw_radius, screw_depth, supportless,
+                chamfer ? CHAMFER_ADDITIONAL_RADIUS : 0, CHAMFER_ANGLE);
         }
     }
 }
@@ -274,6 +295,6 @@ if(!is_undef(test_options)){
 //    screw_hole=true,
 //    supportless=true,
 //    crush_ribs=false,
-//    chamfer=false
+//    chamfer=true
 //));
 //make_hole_printable(1, 3, 0);
