@@ -50,22 +50,29 @@ fity = 0; // [-1:0.1:1]
 // baseplate styles
 style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
 
-// enable magnet hole
-enable_magnet = true;
 
 // hole styles
 style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 
+/* [Magnet Hole] */
+// Baseplate will have holes for 6mm Diameter x 2mm high magnets.
+enable_magnet = true;
+// Magnet holes will have crush ribs to hold the magnet.
+crush_ribs = true;
+// Magnet holes will have a chamfer to ease insertion.
+chamfer_holes = true;
+
+hole_options = bundle_hole_options(refined_hole=false, magnet_hole=enable_magnet, screw_hole=false, crush_ribs=crush_ribs, chamfer=chamfer_holes, supportless=false);
 
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
-gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
+gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, hole_options, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
+module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, hole_options, sh, fitx, fity) {
 
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
@@ -75,7 +82,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
     dx = max(gx*length-bp_xy_clearance, dix);
     dy = max(gy*length-bp_xy_clearance, diy);
 
-    off = calculate_offset(sp, sm, sh);
+    off = calculate_offset(sp, hole_options[1], sh);
 
     offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearance-dix)/2*fitx*-1;
     offsety = diy < dy ? 0 : (gy*length-bp_xy_clearance-diy)/2*fity*-1;
@@ -105,10 +112,8 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
 
 
                 hole_pattern(){
-                    if (sm) {
-                        mirror([0, 0, 1])
-                        block_base_hole(bundle_hole_options(magnet_hole=true));
-                    }
+                    mirror([0, 0, 1])
+                    block_base_hole(hole_options);
 
                     translate([0,0,-off-TOLLERANCE])
                     if (sh == 1) cutter_countersink();

@@ -38,13 +38,42 @@ class TestBasePlateHoles(unittest.TestCase):
         self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
         self.scad_runner.create_image([], Path('no_holes_top.png'))
 
-    def test_only_magnet_holes(self):
+    def test_plain_magnet_holes(self):
         vars = self.scad_runner.parameters
         vars["enable_magnet"] = True
         vars["style_hole"] = 0
-        self.scad_runner.create_image([], Path('only_magnet_holes_bottom.png'))
+        vars["chamfer_holes"] = False
+        vars["crush_ribs"] = False
+        self.scad_runner.create_image([], Path('magnet_holes_bottom.png'))
         self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
-        self.scad_runner.create_image([], Path('only_magnet_holes_top.png'))
+        self.scad_runner.create_image([], Path('plain_magnet_holes_top.png'))
+
+    def test_chamfered_magnet_holes(self):
+        vars = self.scad_runner.parameters
+        vars["enable_magnet"] = True
+        vars["style_hole"] = 0
+        vars["chamfer_holes"] = True
+        vars["crush_ribs"] = False
+        self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
+        self.scad_runner.create_image([], Path('chamfered_magnet_holes.png'))
+
+    def test_ribbed_magnet_holes(self):
+        vars = self.scad_runner.parameters
+        vars["enable_magnet"] = True
+        vars["style_hole"] = 0
+        vars["chamfer_holes"] = False
+        vars["crush_ribs"] = True
+        self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
+        self.scad_runner.create_image([], Path('ribbed_magnet_holes.png'))
+
+    def test_chamfered_and_ribbed_magnet_holes(self):
+        vars = self.scad_runner.parameters
+        vars["enable_magnet"] = True
+        vars["style_hole"] = 0
+        vars["chamfer_holes"] = True
+        vars["crush_ribs"] = True
+        self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
+        self.scad_runner.create_image([], Path('chamfered_and_ribbed_magnet_holes.png'))
 
     def test_only_countersunk_screw_holes(self):
         vars = self.scad_runner.parameters
@@ -65,6 +94,8 @@ class TestBasePlateHoles(unittest.TestCase):
     def test_magnet_and_countersunk_screw_holes(self):
         vars = self.scad_runner.parameters
         vars["enable_magnet"] = True
+        vars["chamfer_holes"] = False
+        vars["crush_ribs"] = False
         vars["style_hole"] = 1
         self.scad_runner.create_image([], Path('magnet_and_countersunk_screw_holes_bottom.png'))
         self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
@@ -73,6 +104,8 @@ class TestBasePlateHoles(unittest.TestCase):
     def test_magnet_and_counterbored_screw_holes(self):
         vars = self.scad_runner.parameters
         vars["enable_magnet"] = True
+        vars["chamfer_holes"] = False
+        vars["crush_ribs"] = False
         vars["style_hole"] = 2
         self.scad_runner.create_image([], Path('magnet_and_counterbored_screw_holes_bottom.png'))
         self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)

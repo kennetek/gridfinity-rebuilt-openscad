@@ -8,6 +8,8 @@
             "d_screw_head": "5",
             "distancex": "0",
             "distancey": "0",
+            "chamfer_holes": "true",
+            "crush_ribs": "true",
             "enable_magnet": "true",
             "fitx": "0",
             "fity": "0",
