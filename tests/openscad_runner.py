@@ -2,6 +2,7 @@
 Helpful classes for running OpenScad from Python.
 @Copyright Arthur Moore 2024 MIT License
 """
+from __future__ import annotations
 
 import json
 import subprocess
@@ -24,17 +25,27 @@ class Vec3(NamedTuple):
     y: float
     z: float
 
-@dataclass
+@dataclass(frozen=True)
 class CameraArguments:
     """
     Controls the camera position when outputting to png format.
     @see `openscad -h`.
+    Supports fluid interface.
     """
     translate: Vec3
     rotate: Vec3
     distance: float
 
-    def as_argument(self):
+    def with_translation(self, new_translate: Vec3) -> CameraArguments:
+        return CameraArguments(translate=new_translate, rotate=self.rotate, distance=self.distance)
+
+    def with_rotation(self, new_rotate: Vec3) -> CameraArguments:
+        return CameraArguments(translate=self.translate, rotate=new_rotate, distance=self.distance)
+
+    def with_distance(self, new_distance: float) -> CameraArguments:
+        return CameraArguments(translate=self.translate, rotate=rotate, distance=new_distance)
+
+    def as_argument(self) -> str:
         return '--camera=' \
         f'{",".join(map(str,self.translate))},{",".join(map(str,self.rotate))},{self.distance}'
 
@@ -79,6 +90,13 @@ def set_variable_argument(var: str, val: str) -> [str, str]:
     """
     return ['-D', f'{var}={str(val)}']
 
+class CameraRotations:
+    '''Pre-defined useful camera rotations'''
+    Default = Vec3(0,0,0),
+    AngledTop = Vec3(45,0,45)
+    AngledBottom = Vec3(225,0,225)
+    Top = Vec3(45,0,0)
+
 class OpenScadRunner:
     '''Helper to run the openscad binary'''
     scad_file_path: Path
@@ -88,7 +106,7 @@ class OpenScadRunner:
     '''If set, a temporary parameter file is created, and used with these variables'''
 
     WINDOWS_DEFAULT_PATH = 'C:\\Program Files\\OpenSCAD\\openscad.exe'
-    TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),50)
+    TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),150)
 
     common_arguments = [
         #'--hardwarnings', // Does not work when setting variables by using functions
@@ -106,9 +124,10 @@ class OpenScadRunner:
         self.openscad_binary_path = self.WINDOWS_DEFAULT_PATH
         self.scad_file_path = file_path
         self.image_folder_base = Path('.')
+        self.camera_arguments = None
         self.parameters = None
 
-    def create_image(self, camera_args: CameraArguments, args: [str], image_file_name: str):
+    def create_image(self, args: [str], image_file_name: str):
         """
         Run the code, to create an image.
         @Important The only verification is that no errors occured.
@@ -119,11 +138,13 @@ class OpenScadRunner:
 
         image_path = self.image_folder_base.joinpath(image_file_name)
         command_arguments = self.common_arguments + \
-            [camera_args.as_argument()] + args + \
+            ([self.camera_arguments.as_argument()] if self.camera_arguments != None else []) + \
+            args + \
             ["-o", str(image_path), str(self.scad_file_path)]
         #print(command_arguments)
 
         if self.parameters != None:
+            #print(self.parameters)
             params = ParameterFile(parameterSets={"python_generated": self.parameters})
             with NamedTemporaryFile(prefix="gridfinity-rebuilt-", suffix=".json", mode='wt',delete_on_close=False) as file:
                 json.dump(params, file, sort_keys=True, indent=2, cls=DataClassJSONEncoder)
