@@ -182,19 +182,24 @@ module cutter_counterbore(){
     }
 }
 
+/**
+ * @brief 2d Cutter to skeletonize the baseplate.
+ * @example difference(){
+ *              cube(large_number);
+ *              linear_extrude(large_number+TOLLERANCE)
+ *              profile_skeleton();
+ *          }
+ */
 module profile_skeleton() {
     l = l_grid-2*r_c2-2*r_c1;
-    minkowski() {
-        difference() {
-            square([l-2*r_skel+2*d_clear,l-2*r_skel+2*d_clear], center = true);
-            pattern_circular(4)
-            translate([l_grid/2-d_hole_from_side,l_grid/2-d_hole_from_side,0])
-            minkowski() {
-                square([l,l]);
-                circle(MAGNET_HOLE_RADIUS+r_skel+2);
-           }
-        }
-        circle(r_skel);
+
+    offset(r_skel)
+    difference() {
+        square(l-2*r_skel+2*d_clear, center = true);
+
+        hole_pattern()
+        offset(MAGNET_HOLE_RADIUS+r_skel+2)
+        square([l,l]);
     }
 }
 
