@@ -15,7 +15,7 @@ function is_even(number) = (number%2)==0;
  * @details "size" accepts both the standard number or a 2d vector the same as `square`.
  *          However, if passed a 3d vector, this will apply a `linear_extrude` to the resulting shape.
  */
-module rounded_square(size, radius, center = true) {
+module rounded_square(size, radius, center = false) {
     assert(is_num(size) ||
         (is_list(size) && (
             (len(size) == 2 && is_num(size.x) && is_num(size.y)) ||
@@ -36,13 +36,23 @@ module rounded_square(size, radius, center = true) {
 
     if (is_list(size) && len(size) == 3) {
         linear_extrude(size.z)
+        _internal_rounded_square_2d(size, radius, center);
+    } else {
+        _internal_rounded_square_2d(size, radius, center);
+    }
+}
+
+/**
+ * @brief Internal module. Do not use. May be changed/removed at any time.
+ */
+module _internal_rounded_square_2d(size, radius, center) {
+    diameter = 2*radius;
+    if (is_list(size)) {
         offset(radius)
-        offset(-radius)
-        square([size.x, size.y], center = center);
+        square([size.x-diameter, size.y-diameter], center = center);
     } else {
         offset(radius)
-        offset(-radius)
-        square(size, center = center);
+        square(size-diameter, center = center);
     }
 }
 
@@ -50,7 +60,7 @@ module rounded_square(size, radius, center = true) {
  * @deprecated Use rounded_square(...)
  */
 module rounded_rectangle(length, width, height, rad) {
-    rounded_square([length, width, height], rad);
+    rounded_square([length, width, height], rad, center=true);
 }
 
 module copy_mirror(vec=[0,1,0]) {

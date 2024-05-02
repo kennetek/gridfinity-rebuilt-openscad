@@ -161,7 +161,7 @@ module gridfinityBaseVase() {
         intersection() {
             block_base_blank(0);
             translate([0,0,-h_base-1])
-            rounded_rectangle(l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10, r_fo1+0.001);
+            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10], r_fo1+0.001, center=true);
         }
         translate([0,0,0.01])
         difference() {
@@ -220,16 +220,16 @@ module block_base_blank(o = 0) {
     mirror([0,0,1]) {
         hull() {
             linear_extrude(h_base)
-            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, r_fo3);
+            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, r_fo3, center=true);
             linear_extrude(h_base-r_c1)
-            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2);
+            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
         }
         hull() {
             linear_extrude(r_c2)
-            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2);
+            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
             mirror([0,0,1])
             linear_extrude(d_bottom)
-            rounded_square(l_grid-o-0.05, r_fo1);
+            rounded_square(l_grid-o-0.05, r_fo1, center=true);
         }
     }
 }
@@ -527,7 +527,7 @@ module transform_scoop() {
 
 module block_vase(h = d_height*2) {
     translate([0,0,-0.1])
-    rounded_rectangle(gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h, r_base+0.01-nozzle/2);
+    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h], r_base+0.01-nozzle/2, center=true);
 }
 
 module profile_x(x_f = 3) {
