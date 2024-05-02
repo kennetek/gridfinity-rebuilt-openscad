@@ -7,15 +7,50 @@ function clp(x,a,b) = min(max(x,a),b);
 
 function is_even(number) = (number%2)==0;
 
-module rounded_rectangle(length, width, height, rad) {
-    linear_extrude(height)
-    offset(rad)
-    offset(-rad)
-    square([length,width], center = true);
+/**
+ * @brief Create `square`, with rounded corners.
+ * @param size Same as `square`.  See details for differences.
+ * @param radius Radius of the corners. 0 is the same as just calling `square`
+ * @param center Same as `square`.
+ * @details "size" accepts both the standard number or a 2d vector the same as `square`.
+ *          However, if passed a 3d vector, this will apply a `linear_extrude` to the resulting shape.
+ */
+module rounded_square(size, radius, center = true) {
+    assert(is_num(size) ||
+        (is_list(size) && (
+            (len(size) == 2 && is_num(size.x) && is_num(size.y)) ||
+            (len(size) == 3 && is_num(size.x) && is_num(size.y) && is_num(size.z))
+        ))
+    );
+    assert(is_num(radius) && radius >= 0 && is_bool(center));
+
+    // Make sure something is produced.
+    if (is_num(size)) {
+        assert((size/2) > radius);
+    } else {
+        assert((size.x/2) > radius && (size.y/2 > radius));
+        if (len(size) == 3) {
+            assert(size.z > 0);
+        }
+    }
+
+    if (is_list(size) && len(size) == 3) {
+        linear_extrude(size.z)
+        offset(radius)
+        offset(-radius)
+        square([size.x, size.y], center = center);
+    } else {
+        offset(radius)
+        offset(-radius)
+        square(size, center = center);
+    }
 }
 
-module rounded_square(length, height, rad) {
-    rounded_rectangle(length, length, height, rad);
+/**
+ * @deprecated Use rounded_square(...)
+ */
+module rounded_rectangle(length, width, height, rad) {
+    rounded_square([length, width, height], rad);
 }
 
 module copy_mirror(vec=[0,1,0]) {
@@ -56,7 +91,7 @@ unity_matrix = [
  * @param vector A 2d or 3d vectorm
  * @returns Magnitude of the vector.
  */
- function vector_magnitude(vector) =
+function vector_magnitude(vector) =
     sqrt(vector.x^2 + vector.y^2 + (len(vector) == 3 ? vector.z^2 : 0));
 
 /**
