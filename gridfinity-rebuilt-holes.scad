@@ -7,11 +7,23 @@ include <standard.scad>
 use <generic-helpers.scad>
 
 /**
+ * @brief Determines the number of fragments in a circle. Aka, Circle resolution.
+ * @param r Radius of the circle.
+ * @details Recommended function from the manual as a translation of the OpenSCAD function.
+ *          Used to improve performance by not rendering every single degree of circles/spheres.
+ * @see https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Other_Language_Features#Circle_resolution:_$fa,_$fs,_and_$fn
+ */
+function get_fragments_from_r(r) =
+    assert(r > 0)
+    ($fn>0?($fn>=3?$fn:3):ceil(max(min(360/$fa,r*2*PI/$fs),5)));
+
+/**
  * @brief Wave generation function for wrapping a circle.
  * @param t An angle of the circle.  Between 0 and 360 degrees.
  * @param count The number of **full** waves in a 360 degree circle.
  * @param range **Half** the difference between minimum and maximum values.
- * @param vertical_offset A simple offset.
+ * @param vertical_offset Added to the output.
+ *                        When wrapping a circle, radius of that circle.
  * @details
  *    If plotted on an x/y graph this produces a standard sin wave.
  *    Range only seems weird because it describes half a wave.
@@ -41,9 +53,11 @@ module ribbed_circle(outer_radius, inner_radius, ribs) {
 
     wave_range = (outer_radius - inner_radius) / 2;
     wave_vertical_offset = inner_radius + wave_range;
+    fragments=get_fragments_from_r(wave_vertical_offset);
+    degrees_per_fragment = 360/fragments;
 
     // Circe with a wave wrapped around it
-    wrapped_circle = [ for (i = [0:360])
+    wrapped_circle = [ for (i = [0:degrees_per_fragment:360])
         [sin(i), cos(i)] * wave_function(i, ribs, wave_range, wave_vertical_offset)
     ];
 
