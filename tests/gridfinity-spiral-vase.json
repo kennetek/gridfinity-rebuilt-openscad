@@ -1,0 +1,28 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Default": {
+            "$fa": "8",
+            "$fs": "0.25",
+            "a_tab": "40",
+            "bottom_layer": "3",
+            "enable_funnel": "true",
+            "enable_holes": "true",
+            "enable_inset": "true",
+            "enable_lip": "true",
+            "enable_pinch": "true",
+            "enable_scoop_chamfer": "true",
+            "enable_zsnap": "false",
+            "gridx": "1",
+            "gridy": "1",
+            "gridz": "6",
+            "gridz_define": "0",
+            "layer": "0.35",
+            "n_divx": "2",
+            "nozzle": "0.6",
+            "style_base": "0",
+            "style_tab": "0",
+            "type": "0"
+        }
+    }
+}

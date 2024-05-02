@@ -41,9 +41,6 @@ gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments -
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
 /* [Base] */
-style_hole = 0; // [0:no holes, 1:magnet holes only, 2: magnet and screw holes - no printable slit, 3: magnet and screw holes - printable slit]
-// only cut magnet/screw holes at the corners of the bin to save uneccesary print time
-only_corners = false;
 // number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
@@ -51,22 +48,40 @@ div_base_y = 0;
 // thickness of bottom layer
 bottom_layer = 1;
 
+/* [Base Hole Options] */
+// only cut magnet/screw holes at the corners of the bin to save uneccesary print time
+only_corners = false;
+//Use gridfinity refined hole style. Not compatible with magnet_holes!
+refined_holes = false;
+// Base will have holes for 6mm Diameter x 2mm high magnets.
+magnet_holes = true;
+// Base will have holes for M3 screws.
+screw_holes = true;
+// Magnet holes will have crush ribs to hold the magnet.
+crush_ribs = true;
+// Magnet/Screw holes will have a chamfer to ease insertion.
+chamfer_holes = true;
+// Magnet/Screw holes will be printed so supports are not needed.
+printable_hole_top = true;
+
+hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 
 // ===== IMPLEMENTATION ===== //
 
 // Input all the cutter types in here
 color("tomato")
-gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, div_base_x, div_base_y, style_hole, only_corners) {
+gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, div_base_x, div_base_y, hole_options, only_corners) {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
 
 // ===== CONSTRUCTION ===== //
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole, only_corners) {
+    height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
     union() {
         difference() {
             union() {
-                gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length, sl=style_lip)
+                gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
                 children();
                 gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, only_corners=only_corners);
             }
@@ -100,7 +115,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                     difference() {
                         union() {
 
-                            gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), 0, length, sl=style_lip)
+                            gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
                             children();
                         }
 

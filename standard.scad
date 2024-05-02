@@ -21,18 +21,48 @@ l_grid = 42;
 // Per spec, matches radius of upper base section.
 r_base = r_fo1;
 
-// screw hole radius
-r_hole1 = 1.5;
-// magnet hole radius
-r_hole2 = 3.25;
+// Tollerance to make sure cuts don't leave a sliver behind,
+// and that items are properly connected to each other.
+TOLLERANCE = 0.01;
+
+// ****************************************
+// Magnet / Screw Hole Constants
+// ****************************************
+LAYER_HEIGHT = 0.2;
+MAGNET_HEIGHT = 2;
+
+SCREW_HOLE_RADIUS = 3 / 2;
+MAGNET_HOLE_RADIUS = 6.5 / 2;
+MAGNET_HOLE_DEPTH = MAGNET_HEIGHT + (LAYER_HEIGHT * 2);
+
 // center-to-center distance between holes
 d_hole = 26;
 // distance of hole from side of bin
 d_hole_from_side=8;
-// magnet hole depth
-h_hole = 2.4;
-// slit depth (printer layer height)
-h_slit = 0.2;
+
+// Meassured diameter in Fusion360.
+// Smaller than the magnet to keep it squeezed.
+REFINED_HOLE_RADIUS = 5.86 / 2;
+REFINED_HOLE_HEIGHT = MAGNET_HEIGHT - 0.1;
+// How many layers are between a Gridfinity Refined Hole and the bottom
+REFINED_HOLE_BOTTOM_LAYERS = 2;
+
+// Experimentally chosen for a press fit.
+MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS = 5.9 / 2;
+// Mostly arbitrarily chosen.
+// 30 ribs does not print with a 0.4mm nozzle.
+// Anything 5 or under produces a hole that is not round.
+MAGNET_HOLE_CRUSH_RIB_COUNT = 8;
+
+// Radius to add when chamfering magnet and screw holes.
+CHAMFER_ADDITIONAL_RADIUS = 0.8;
+CHAMFER_ANGLE = 45;
+
+// When countersinking the baseplate, how much to add to the screw radius.
+BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS = 5/2;
+BASEPLATE_SCREW_COUNTERBORE_RADIUS = 5.5/2;
+BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
+// ****************************************
 
 // top edge fillet radius
 r_f1 = 0.6;
@@ -93,13 +123,7 @@ bp_rcut_length = 4.25;
 bp_rcut_depth = 2;
 // Baseplate clearance offset
 bp_xy_clearance = 0.5;
-// countersink diameter for baseplate
-d_cs = 2.5;
 // radius of cutout for skeletonized baseplate
 r_skel = 2;
-// baseplate counterbore radius
-r_cb = 2.75;
-// baseplate counterbore depth
-h_cb = 3;
 // minimum baseplate thickness (when skeletonized)
 h_skel = 1;

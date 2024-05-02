@@ -5,6 +5,8 @@
 
 function clp(x,a,b) = min(max(x,a),b);
 
+function is_even(number) = (number%2)==0;
+
 module rounded_rectangle(length, width, height, rad) {
     linear_extrude(height)
     offset(rad)
