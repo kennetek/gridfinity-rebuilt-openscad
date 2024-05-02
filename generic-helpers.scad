@@ -166,6 +166,8 @@ function affine_translate(vector) = [
  *        Centered on origin.
  */
 module sweep_rounded(width=10, length=10) {
+    assert(width > 0 && length > 0);
+
     half_width = width/2;
     half_length = length/2;
     path_points = [
