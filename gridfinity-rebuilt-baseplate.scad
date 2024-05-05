@@ -52,6 +52,9 @@ style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: 
 // enable magnet hole
 enable_magnet = true;
 
+// enable snaps
+enable_snaps = true;
+
 // hole styles
 style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 
@@ -61,7 +64,10 @@ screw_together = (style_plate == 3 || style_plate == 4);
 
 color("tomato")
 gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
-
+if (enable_snaps){
+    translate([((gridx+1)%2)*l_grid/2,((gridy+1)%2)*l_grid/2,0])
+    snap(clearance=0);
+}
 
 // ===== CONSTRUCTION ===== //
 
@@ -114,6 +120,10 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
             }
         }
         if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);
+       if (enable_snaps) {
+            translate([0,0,-off])
+            cutter_snaps(gx,gy);
+       }
     }
 
 }
@@ -205,5 +215,36 @@ module cutter_screw_together(gx, gy, off) {
         pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
         rotate([0,90,0])
         cylinder(h=l_grid/2, d=d_screw, center = true);
+    }
+}
+
+module cutter_snaps(gx, gy) {
+    snaps(gx, gy);
+    rotate([0,0,90])
+    snaps(gy, gx);
+    module snaps(a, b) {
+        copy_mirror([1,0,0])
+        translate([a*(l_grid)/2 - (bp_xy_clearance/2), 0])
+        pattern_linear(1, b, l_grid/2, l_grid)
+        snap();
+    }
+}
+
+module snap(r1=4,r2=5.2,l=1.5,h=1,clearance=0.2){
+r1c = r1+clearance;
+r2c = r2+clearance;
+hc = h+clearance;
+lc = l+clearance;
+mirror([1,0,0])
+hsnap();
+hsnap();
+module hsnap(){
+    hull() {
+        translate([0,-r1c/2,0]){
+        cube([.0001,r1c,hc]); // 0.0001 ≈ 0
+        }
+        translate([lc,-r2c/2,0])
+        cube([.0001,r2c,hc]);
+    }
     }
 }
