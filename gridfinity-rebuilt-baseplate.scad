@@ -52,34 +52,47 @@ style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: 
 // enable magnet hole
 enable_magnet = true;
 
-// enable snaps
-snaps = 0; // [0: None, 1:F-F, 2:F-M, 3:F-0, 4:0-M]
-
 // hole styles
 style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 
 
-// ===== IMPLEMENTATION ===== //
+/* [Snaps] */
+
+// Print a snap to connect F-F
+print_snap = 0; // [0: No, 1:Yes]
+// East side
+snap_east = 0; // [0: None, 1:F, 2:M]
+// North side
+snap_north = 0; // [0: None, 1:F, 2:M]
+// West side
+snap_west = 0; // [0: None, 1:F, 2:M]
+// South side
+snap_south = 0; // [0: None, 1:F, 2:M]
+
+
+/* [Hidden] */
 screw_together = (style_plate == 3 || style_plate == 4);
+// order is: east, north, west, south
+snaps = [snap_east, snap_north, snap_west, snap_south];
 
-
-enable_snaps = snaps != 0 && snaps != 4;
-enable_tabs = snaps == 2 || snaps == 4;
-enable_snaps_one_side = enable_tabs || snaps == 3;
+// ===== IMPLEMENTATION ===== //
 
 color("tomato")
-gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
-if (snaps == 1){
+gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity, snaps);
+if (print_snap){
     translate([((gridx+1)%2)*l_grid/2,((gridy+1)%2)*l_grid/2,0])
     snap(clearance=0);
 }
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity) {
+module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fity, snaps) {
 
     assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
     assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
+
+    f_snaps = [snaps[0]==1, snaps[1]==1, snaps[2]==1, snaps[3]==1];
+    m_snaps = [snaps[0]==2, snaps[1]==2, snaps[2]==2, snaps[3]==2];
 
     gx = gridx == 0 ? floor(dix/length) : gridx;
     gy = gridy == 0 ? floor(diy/length) : gridy;
@@ -125,15 +138,11 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
             }
         }
         if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);
-        if (enable_snaps) {
-            translate([0,0,-off])
-            cutter_snaps(gx,gy);
-        }
-    }
-    if (enable_tabs){
         translate([0,0,-off])
-        adder_snaps(gx,gy);
+        cutter_snaps(gx,gy, f_snaps);
     }
+    translate([0,0,-off])
+    adder_snaps(gx,gy, m_snaps);
 
 }
 
@@ -227,32 +236,32 @@ module cutter_screw_together(gx, gy, off) {
     }
 }
 
-module cutter_snaps(gx, gy) {
-    snaps(gx, gy);
-    rotate([0,0,90])
-    snaps(gy, gx);
-
-    module snaps(a, b) {
-        if (!enable_snaps_one_side){
-            copy_mirror([1,0,0])
-            snaps_one_side(a, b);
-        }   else {
-            snaps_one_side(a, b);
-        }
-    }
+module cutter_snaps(gx, gy, snaps) {
+    snaps_on_sides(gx, gy, snaps, clearance=0.2);
 }
 
-module adder_snaps(gx, gy) {
-    snaps(gx, gy);
-    rotate([0,0,90])
-    snaps(gy, gx);
+module adder_snaps(gx, gy, snaps) {
+    snaps_on_sides(gx, gy, snaps, clearance=0);
+}
 
-    module snaps(a, b) {
+module snaps_on_sides(gx, gy, sides = [false,false,false,false], clearance=0.2) {
+    if (sides[0]){
+        snaps_one_side(gx, gy, clearance=clearance);
+    }
+    if (sides[2]){
         mirror([1,0,0])
-        snaps_one_side(a, b, clearance=0);
+        snaps_one_side(gx, gy, clearance=clearance);
+    }
+    if (sides[1]){
+        rotate([0,0,90])
+        snaps_one_side(gy, gx, clearance=clearance);
+    }
+    if (sides[3]){
+        rotate([0,0,90])
+        mirror([1,0,0])
+        snaps_one_side(gy, gx, clearance=clearance);
     }
 }
-
 
 module snaps_one_side(a, b, clearance=0.2) {
     translate([a*(l_grid)/2 - (bp_xy_clearance/2), 0])
