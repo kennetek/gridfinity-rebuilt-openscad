@@ -387,7 +387,7 @@ module block_vase_base() {
 
 module block_inset() {
     ixx = (gridx*l_grid-0.5)/2;
-    iyy = d_height/1.875;
+    iyy = d_height/2.1;
     izz = sqrt(ixx^2+iyy^2)*tan(40);
     if (enable_scoop_chamfer && enable_inset)
     difference() {
