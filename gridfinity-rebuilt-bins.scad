@@ -25,15 +25,15 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 
 /* [Setup Parameters] */
 $fa = 8;
-$fs = 0.25;
+$fs = 0.25; // .01
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 3;
+gridx = 3; //.5
 // number of bases along y-axis
-gridy = 2;
+gridy = 2; //.5
 // bin height. See bin height information and "gridz_define" below.
-gridz = 6;
+gridz = 6; //.1
 
 /* [Linear Compartments] */
 // number of X Divisions (set to zero to have solid bin)
@@ -49,13 +49,13 @@ cdivy = 0;
 // orientation
 c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
 // diameter of cylindrical cut outs
-cd = 10;
+cd = 10; // .1
 // cylinder height
-ch = 1;
+ch = 1;  //.1
 // spacing to lid
 c_depth = 1;
 // chamfer around the top rim of the holes
-c_chamfer = 0.5;
+c_chamfer = 0.5; // .1
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
