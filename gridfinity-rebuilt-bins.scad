@@ -153,6 +153,30 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 gridfinityBase(3, 3, 42, 0, 0, 1);
 */
 
+// Shapes can also be cut in an indentation by using cut_indent() instead of cut_move(). To cut multiple shapes into one indented compartment use indent() in combination with cut_move().
+/*
+gridfinityInit(2, 2, height(6), 0, 42) {
+
+    cut_indent(14, 0, 0, 1, 1, enable_fillet=false)
+        sphere(12);
+
+    indent(height(4), 1, 0, 1, 2) {
+        cut_move($indent_x, $indent_y, $indent_w, $indent_h/2) {
+            cube([20,20,20], true);
+            rotate([0,0,45]) cube([20,20,20], true);
+        }
+
+        cut_move($indent_x, $indent_y+1, $indent_w, $indent_h/2)
+            translate([0, 0, -10])
+                cylinder(20, r=12, true);
+    }
+
+    cut(0, 1, 1, 1);
+}
+gridfinityBase(2, 2, 42, 0, 0, 1);
+//*/
+
+
 // You can use loops as well as the bin dimensions to make different parametric functions, such as this one, which divides the box into columns, with a small 1x1 top compartment and a long vertical compartment below
 /*
 gx = 3;

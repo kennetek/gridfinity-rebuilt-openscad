@@ -196,6 +196,46 @@ module cut_move(x, y, w, h) {
     children();
 }
 
+
+// Cuts an indentation at the requested compartment block and moves objects down to the new top surface height
+// Use in conjunction with cut_move()
+// d:   indent depth
+// x:   start coord. x=0 is the left side of the bin.
+// y:   start coord. y=0 is the bottom side of the bin.
+// w:   width of compartment, in # of bases covered
+// h:   height of compartment, in # of bases covered
+// enable_fillet:   add a fillet between the surface of the indentation and the wall
+module indent(d, x = 0, y = 0, w = $gxx, h = $gyy, enable_fillet = true) {
+
+    $indent_d = d;
+    $indent_x = x;
+    $indent_y = y;
+    $indent_w = w;
+    $indent_h = h;
+
+    grid_to_mm = l_grid - d_wall*2;
+        
+    translate([0, 0, -d]) {
+        if (enable_fillet)
+            translate([0, 0, $dh - h_bot])
+                cut(x, y, w, h, t=5, s=0);
+        else
+            cut_move(x, y, w, h)
+                rounded_rectangle(w*grid_to_mm, h*grid_to_mm, d*2, r_f2);
+
+        children();
+    }
+}
+
+// Cuts an indentation at the requested compartment and translates objects from the origin point to the center of the indentation. Combines indent() and cut_move().
+// See indent() module for parameter descriptions
+module cut_indent(d, x = 0, y = 0, w = $gxx, h = $gyy, enable_fillet = true) {
+    indent(d, x, y, w, h, enable_fillet)
+        cut_move(x, y, w, h)
+            children();
+}
+
+
 // ===== Modules ===== //
 
 module profile_base() {
