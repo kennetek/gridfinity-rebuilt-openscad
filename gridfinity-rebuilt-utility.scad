@@ -85,10 +85,10 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
 //         set n_div values to 0 for a solid bin
 // cylinder_diameter: diameter of cutouts
 // cylinder_height: height of cutouts
-// coutout_depth: offset from top to solid part of container
+// cutout_depth: offset from top to solid part of container
 // orientation: orientation of cylinder cutouts (0 = x direction, 1 = y direction, 2 = z direction)
 // chamfer: chamfer around the top rim of the holes
-module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, coutout_depth=0, orientation=0, chamfer=0.5) {
+module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, cutout_depth=0, orientation=0, chamfer=0.5, cutout_fillet=false) {
     rotation = (orientation == 0)
             ? [0,90,0]
             : (orientation == 1)
@@ -101,19 +101,15 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     cutout_x = gridx_mm - d_wall*2;
     cutout_y = gridy_mm - d_wall*2;
 
-    cut_move(x=0, y=0, w=$gxx, h=$gyy) {
-        translate([0,0,-coutout_depth]) {
-            rounded_rectangle(cutout_x, cutout_y, coutout_depth*2, r_base);
-
-            pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding)/n_divx, sy=(gridy_mm - padding)/n_divy)
-                rotate(rotation)
-                    union() {
-                        cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true);
-                        if (chamfer > 0) {
-                            translate([0,0,-chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter+4*chamfer, h=2*chamfer);
-                        }
-                    };
-        }
+    cut_indent(cutout_depth,x=0, y=0, w=$gxx, h=$gyy, enable_fillet=cutout_fillet) {
+        pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding)/n_divx, sy=(gridy_mm - padding)/n_divy)
+            rotate(rotation)
+                union() {
+                    cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true);
+                    if (chamfer > 0) {
+                        translate([0,0,-chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter+4*chamfer, h=2*chamfer);
+                    }
+                };
     }
 }
 
@@ -195,6 +191,46 @@ module cut_move(x, y, w, h) {
     cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
     children();
 }
+
+
+// Cuts an indentation at the requested compartment block and moves objects down to the new top surface height
+// Use in conjunction with cut_move()
+// d:   indent depth
+// x:   start coord. x=0 is the left side of the bin.
+// y:   start coord. y=0 is the bottom side of the bin.
+// w:   width of compartment, in # of bases covered
+// h:   height of compartment, in # of bases covered
+// enable_fillet:   add a fillet between the surface of the indentation and the wall
+module indent(d, x = 0, y = 0, w = $gxx, h = $gyy, enable_fillet = true) {
+
+    $indent_d = d;
+    $indent_x = x;
+    $indent_y = y;
+    $indent_w = w;
+    $indent_h = h;
+
+    grid_to_mm = l_grid - d_wall*2;
+        
+    translate([0, 0, -d]) {
+        if (enable_fillet)
+            translate([0, 0, $dh - h_bot])
+                cut(x, y, w, h, t=5, s=0);
+        else
+            cut_move(x, y, w, h)
+                rounded_rectangle(w*grid_to_mm, h*grid_to_mm, d*2, r_f2);
+
+        children();
+    }
+}
+
+// Cuts an indentation at the requested compartment and translates objects from the origin point to the center of the indentation. Combines indent() and cut_move().
+// See indent() module for parameter descriptions
+module cut_indent(d, x = 0, y = 0, w = $gxx, h = $gyy, enable_fillet = true) {
+    indent(d, x, y, w, h, enable_fillet)
+        cut_move(x, y, w, h)
+            children();
+}
+
 
 // ===== Modules ===== //
 
