@@ -54,6 +54,8 @@ cd = 10;
 ch = 1;
 // spacing to lid
 c_depth = 1;
+// fillet between indentation and walls
+c_fillet = false;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5;
 
@@ -95,7 +97,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
 
     } else if (cdivx > 0 && cdivy > 0) {
 
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, cutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer,cutout_fillet=c_fillet);
     }
 }
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
