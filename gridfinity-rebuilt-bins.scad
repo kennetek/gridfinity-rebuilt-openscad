@@ -6,6 +6,7 @@ include <gridfinity-rebuilt-utility.scad>
  the magnet holes can have an extra cut in them to make it easier to print without supports
  tabs will automatically be disabled when gridz is less than 3, as the tabs take up too much space
  base functions can be found in "gridfinity-rebuilt-utility.scad"
+ comments like ' //.5' after variables are intentional and used by the customizer
  examples at end of file
 
  BIN HEIGHT
