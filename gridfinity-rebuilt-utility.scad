@@ -136,6 +136,8 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
         if ($style_lip == 0) profile_wall(h);
         else profile_wall2(h);
     }
+
+    if ((style_lip == 0) && stacking_tabs) generate_tabs(h);
 }
 // Function to include in the custom() module to individually slice bins
 // Will try to clamp values to fit inside the provided base size
@@ -623,4 +625,50 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
 
+}
+
+module generate_tabs(height_mm) {
+    if ($gxx > 1) {
+        for (xtab=[1:$gxx-1]) {
+            lip_tab(xtab, 0, height_mm);
+            lip_tab(xtab, $gyy, height_mm);
+        }
+    }
+
+    if ($gyy > 1) {
+        for (ytab=[1:$gyy-1]) {
+            lip_tab(0, ytab, height_mm);
+            lip_tab($gxx, ytab, height_mm);
+        }
+    }
+}
+
+module lip_tab(x, y, height_mm) {
+    //Calculate rotation of lip based on which edge it is on
+    rot = (x == $gxx) ? 0 : ((x == 0) ? 180 : ((y == $gyy) ? 90 : 270));
+    wall_thickness = r_base-r_c2+d_clear*2-r_c1;
+
+    translate(
+        [(x * l_grid) - ((l_grid * $gxx / 2)),
+         (y * l_grid) - ((l_grid * $gyy / 2)),
+         $dh+h_base]) {
+        rotate([0, 0, rot])
+        translate([-r_base-d_clear,-r_base,0]) {
+            //Extrude the wall profile in circle; same as you would at a corner of bin
+            //Intersection - limit it to the section where the lip would not interfere with the base
+            intersection() {
+                translate([wall_thickness, -r_base*1.5, 0]) cube([wall_thickness, r_base*5, (h_lip)*5]);
+                translate([0,0,-$dh]) union() {
+                    rotate_extrude(angle=90) profile_wall(height_mm);
+                    translate([0, r_base*2, 0]) rotate_extrude(angle=-90) profile_wall(height_mm);
+                }
+            }
+            //Fill the gap between rotational extrusions (think of it as the gap between bins, if this was multiple bins instead of tabs)
+            difference() {
+                translate([wall_thickness, 0, -h_lip*0.5]) cube([(r_base-wall_thickness)-r_f1, r_base*2, h_lip*1.5]);
+                cylinder(h=h_lip*3, r=r_base-r_f1, center=true);
+                translate([0, r_base*2, 0]) cylinder(h=h_lip*3, r=r_base-r_f1, center=true);
+            }
+        }
+    }
 }
