@@ -1,0 +1,24 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Default": {
+            "$fa": "8",
+            "$fs": "0.25",
+            "d_screw": "3.3500000000000001",
+            "d_screw_head": "5",
+            "distancex": "0",
+            "distancey": "0",
+            "chamfer_holes": "true",
+            "crush_ribs": "true",
+            "enable_magnet": "true",
+            "fitx": "0",
+            "fity": "0",
+            "gridx": "1",
+            "gridy": "1",
+            "n_screws": "1",
+            "screw_spacing": "0.5",
+            "style_hole": "1",
+            "style_plate": "2"
+        }
+    }
+}

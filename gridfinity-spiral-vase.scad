@@ -15,7 +15,7 @@ $fa = 8;
 $fs = 0.25;
 
 /* [Bin or Base] */
-type = 0; // [0:bin, 1:base]
+type = 1; // [0:bin, 1:base]
 
 /* [Printer Settings] */
 // extrusion width (walls will be twice this size)
@@ -161,7 +161,7 @@ module gridfinityBaseVase() {
         intersection() {
             block_base_blank(0);
             translate([0,0,-h_base-1])
-            rounded_rectangle(l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10, r_fo1+0.001);
+            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10], r_fo1+0.001, center=true);
         }
         translate([0,0,0.01])
         difference() {
@@ -202,28 +202,34 @@ module gridfinityBaseVase() {
 }
 
 module block_magnet_blank(o = 0, half = true) {
+    magnet_radius = MAGNET_HOLE_RADIUS + o;
+
     translate([d_hole/2,d_hole/2,-h_base+0.1])
     difference() {
         hull() {
-            cylinder(r = r_hole2+o, h = h_hole*2, center = true);
-            cylinder(r = (r_hole2+o)-(h_base+0.1-h_hole), h = (h_base+0.1)*2, center = true);
+            cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
+            cylinder(r = magnet_radius-(h_base+0.1-MAGNET_HOLE_DEPTH), h = (h_base+0.1)*2, center = true);
         }
         if (half)
         mirror([0,0,1])
-        cylinder(r=(r_hole2+o)*2, h = (h_base+0.1)*4);
+        cylinder(r=magnet_radius*2, h = (h_base+0.1)*4);
     }
 }
 
 module block_base_blank(o = 0) {
     mirror([0,0,1]) {
         hull() {
-            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, h_base, r_fo3);
-            rounded_square(l_grid-o-0.05-2*r_c2, h_base-r_c1, r_fo2);
+            linear_extrude(h_base)
+            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, r_fo3, center=true);
+            linear_extrude(h_base-r_c1)
+            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
         }
         hull() {
-            rounded_square(l_grid-o-0.05-2*r_c2, r_c2, r_fo2);
+            linear_extrude(r_c2)
+            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
             mirror([0,0,1])
-            rounded_square(l_grid-o-0.05, d_bottom, r_fo1);
+            linear_extrude(d_bottom)
+            rounded_square(l_grid-o-0.05, r_fo1, center=true);
         }
     }
 }
@@ -521,7 +527,7 @@ module transform_scoop() {
 
 module block_vase(h = d_height*2) {
     translate([0,0,-0.1])
-    rounded_rectangle(gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h, r_base+0.01-nozzle/2);
+    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h], r_base+0.01-nozzle/2, center=true);
 }
 
 module profile_x(x_f = 3) {
