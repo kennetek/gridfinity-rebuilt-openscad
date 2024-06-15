@@ -48,7 +48,7 @@ fity = 0; // [-1:0.1:1]
 /* [Styles] */
 
 // baseplate styles
-style_plate = 2; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
+style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
 
 
 // hole styles
@@ -67,79 +67,161 @@ hole_options = bundle_hole_options(refined_hole=false, magnet_hole=enable_magnet
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
-gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, hole_options, style_hole, fitx, fity);
+gridfinityBaseplate([gridx, gridy], l_grid, [distancex, distancey], style_plate, hole_options, style_hole, [fitx, fity]);
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, hole_options, sh, fitx, fity) {
+/**
+ * @brief Create a baseplate.
+ * @param grid_size_bases Number of Gridfinity bases.
+ *        2d Vector. [x, y].
+ *        Set to [0, 0] to auto calculate using min_size_mm.
+ * @param length X,Y size of a single Gridfinity base.
+ * @param min_size_mm Minimum size of the baseplate. [x, y]
+ *                    Extra space is filled with solid material.
+ *                    Enables "Fit to Drawer."
+ * @param sp Baseplate Style
+ * @param hole_options
+ * @param sh Style of screw hole allowing the baseplate to be mounted to something.
+ * @param fit_offset Determines where padding is added.
+ */
+module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_options, sh, fit_offset = [0, 0]) {
 
-    assert(gridx > 0 || dix > 0, "Must have positive x grid amount!");
-    assert(gridy > 0 || diy > 0, "Must have positive y grid amount!");
+    assert(is_list(grid_size_bases) && len(grid_size_bases) == 2,
+        "grid_size_bases must be a 2d list");
+    assert(is_list(min_size_mm) && len(min_size_mm) == 2,
+        "min_size_mm must be a 2d list");
+    assert(is_list(fit_offset) && len(fit_offset) == 2,
+        "fit_offset must be a 2d list");
+    assert(grid_size_bases.x > 0 || min_size_mm.x > 0,
+        "Must have positive x grid amount!");
+    assert(grid_size_bases.y > 0 || min_size_mm.y > 0,
+        "Must have positive y grid amount!");
 
-    gx = gridx == 0 ? floor(dix/length) : gridx;
-    gy = gridy == 0 ? floor(diy/length) : gridy;
-    dx = max(gx*length-bp_xy_clearance, dix);
-    dy = max(gy*length-bp_xy_clearance, diy);
+    additional_height = calculate_offset(sp, hole_options[1], sh);
 
-    off = calculate_offset(sp, hole_options[1], sh);
+    // Final height of the baseplate. In mm.
+    baseplate_height_mm = additional_height + BASEPLATE_LIP_MAX.y;
 
-    offsetx = dix < dx ? 0 : (gx*length-bp_xy_clearance-dix)/2*fitx*-1;
-    offsety = diy < dy ? 0 : (gy*length-bp_xy_clearance-diy)/2*fity*-1;
+    // Final size in number of bases
+    grid_size = [for (i = [0:1])
+        grid_size_bases[i] == 0 ? floor(min_size_mm[i]/length) : grid_size_bases[i]];
+
+    // Final size of the base before padding. In mm.
+    grid_size_mm = concat(grid_size * length, [baseplate_height_mm]);
+
+    // Final size, including padding. In mm.
+    size_mm = [
+        max(grid_size_mm.x, min_size_mm.x),
+        max(grid_size_mm.y, min_size_mm.y),
+        baseplate_height_mm
+    ];
+
+    // Amount of padding needed to fit to a specific drawer size. In mm.
+    padding_mm = size_mm - grid_size_mm;
+
+    is_padding_needed = padding_mm != [0, 0, 0];
+
+    //Convert the fit offset to percent of how much will be added to the positive axes.
+    // -1 : 1 -> 0 : 1
+    fit_percent_positive = [for (i = [0:1]) (fit_offset[i] + 1) / 2];
+
+    padding_start_point = -grid_size_mm/2 -
+        [
+            padding_mm.x * (1 - fit_percent_positive.x),
+            padding_mm.y * (1 - fit_percent_positive.y),
+            -grid_size_mm.z/2
+        ];
+
+    corner_points = [
+        padding_start_point + [size_mm.x, size_mm.y, 0],
+        padding_start_point + [0, size_mm.y, 0],
+        padding_start_point,
+        padding_start_point + [size_mm.x, 0, 0],
+    ];
+
+    echo(str("Number of Grids per axes (X, Y)]: ", grid_size));
+    echo(str("Final size (in mm): ", size_mm));
+    if (is_padding_needed) {
+        echo(str("Padding +X (in mm): ", padding_mm.x * fit_percent_positive.x));
+        echo(str("Padding -X (in mm): ", padding_mm.x * (1 - fit_percent_positive.x)));
+        echo(str("Padding +Y (in mm): ", padding_mm.y * fit_percent_positive.y));
+        echo(str("Padding -Y (in mm): ", padding_mm.y * (1 - fit_percent_positive.y)));
+    }
 
     screw_together = sp == 3 || sp == 4;
     minimal = sp == 0 || sp == 4;
 
     difference() {
-        pattern_linear(gx, gy, length) {
-            difference() {
-                if (minimal) {
-                    square_baseplate_lip(off);
-                } else {
-                    solid_square_baseplate(off);
-                }
+        union() {
+            // Baseplate itself
+            pattern_linear(grid_size.x, grid_size.y, length) {
+                // Single Baseplate piece
+                difference() {
+                    if (minimal) {
+                        square_baseplate_lip(additional_height);
+                    } else {
+                        solid_square_baseplate(additional_height);
+                    }
 
-                // Bottom/through pattern for the solid baseplates.
-                if (sp == 1) {
-                    cutter_weight();
-                } else if (sp == 2 || sp == 3) {
-                    translate([0,0,-TOLLERANCE])
-                    linear_extrude(off+2*TOLLERANCE)
-                    profile_skeleton();
-                }
+                    // Bottom/through pattern for the solid baseplates.
+                    if (sp == 1) {
+                        cutter_weight();
+                    } else if (sp == 2 || sp == 3) {
+                        translate([0,0,-TOLLERANCE])
+                        linear_extrude(additional_height + (2 * TOLLERANCE))
+                        profile_skeleton();
+                    }
 
-                // Add holes to the solid baseplates.
-                hole_pattern(){
-                    // Manget hole
-                    translate([0, 0, off+TOLLERANCE])
-                    mirror([0, 0, 1])
-                    block_base_hole(hole_options);
+                    // Add holes to the solid baseplates.
+                    hole_pattern(){
+                        // Manget hole
+                        translate([0, 0, additional_height+TOLLERANCE])
+                        mirror([0, 0, 1])
+                        block_base_hole(hole_options);
 
-                    translate([0,0,-TOLLERANCE])
-                    if (sh == 1) {
-                        cutter_countersink();
-                    } else if (sh == 2) {
-                        cutter_counterbore();
+                        translate([0,0,-TOLLERANCE])
+                        if (sh == 1) {
+                            cutter_countersink();
+                        } else if (sh == 2) {
+                            cutter_counterbore();
+                        }
                     }
                 }
+            }
 
+            // Padding
+            if (is_padding_needed) {
+                render()
+                difference() {
+                    translate(padding_start_point)
+                    cube(size_mm);
+
+                    translate([
+                        -grid_size_mm.x/2,
+                        -grid_size_mm.y/2,
+                        0
+                    ])
+                    cube(grid_size_mm);
+                }
             }
         }
 
-        // Round the outside corners
-        corner_center_distance = length/2;
-        copy_mirror([0, 1, 0])
-        copy_mirror([1, 0, 0])
-        translate([
-            (gx*length/2) - BASEPLATE_OUTSIDE_RADIUS,
-            (gy*length/2) - BASEPLATE_OUTSIDE_RADIUS,
-            -TOLLERANCE
-        ])
-        scale([1+TOLLERANCE, 1+TOLLERANCE, 1+2*TOLLERANCE])
-        square_baseplate_corner(off);
+        // Round the outside corners (Including Padding)
+        for(i = [0:len(corner_points) - 1]) {
+                point = corner_points[i];
+                translate([
+                point.x + (BASEPLATE_OUTSIDE_RADIUS * -sign(point.x)),
+                point.y + (BASEPLATE_OUTSIDE_RADIUS * -sign(point.y)),
+                0
+            ])
+            rotate([0, 0, i*90])
+            square_baseplate_corner(additional_height, true);
+        }
 
         if (screw_together) {
-            translate([0, 0, off])
-            cutter_screw_together(gx, gy, off);
+            translate([0, 0, additional_height/2])
+            cutter_screw_together(grid_size.x, grid_size.y, length);
         }
     }
 }
@@ -201,14 +283,21 @@ module cutter_counterbore(){
 
 /**
  * @brief Added or removed from the baseplate to square off or round the corners.
- * @param height Baseplate's height excluding lip and clearance height.
+ * @param height Baseplate's height, excluding lip and clearance height.
+ * @param subtract If the corner should be scaled to allow subtraction.
  */
-module square_baseplate_corner(height=0) {
+module square_baseplate_corner(height=0, subtract=false) {
     assert(height >= 0);
-    linear_extrude(height + BASEPLATE_LIP_MAX.y)
+    assert(is_bool(subtract));
+
+    subtract_ammount = subtract ? TOLLERANCE : 0;
+
+    translate([0, 0, -subtract_ammount])
+    linear_extrude(height + BASEPLATE_LIP_MAX.y + (2 * subtract_ammount))
     difference() {
-        square(BASEPLATE_OUTSIDE_RADIUS, center=false);
-        circle(r=BASEPLATE_OUTSIDE_RADIUS-TOLLERANCE);
+        square(BASEPLATE_OUTSIDE_RADIUS + subtract_ammount , center=false);
+        // TOLLERANCE needed to prevent a gap
+        circle(r=BASEPLATE_OUTSIDE_RADIUS - TOLLERANCE);
     }
 }
 
@@ -248,7 +337,10 @@ module baseplate_lip(height=0, width=l_grid, length=l_grid) {
  */
 module square_baseplate_lip(height=0, size = l_grid) {
     assert(height >= 0 && size/2 >= BASEPLATE_OUTSIDE_RADIUS);
+
     corner_center_distance = size/2 - BASEPLATE_OUTSIDE_RADIUS;
+
+    render(convexity = 2) // Fixes ghosting in preview
     union() {
         baseplate_lip(height, size, size);
         pattern_circular(4)
@@ -260,15 +352,17 @@ module square_baseplate_lip(height=0, size = l_grid) {
 /**
  * @brief A single baseplate with square corners, a solid inner section, lip and the set clearance height.
  * @param height Baseplate's height excluding lip and clearance height.
+ * @param size Width/Length of a single baseplate.  Only set if deviating from the standard!
  * @details A height of zero is the equivalent of just calling square_baseplate_lip()
  */
-module solid_square_baseplate(height=0, length = l_grid) {
-    assert(height >= 0);
+module solid_square_baseplate(height=0, size = l_grid) {
+    assert(height >= 0 && size > 0);
+
     union() {
-        square_baseplate_lip(height, length);
+        square_baseplate_lip(height, size);
         if (height > 0) {
             linear_extrude(height)
-            square(length - BASEPLATE_OUTSIDE_RADIUS, center=true);
+            square(size - BASEPLATE_OUTSIDE_RADIUS, center=true);
         }
     }
 }
@@ -295,7 +389,7 @@ module profile_skeleton(size=l_grid) {
     }
 }
 
-module cutter_screw_together(gx, gy, off) {
+module cutter_screw_together(gx, gy, size = l_grid) {
 
     screw(gx, gy);
     rotate([0,0,90])
@@ -303,10 +397,10 @@ module cutter_screw_together(gx, gy, off) {
 
     module screw(a, b) {
         copy_mirror([1,0,0])
-        translate([a*l_grid/2, 0, -off/2])
-        pattern_linear(1, b, 1, l_grid)
+        translate([a*size/2, 0, 0])
+        pattern_linear(1, b, 1, size)
         pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
         rotate([0,90,0])
-        cylinder(h=l_grid/2, d=d_screw, center = true);
+        cylinder(h=size/2, d=d_screw, center = true);
     }
 }
