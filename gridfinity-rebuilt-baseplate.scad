@@ -113,7 +113,7 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, sm, sh, fitx, fit
                 }
             }
         }
-        if (sp == 3 || sp ==4) cutter_screw_together(gx, gy, off);
+        if (sp == 3 || sp == 4) cutter_screw_together(gx, gy, off);
     }
 
 }
