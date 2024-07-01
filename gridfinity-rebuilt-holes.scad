@@ -235,7 +235,29 @@ module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_a
  * @param supportless If the magnet/screw hole should be printed in such a way that the screw hole does not require supports.
  */
 function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
+    assert(
+        is_bool(refined_hole) &&
+        is_bool(magnet_hole) &&
+        is_bool(screw_hole) &&
+        is_bool(crush_ribs) &&
+        is_bool(chamfer) &&
+        is_bool(supportless))
     [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];
+
+/**
+ * @summary Ensures that hole options are valid, and can be used.
+ */
+module assert_hole_options_valid(hole_options) {
+    assert(is_list(hole_options) && len(hole_options) == 6);
+    for(option=hole_options){
+        assert(is_bool(option), "One or more hole options is not a boolean value!");
+    }
+    refined_hole = hole_options[0];
+    magnet_hole = hole_options[1];
+    if(refined_hole) {
+        assert(!magnet_hole, "magnet_hole is not compatible with refined_hole");
+    }
+}
 
 /**
  * @brief A single magnet/screw hole.  To be cut out of the base.
@@ -244,7 +266,8 @@ function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=f
  * @param o Offset
  */
 module block_base_hole(hole_options, o=0) {
-    assert(is_list(hole_options));
+    assert_hole_options_valid(hole_options);
+    assert(is_num(o));
 
     // Destructure the options
     refined_hole = hole_options[0];
@@ -253,11 +276,6 @@ module block_base_hole(hole_options, o=0) {
     crush_ribs = hole_options[3];
     chamfer = hole_options[4];
     supportless = hole_options[5];
-
-    // Validate said options
-    if(refined_hole) {
-        assert(!magnet_hole, "magnet_hole is not compatible with refined_hole");
-    }
 
     screw_radius = SCREW_HOLE_RADIUS - (o/2);
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
