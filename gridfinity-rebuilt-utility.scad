@@ -6,6 +6,7 @@
 
 include <standard.scad>
 use <generic-helpers.scad>
+use <gridfinity-rebuilt-holes.scad>
 
 // ===== User Modules ===== //
 
@@ -209,7 +210,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -226,61 +227,49 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
         translate([0,0,-1])
         rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
 
-        if((style_hole != 0) && (only_corners)) {
+        if(only_corners) {
             difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
-                if (style_hole == 4) {
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
-                    refined_hole();
-                    mirror([1, 0, 0])
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
-                    refined_hole();
-                    mirror([0, 1, 0]) {
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
-                        refined_hole();
-                        mirror([1, 0, 0])
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
-                        refined_hole();
+
+                copy_mirror([0, 1, 0]) {
+                    copy_mirror([1, 0, 0]) {
+                        translate([
+                            (gx/2)*l_grid - d_hole_from_side,
+                            (gy/2) * l_grid - d_hole_from_side,
+                            0
+                        ])
+                        block_base_hole(hole_options, off);
                     }
-                }
-                else {
-                    pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
-                    block_base_hole(style_hole, off);
                 }
             }
         }
         else {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-            block_base(gx, gy, l, dbnx, dbny, style_hole, off);
+            block_base(gx, gy, l, dbnx, dbny, hole_options, off);
         }
     }
 }
 
 /**
- * @brief A single Gridfinity base.
+ * @brief A single Gridfinity base.  With holes (if set).
  * @param gx
  * @param gy
  * @param l
  * @param dbnx
  * @param dbny
- * @param style_hole
+ * @param hole_options @see block_base_hole.hole_options
  * @param off
  */
-module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
+module block_base(gx, gy, l, dbnx, dbny, hole_options, off) {
     render(convexity = 2)
     difference() {
         block_base_solid(dbnx, dbny, l, off);
 
-        if (style_hole > 0)
-            pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
-            if (style_hole == 4)
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, h_slit*2])
-                refined_hole();
-            else
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-                block_base_hole(style_hole, off);
-        }
+        pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
+        translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
+        block_base_hole(hole_options, off);
+    }
 }
 
 /**
@@ -307,56 +296,6 @@ module block_base_solid(dbnx, dbny, l, o) {
             rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2);
             mirror([0,0,1])
             rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1);
-        }
-    }
-}
-
-module block_base_hole(style_hole, o=0) {
-    r1 = r_hole1-o/2;
-    r2 = r_hole2-o/2;
-    union() {
-        difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r=r2, center=true);
-
-            if (style_hole==3)
-            copy_mirror([0,1,0])
-            translate([-1.5*r2,r1+0.1,h_hole-o])
-            cube([r2*3,r2*3, 10]);
-        }
-        if (style_hole > 1)
-        cylinder(h = 2*h_base-o, r = r1, center=true);
-    }
-}
-
-
-module refined_hole() {
-    /**
-    * Refined hole based on Printables @grizzie17's Gridfinity Refined
-    * https://www.printables.com/model/413761-gridfinity-refined
-    */
-
-    // Meassured magnet hole diameter to be 5.86mm (meassured in fusion360
-    r = r_hole2-0.32;
-
-    // Magnet height
-    m = 2;
-    mh = m-0.1;
-
-    // Poke through - For removing a magnet using a toothpick
-    ptl = h_slit*3; // Poke Through Layers
-    pth = mh+ptl; // Poke Through Height
-    ptr = 2.5; // Poke Through Radius
-
-    union() {
-        hull() {
-            // Magnet hole - smaller than the magnet to keep it squeezed
-            translate([10, -r, 0]) cube([1, r*2, mh]);
-            cylinder(1.9, r=r);
-        }
-        hull() {
-            // Poke hole
-            translate([-9+5.60, -ptr/2, -ptl]) cube([1, ptr, pth]);
-            translate([-12.53+5.60, 0, -ptl]) cylinder(pth, d=ptr);
         }
     }
 }

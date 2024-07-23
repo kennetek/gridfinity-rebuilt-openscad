@@ -1,0 +1,36 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Default": {
+            "$fa": "8",
+            "$fs": "0.25",
+            "c_chamfer": "0.5",
+            "c_depth": "1",
+            "c_orientation": "2",
+            "cd": "10",
+            "cdivx": "0",
+            "cdivy": "0",
+            "ch": "1",
+            "chamfer_holes": "true",
+            "crush_ribs": "true",
+            "div_base_x": "0",
+            "div_base_y": "0",
+            "divx": "0",
+            "divy": "0",
+            "enable_zsnap": "false",
+            "gridx": "1",
+            "gridy": "1",
+            "gridz": "6",
+            "gridz_define": "0",
+            "height_internal": "0",
+            "magnet_holes": "false",
+            "only_corners": "false",
+            "printable_hole_top": "true",
+            "refined_holes": "true",
+            "scoop": "0",
+            "screw_holes": "false",
+            "style_lip": "0",
+            "style_tab": "1"
+        }
+    }
+}
