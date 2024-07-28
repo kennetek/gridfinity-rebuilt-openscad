@@ -210,7 +210,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, single_hole=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -218,25 +218,27 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
     xx = gx*l-0.5;
     yy = gy*l-0.5;
 
-    if (final_cut)
-    translate([0,0,h_base])
-    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1+0.001);
+    if (final_cut) {
+        translate([0,0,h_base])
+        rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1+0.001);
+    }
 
     intersection(){
-        if (final_cut)
-        translate([0,0,-1])
-        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
+        if (final_cut) {
+            translate([0,0,-1])
+            rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
+        }
 
         if(only_corners) {
             difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-                block_base(gx, gy, l, dbnx, dbny, 0, off);
+                block_base(gx, gy, l, dbnx, dbny, [], off);
 
                 copy_mirror([0, 1, 0]) {
                     copy_mirror([1, 0, 0]) {
                         translate([
-                            (gx/2)*l_grid - d_hole_from_side,
-                            (gy/2) * l_grid - d_hole_from_side,
+                            (gx/2)*l_grid - (single_hole ? l_grid/2 : d_hole_from_side),
+                            (gy/2)*l_grid - (single_hole ? l_grid/2 : d_hole_from_side),
                             0
                         ])
                         block_base_hole(hole_options, off);
@@ -246,13 +248,29 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
         }
         else {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-            block_base(gx, gy, l, dbnx, dbny, hole_options, off);
+            block_base(gx, gy, l, dbnx, dbny, hole_options, off, single_hole=single_hole);
         }
     }
 }
 
 /**
- * @brief A single Gridfinity base.  With holes (if set).
+ * @brief Apply hole pattern to children
+ * @param l
+ * @param single_hole Use a single hole, default = false
+ */
+module hole_pattern(l, single_hole=false){
+    hole_offset = single_hole ? 0 : l/2 - d_hole_from_side;
+    steps= (single_hole || abs(l - d_hole_from_side/2) < 0.001) ? 1 : 4;
+
+    pattern_circular(steps)
+    translate([hole_offset, hole_offset, 0]) {
+        render();
+        children();
+    }
+}
+
+/**
+ * @brief A single Gridfinity base. With holes (if set).
  * @param gx
  * @param gy
  * @param l
@@ -261,14 +279,14 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
  * @param hole_options @see block_base_hole.hole_options
  * @param off
  */
-module block_base(gx, gy, l, dbnx, dbny, hole_options, off) {
+module block_base(gx, gy, l, dbnx, dbny, hole_options, off, single_hole=false) {
     render(convexity = 2)
     difference() {
         block_base_solid(dbnx, dbny, l, off);
-
-        pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
-        translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-        block_base_hole(hole_options, off);
+  
+        hole_pattern(l, single_hole=single_hole) {
+          block_base_hole(hole_options, off);
+        }
     }
 }
 

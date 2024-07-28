@@ -48,11 +48,14 @@ fity = 0; // [-1:0.1:1]
 /* [Styles] */
 
 // baseplate styles
-style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal]
+style_plate = 0; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: screw together minimal, 5:crosshair, 6:screw together crosshair]
 
 
 // hole styles
 style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
+
+// spoke width of crosshair
+spoke_width = 3; // [2:1:24]
 
 /* [Magnet Hole] */
 // Baseplate will have holes for 6mm Diameter x 2mm high magnets.
@@ -64,11 +67,11 @@ chamfer_holes = true;
 
 hole_options = bundle_hole_options(refined_hole=false, magnet_hole=enable_magnet, screw_hole=false, crush_ribs=crush_ribs, chamfer=chamfer_holes, supportless=false);
 
+
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
 gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, hole_options, style_hole, fitx, fity);
-
 
 // ===== CONSTRUCTION ===== //
 
@@ -109,9 +112,12 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, hole_options, sh,
                 else if (sp == 4)
                     translate([0,0,-5*(h_base+off)])
                     rounded_square(length-2*r_c2-2*r_c1, 10*(h_base+off), r_fo3);
+                else if (sp == 5 || sp == 6)
+                    linear_extrude(10*(h_base+off), center = true)
+                    profile_crosshair();
 
-
-                hole_pattern(){
+                single_hole=sp==5||sp==6;
+                hole_pattern(l=l_grid, single_hole){
                     mirror([0, 0, 1])
                     block_base_hole(hole_options);
 
@@ -121,15 +127,14 @@ module gridfinityBaseplate(gridx, gridy, length, dix, diy, sp, hole_options, sh,
                 }
             }
         }
-        screw_together = sp == 3 || sp == 4;
+        screw_together = sp == 3 || sp == 4 || sp == 6;
         if (screw_together) cutter_screw_together(gx, gy, off);
     }
-
 }
 
 function calculate_offset(style_plate, enable_magnet, style_hole) =
-    assert(style_plate >=0 && style_plate <=4)
-    let (screw_together = style_plate == 3 || style_plate == 4)
+    assert(style_plate >= 0 && style_plate <= 6)
+    let (screw_together = style_plate == 3 || style_plate == 4 || style_plate == 6)
     screw_together ? 6.75 :
     style_plate==0 ? 0 :
     style_plate==1 ? bp_h_bot :
@@ -155,13 +160,6 @@ module cutter_weight() {
             translate([0,bp_rcut_length/2,0])
             circle(d=bp_rcut_width);
         }
-    }
-}
-module hole_pattern(){
-    pattern_circular(4)
-    translate([l_grid/2-d_hole_from_side, l_grid/2-d_hole_from_side, 0]) {
-        render();
-        children();
     }
 }
 
@@ -192,9 +190,30 @@ module profile_skeleton() {
             minkowski() {
                 square([l,l]);
                 circle(MAGNET_HOLE_RADIUS+r_skel+2);
-           }
+            }
         }
         circle(r_skel);
+    }
+}
+
+module profile_crosshair() {
+    l_grid_inner = l_grid - 2*r_c2 - 2*r_c1; // l without chamfers
+    l_grid_inner_minkowski = l_grid_inner / 2 - r_f1;
+
+     // sqrt 2 because of 45 degree angle
+    spoke_offset=sqrt(2)*spoke_width/2;
+
+    pattern_circular(4)
+    difference() {
+      minkowski() {
+        polygon([
+          [spoke_offset, 0],
+          [l_grid_inner_minkowski, l_grid_inner_minkowski - spoke_offset],
+          [l_grid_inner_minkowski, -l_grid_inner_minkowski + spoke_offset],
+         ]);
+         circle(r_f1);
+      }
+      circle(MAGNET_HOLE_RADIUS+r_skel);
     }
 }
 

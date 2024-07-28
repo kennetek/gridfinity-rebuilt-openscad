@@ -111,6 +111,16 @@ class TestBasePlateHoles(unittest.TestCase):
         self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
         self.scad_runner.create_image([], Path('magnet_and_counterbored_screw_holes_top.png'))
 
+    def test_crosshair_with_magnet(self):
+        vars = self.scad_runner.parameters
+        vars["enable_magnet"] = True
+        vars["chamfer_holes"] = False
+        vars["crush_ribs"] = False
+        vars["style_plate"] = 5
+        self.scad_runner.create_image([], Path('crosshair_with_magnet_bottom.png'))
+        self.scad_runner.camera_arguments = self.scad_runner.camera_arguments.with_rotation(CameraRotations.AngledTop)
+        self.scad_runner.create_image([], Path('crosshair_with_magnet_top.png'))
+
 
 if __name__ == '__main__':
     unittest.main()
