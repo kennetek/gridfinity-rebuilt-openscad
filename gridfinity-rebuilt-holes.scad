@@ -233,9 +233,11 @@ module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_a
  * @param crush_ribs If the magnet hole should have crush ribs for a press fit.
  * @param chamfer Add a chamfer to the magnet/screw hole.
  * @param supportless If the magnet/screw hole should be printed in such a way that the screw hole does not require supports.
+ * @param embedded If the magent is inserted during the print. 
  */
-function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
-    [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];
+function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false,
+supportless=false, embedded=false) =
+    [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless, embedded];
 
 /**
  * @brief A single magnet/screw hole.  To be cut out of the base.
@@ -253,6 +255,8 @@ module block_base_hole(hole_options, o=0) {
     crush_ribs = hole_options[3];
     chamfer = hole_options[4];
     supportless = hole_options[5];
+    embedded = hole_options[6];
+    embedded_extra_layers = 3;
 
     // Validate said options
     if(refined_hole) {
@@ -268,6 +272,11 @@ module block_base_hole(hole_options, o=0) {
     magnet_depth = MAGNET_HOLE_DEPTH - o +
         (supportless ? supportless_additional_layers*LAYER_HEIGHT : 0);
 
+    embedded_depth =  embedded_extra_layers*LAYER_HEIGHT;
+    if(embedded) {
+        magnet_depth = magnet_depth + embedded_depth;
+    }
+
     union() {
         if(refined_hole) {
             refined_hole();
@@ -278,7 +287,18 @@ module block_base_hole(hole_options, o=0) {
                 if(crush_ribs) {
                     ribbed_cylinder(magnet_radius, magnet_inner_radius, magnet_depth, MAGNET_HOLE_CRUSH_RIB_COUNT);
                 } else {
-                    cylinder(h = magnet_depth, r=magnet_radius);
+                    if(embedded) {
+                      // Leave a gap for the screwdriver for recycling
+                      intersection() {
+                        cube([magnet_radius * 0.3, magnet_radius, embedded_depth]);
+                        cylinder(h = embedded_depth, r=magnet_radius);
+                      }
+                      
+                      translate([0, 0, embedded_depth])
+                      cylinder(h = magnet_depth, r=magnet_radius);
+                    } else {
+                      cylinder(h = magnet_depth, r=magnet_radius);
+                    }
                 }
 
                 if(supportless) {

@@ -94,8 +94,11 @@ crush_ribs = true;
 chamfer_holes = true;
 // Magnet/Screw holes will be printed so supports are not needed.
 printable_hole_top = true;
+// Wether the plastic is printed around the magnet and it is embedded
+embedded=false;
 
-hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
+hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes,
+printable_hole_top, embedded);
 
 // ===== IMPLEMENTATION ===== //
 
