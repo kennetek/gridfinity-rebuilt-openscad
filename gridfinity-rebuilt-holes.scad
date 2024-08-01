@@ -290,7 +290,8 @@ module block_base_hole(hole_options, o=0) {
                     if(embedded) {
                       // Leave a gap for the screwdriver for recycling
                       intersection() {
-                        cube([magnet_radius * 0.3, magnet_radius, embedded_depth]);
+                        translate([-magnet_radius,-magnet_radius * 0.15,0])
+                        cube([2*magnet_radius, magnet_radius * 0.3, embedded_depth]);
                         cylinder(h = embedded_depth, r=magnet_radius);
                       }
                       
