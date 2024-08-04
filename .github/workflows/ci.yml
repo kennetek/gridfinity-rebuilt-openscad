@@ -46,6 +46,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install openscad
 
+    - name: OpenSCAD Build Information
+      run: openscad --info
+      continue-on-error: true
+
     - name: Run Unit Tests
       shell: bash
       working-directory: ./tests
