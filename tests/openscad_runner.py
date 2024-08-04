@@ -115,8 +115,8 @@ class OpenScadRunner:
 
     common_arguments = [
         #'--hardwarnings', // Does not work when setting variables by using functions
-        '--enable=fast-csg',
-        '--enable=predictible-output',
+        #'--enable=fast-csg', // Requires Beta version of OpenSCAD
+        #'--enable=predictible-output', // Requires Beta version of OpenSCAD
         '--imgsize=1280,720',
         '--view=axes',
         '--projection=ortho',
