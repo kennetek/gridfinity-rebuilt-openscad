@@ -60,6 +60,12 @@ jobs:
         working-directory: ./tests
         run: python3 -m unittest
 
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: images
+        path: images/**/*.png
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
