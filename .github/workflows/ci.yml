@@ -50,10 +50,13 @@ jobs:
       run: openscad --info
       continue-on-error: true
 
+    - name: Create Image Directories
+      run: mkdir -p base_hole_options baseplate hole_cutouts spiral_vase_base
+      working-directory: ./images
+
     - name: Run Unit Tests (Headless)
       uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
       with:
-        shell: bash
         working-directory: ./tests
         run: python3 -m unittest
 
