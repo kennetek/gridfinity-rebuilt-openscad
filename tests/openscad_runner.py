@@ -5,11 +5,14 @@ Helpful classes for running OpenScad from Python.
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 from dataclasses import dataclass, is_dataclass, asdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import NamedTuple, Optional
+
+logger = logging.getLogger(__name__)
 
 class DataClassJSONEncoder(json.JSONEncoder):
     '''Allow json serialization'''
@@ -99,13 +102,15 @@ class CameraRotations:
 
 class OpenScadRunner:
     '''Helper to run the openscad binary'''
+    camera_arguments: CameraArguments
     scad_file_path: Path
     openscad_binary_path: Path
     image_folder_base: Path
     parameters: Optional[dict]
     '''If set, a temporary parameter file is created, and used with these variables'''
 
-    WINDOWS_DEFAULT_PATH = 'C:\\Program Files\\OpenSCAD\\openscad.exe'
+    LINUX_DEFAULT_PATH = Path('/bin/openscad')
+    WINDOWS_DEFAULT_PATH = Path('C:\\Program Files\\OpenSCAD\\openscad.exe')
     TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),150)
 
     common_arguments = [
@@ -121,11 +126,20 @@ class OpenScadRunner:
         set_variable_argument('$fa', 8) + set_variable_argument('$fs', 0.25)
 
     def __init__(self, file_path: Path):
-        self.openscad_binary_path = self.WINDOWS_DEFAULT_PATH
+        self.openscad_binary_path = self.find_openscad_binary()
         self.scad_file_path = file_path
         self.image_folder_base = Path('.')
         self.camera_arguments = None
         self.parameters = None
+
+    @classmethod
+    def find_openscad_binary(cls) -> Path:
+        if cls.WINDOWS_DEFAULT_PATH.exists():
+            return cls.WINDOWS_DEFAULT_PATH
+        if cls.LINUX_DEFAULT_PATH.exists():
+            return cls.LINUX_DEFAULT_PATH
+        logger.warning("Could not find OpenSCAD binary, defaulting to 'openscad'")
+        return Path("openscad")
 
     def create_image(self, args: [str], image_file_name: str):
         """
@@ -133,8 +147,9 @@ class OpenScadRunner:
         @Important The only verification is that no errors occured.
                    There is no verification if the image was created, or the image contents.
         """
-        assert(self.scad_file_path.exists())
-        assert(self.image_folder_base.exists())
+        assert self.openscad_binary_path.exists(), f"OpenSCAD binary not found at '{self.openscad_binary_path}'"
+        assert self.scad_file_path.exists(), f"OpenSCAD file not found at '{self.scad_file_path}'"
+        assert self.image_folder_base.exists(), f"Image folder not found at '{self.image_folder_base}'"
 
         image_path = self.image_folder_base.joinpath(image_file_name)
         command_arguments = self.common_arguments + \
@@ -150,6 +165,6 @@ class OpenScadRunner:
                 json.dump(params, file, sort_keys=True, indent=2, cls=DataClassJSONEncoder)
                 file.close()
                 command_arguments += ["-p", file.name, "-P", "python_generated"]
-                return subprocess.run([self.openscad_binary_path]+command_arguments, check=True)
+                return subprocess.run([str(self.openscad_binary_path)] + command_arguments, check=True)
         else:
-            return subprocess.run([self.openscad_binary_path]+command_arguments, check=True)
+            return subprocess.run([str(self.openscad_binary_path)] + command_arguments, check=True)
