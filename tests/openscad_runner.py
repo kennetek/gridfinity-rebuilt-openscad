@@ -114,9 +114,10 @@ class OpenScadRunner:
     TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),150)
 
     common_arguments = [
-        #'--hardwarnings', // Does not work when setting variables by using functions
-        #'--enable=fast-csg', // Requires Beta version of OpenSCAD
-        #'--enable=predictible-output', // Requires Beta version of OpenSCAD
+        #'--hardwarnings', # Does not work when setting variables by using functions
+        #'--enable=fast-csg', # Requires Beta version of OpenSCAD
+        #'--enable=predictible-output', # Requires Beta version of OpenSCAD
+        '--render=true'  # Required on headless systems
         '--imgsize=1280,720',
         '--view=axes',
         '--projection=ortho',
