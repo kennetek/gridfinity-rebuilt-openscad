@@ -50,10 +50,12 @@ jobs:
       run: openscad --info
       continue-on-error: true
 
-    - name: Run Unit Tests
-      shell: bash
-      working-directory: ./tests
-      run: python3 -m unittest
+    - name: Run Unit Tests (Headless)
+      uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
+      with:
+        shell: bash
+        working-directory: ./tests
+        run: python3 -m unittest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

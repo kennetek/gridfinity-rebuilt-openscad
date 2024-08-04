@@ -117,7 +117,7 @@ class OpenScadRunner:
         #'--hardwarnings', # Does not work when setting variables by using functions
         #'--enable=fast-csg', # Requires Beta version of OpenSCAD
         #'--enable=predictible-output', # Requires Beta version of OpenSCAD
-        '--render=true'  # Required on headless systems
+        #'--render=true'  # Fully render geometry for images, instead of using fast preview mode.
         '--imgsize=1280,720',
         '--view=axes',
         '--projection=ortho',
