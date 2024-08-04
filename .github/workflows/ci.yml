@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  Test:
+  PreCommit:
     name: pre-commit
     runs-on: ubuntu-latest
     steps:
     - name: 💾 Check out repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 🪝 Cache pre-commit hooks
       uses: actions/cache@v3
@@ -28,6 +28,28 @@ jobs:
 
     - name: 🔥 Test
       run: pre-commit run --show-diff-on-failure --all-files
+
+  Test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: 💾 Check out repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install OpenSCAD
+      run: |
+        sudo apt-get update
+        sudo apt-get install openscad
+
+    - name: Run Unit Tests
+      shell: bash
+      working-directory: ./tests
+      run: python3 -m unittest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
