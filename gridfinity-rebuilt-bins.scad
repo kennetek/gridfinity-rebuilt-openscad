@@ -181,7 +181,7 @@ gridfinityBase(gx, gy, 42, 0, 0, 1);
 
 // Pyramid scheme bin
 /*
-gx = 4.5;
+gx = 4;
 gy = 4;
 gridfinityInit(gx, gy, height(6), 0, 42) {
     for (i = [0:gx-1])
