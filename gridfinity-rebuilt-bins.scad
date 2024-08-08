@@ -79,6 +79,8 @@ scoop = 1; //[0:0.1:1]
 div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0;
+// Base will have a single hole in the center (use with crosshair style base)
+single_hole = false;
 
 /* [Base Hole Options] */
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
@@ -112,7 +114,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners, single_hole=single_hole);
 }
 
 
