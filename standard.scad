@@ -88,8 +88,11 @@ h_lip = 3.548;
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div;
 
-// Stacking Lip
+
+// ****************************************
+// Stacking Lip Constants
 // Based on https://gridfinity.xyz/specification/
+// ****************************************
 stacking_lip_inner_slope_height_mm = 0.7;
 stacking_lip_wall_height_mm = 1.8;
 stacking_lip_outer_slope_height_mm = 1.9;
@@ -106,8 +109,40 @@ stacking_lip_support_wall_height_mm = 1.2;
 stacking_lip_support_height_mm =
     stacking_lip_support_wall_height_mm + d_wall2;
 
-
+// ****************************************
 // Baseplate constants
+// Based on https://gridfinity.xyz/specification/
+// ****************************************
+BASEPLATE_OUTSIDE_RADIUS = 8 / 2;
+
+// Polygon describing the raw baseplate lip.
+// Does NOT include clearance height.
+BASEPLATE_LIP = [
+    [0, 0], // Innermost bottom point
+    [0.7, 0.7], // Up and out at a 45 degree angle
+    [0.7, (0.7+1.8)], // Straight up
+    [(0.7+2.15), (0.7+1.8+2.15)], // Up and out at a 45 degree angle
+    [(0.7+2.15), 0], // Straight down
+    [0, 0] //Back to start
+];
+
+// Height of the baseplate lip.
+// This ads clearance height to the polygon
+// that ensures the base makes contact with the baseplate lip.
+BASEPLATE_LIP_HEIGHT = 5;
+
+// The minimum height between the baseplate lip and anything below it.
+// Needed to make sure the base always makes contact with the baseplate lip.
+BASEPLATE_CLEARANCE_HEIGHT = BASEPLATE_LIP_HEIGHT - BASEPLATE_LIP[3].y;
+assert(BASEPLATE_CLEARANCE_HEIGHT > 0, "Negative clearance doesn't make sense.");
+
+// Maximum [x,y] values/size of the baseplate lip.
+// Includes clearance height!
+BASEPLATE_LIP_MAX = [BASEPLATE_LIP[3].x, BASEPLATE_LIP_HEIGHT];
+
+// ****************************************
+// Weighted Baseplate
+// ****************************************
 
 // Baseplate bottom part height (part added with weigthed=true)
 bp_h_bot = 6.4;
@@ -121,6 +156,9 @@ bp_rcut_width = 8.5;
 bp_rcut_length = 4.25;
 // Baseplate bottom cutout rounded thingy depth
 bp_rcut_depth = 2;
+
+// ****************************************
+
 // Baseplate clearance offset
 bp_xy_clearance = 0.5;
 // radius of cutout for skeletonized baseplate
