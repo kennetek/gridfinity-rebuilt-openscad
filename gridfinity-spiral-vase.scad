@@ -146,7 +146,7 @@ module gridfinityVase() {
         block_x();
         block_inset();
         if (enable_pinch)
-        block_pinch();
+        block_pinch(d_height);
 
         if (bottom_layer <= 0)
         translate([0,0,-50+layer+0.01])
@@ -234,26 +234,13 @@ module block_base_blank(o = 0) {
     }
 }
 
-module block_pinch() {
-    sweep_rounded(gridx*l_grid-2*r_base-0.5-0.001, gridy*l_grid-2*r_base-0.5-0.001)
-    translate([r_base,0,0])
-    mirror([1,0,0])
-    translate([0,-(-d_height-h_base/2+r_c1),0])
-    copy_mirror([0,1,0])
-    difference() {
-        offset(delta = -nozzle*sqrt(2))
-        translate([0,-d_height-h_base/2+r_c1,0])
-        union() {
-            profile_wall_sub();
-            mirror([1,0,0])
-            square([10,d_height+h_base]);
-        }
+module block_pinch(height_mm) {
+    assert(is_num(height_mm));
 
-        translate([0,-50,0])
-        square([100,100], center = true);
-
+    translate([0, 0, -h_base])
+    block_wall(gridx, gridy, l_grid) {
         translate([d_wall2-nozzle*2-d_clear*2,0,0])
-        square(r_c2*2);
+        profile_wall(height_mm);
     }
 }
 
@@ -331,7 +318,9 @@ module block_divider_edgecut() {
     rotate([90,0,90])
     linear_extrude(100)
     offset(delta = 0.1)
-    profile_wall_sub();
+    mirror([1,0,0])
+    translate([-r_base,0,0])
+    profile_wall($dh);
 }
 
 module transform_funnel() {
@@ -367,8 +356,8 @@ module block_vase_base() {
             block_bottom(d_bottom, gridx, gridy, l_grid);
             color("royalblue")
             block_wall(gridx, gridy, l_grid) {
-                if (enable_lip) profile_wall();
-                else profile_wall2();
+                if (enable_lip) profile_wall($dh);
+                else profile_wall2($dh);
             }
         }
 
@@ -402,20 +391,9 @@ module block_vase_base() {
     }
 }
 
-module profile_wall_sub_sub() {
-    polygon([
-        [0,0],
-        [nozzle*2,0],
-        [nozzle*2,d_height-1.2-d_wall2+nozzle*2],
-        [d_wall2-d_clear,d_height-1.2],
-        [d_wall2-d_clear,d_height+h_base],
-        [0,d_height+h_base]
-    ]);
-}
-
 module block_inset() {
     ixx = (gridx*l_grid-0.5)/2;
-    iyy = d_height/1.875;
+    iyy = d_height/2.1;
     izz = sqrt(ixx^2+iyy^2)*tan(40);
     if (enable_scoop_chamfer && enable_inset)
     difference() {
