@@ -199,103 +199,122 @@ module cut_move(x, y, w, h) {
 
 // ===== Modules ===== //
 
-module profile_base() {
-    polygon([
-        [0,0],
-        [0,h_base],
-        [r_base,h_base],
-        [r_base-r_c2,h_base-r_c2],
-        [r_base-r_c2,r_c1],
-        [r_base-r_c2-r_c1,0]
-    ]);
-}
+/**
+ *@summary Create the base of a gridfinity bin, or use it for a custom object.
+ * @param length X,Y size of a single Gridfinity base.
+ */
+module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
+    assert(
+        is_num(gx) &&
+        is_num(gy) &&
+        is_num(length) &&
+        is_num(dx) &&
+        is_num(dy) &&
+        is_bool(final_cut) &&
+        is_bool(only_corners)
+    );
 
-module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
-    dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
-    dbny = 1/(dy==0 ? len(dbnyt) > 0 ? dbnyt[0] : 1 : round(dy));
-    xx = gx*l-0.5;
-    yy = gy*l-0.5;
+    dbnx = 1/(dx != 0 ? round(dx) : (len(dbnxt) > 0 ? dbnxt[0] : 1));
+    dbny = 1/(dy != 0 ? round(dy) : (len(dbnyt) > 0 ? dbnyt[0] : 1));
 
-    if (final_cut)
-    translate([0,0,h_base])
-    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1+0.001);
+    // Final size in number of bases
+    grid_size = [gx/dbnx, gy/dbny];
 
-    intersection(){
-        if (final_cut)
-        translate([0,0,-1])
-        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
+    // Per spec, there's a 0.5mm gap between each base,
+    // But that needs to be scaled based on everything else.
+    individual_base_size_mm = [dbnx, dbny] * BASE_SIZE;
+    base_center_distance_mm = [dbnx, dbny] * length;
+    gap_mm = base_center_distance_mm - individual_base_size_mm;
 
-        if(only_corners) {
-            difference(){
-                pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-                block_base(gx, gy, l, dbnx, dbny, bundle_hole_options(), off);
+    // Final size of the base top. In mm.
+    grid_size_mm = [
+        base_center_distance_mm.x * grid_size.x,
+        base_center_distance_mm.y * grid_size.y,
+    ] - gap_mm;
 
-                copy_mirror([0, 1, 0]) {
-                    copy_mirror([1, 0, 0]) {
-                        translate([
-                            (gx/2)*l_grid - d_hole_from_side,
-                            (gy/2) * l_grid - d_hole_from_side,
-                            0
-                        ])
-                        block_base_hole(hole_options, off);
-                    }
+    if (final_cut) {
+        translate([0, 0, h_base-TOLLERANCE])
+        rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_OUTSIDE_RADIUS, center=true);
+    }
+
+    if(only_corners) {
+        difference(){
+            pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
+            block_base(bundle_hole_options(), 0, individual_base_size_mm);
+
+            copy_mirror([0, 1, 0]) {
+                copy_mirror([1, 0, 0]) {
+                    translate([
+                        grid_size_mm.x/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE - BASE_PROFILE_MAX.x,
+                        grid_size_mm.y/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE - BASE_PROFILE_MAX.x,
+                        0
+                    ])
+                    block_base_hole(hole_options, off);
                 }
             }
         }
-        else {
-            pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-            block_base(gx, gy, l, dbnx, dbny, hole_options, off);
-        }
+    }
+    else {
+        pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
+        block_base(hole_options, off, individual_base_size_mm);
     }
 }
 
 /**
  * @brief A single Gridfinity base.  With holes (if set).
- * @param gx
- * @param gy
- * @param l
- * @param dbnx
- * @param dbny
  * @param hole_options @see block_base_hole.hole_options
  * @param off
+ * @param size [x, y] size of a single base.  Only set if deviating from the standard!
  */
-module block_base(gx, gy, l, dbnx, dbny, hole_options, off) {
+module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE]) {
+    assert(is_list(size) && len(size) == 2);
+
+    // How far, in the +x direction,
+    // the profile needs to be from it's [0, 0] point
+    // such that when swept by 90 degrees to produce a corner,
+    // the outside edge has the desired radius.
+    translation_x = BASE_OUTSIDE_RADIUS - BASE_PROFILE_MAX.x;
+
+    outer_diameter = [2*BASE_OUTSIDE_RADIUS, 2*BASE_OUTSIDE_RADIUS];
+    base_profile_size = size - outer_diameter;
+    base_bottom_size = base_profile_size + [2*translation_x, 2*translation_x];
+    assert(base_profile_size.x > 0 && base_profile_size.y > 0,
+        str("Minimum size of a single base must be greater than ", outer_diameter)
+    );
+
     render(convexity = 2)
     difference() {
-        block_base_solid(dbnx, dbny, l, off);
+        union() {
+            sweep_rounded(base_profile_size.x, base_profile_size.y)
+            translate([translation_x, 0, 0])
+            polygon(BASE_PROFILE);
 
-        pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
-        translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
-        block_base_hole(hole_options, off);
-    }
-}
-
-/**
- * @brief A gridfinity base with no holes.
- * @details Used as the "base" with holes removed from it later.
- * @param dbnx
- * @param dbny
- * @param l
- * @param o
- */
-module block_base_solid(dbnx, dbny, l, o) {
-    xx = dbnx*l-0.05;
-    yy = dbny*l-0.05;
-    oo = (o/2)*(sqrt(2)-1);
-    translate([0,0,h_base])
-    mirror([0,0,1])
-    union() {
-        hull() {
-            rounded_rectangle(xx-2*r_c2-2*r_c1+o, yy-2*r_c2-2*r_c1+o, h_base+oo, r_fo3);
-            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, h_base-r_c1+oo, r_fo2);
+            rounded_square(
+                [
+                    base_bottom_size.x + TOLLERANCE,
+                    base_bottom_size.y + TOLLERANCE,
+                    BASE_PROFILE_MAX.y
+                ],
+                translation_x,
+                center=true
+            );
         }
-        translate([0,0,oo])
-        hull() {
-            rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2);
-            mirror([0,0,1])
-            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1);
+
+        // 4 holes
+        // Need this fancy code to support refined holes and non-square bases.
+        for(a=[0:90:270]){
+            // i and j represent the 4 quadrants.
+            // The +1 is used to keep any values from being exactly 0.
+            j = sign(sin(a+1));
+            i = sign(cos(a+1));
+            translate([
+                i * (base_bottom_size.x/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
+                j * (base_bottom_size.y/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
+                0])
+            rotate([0, 0, a])
+            block_base_hole(hole_options, off);
         }
     }
 }

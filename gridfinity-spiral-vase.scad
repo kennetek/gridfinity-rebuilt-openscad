@@ -72,13 +72,20 @@ else gridfinityVase(); // Generate the bin
 
 // ===== CONSTRUCTION ===== //
 
+//Deprecated Variables
+r_fo2 = 3.2 / 2;  // outside radii 2
+r_fo3 = 1.6 / 2;  // outside radii 3
+r_c2 = 2.4; // upper base chamfer "radius"
+d_hole = 26;  // center-to-center distance between holes
+//End Deprecated Variables
+
 d_bottom = layer*(max(bottom_layer,1));
 x_l = l_grid/2;
 
 dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+h_base : gridz-(enable_lip?3.8:0);
 d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-h_base;
 
-d_fo1 = 2*r_fo1;
+d_fo1 = 2*+BASE_OUTSIDE_RADIUS;
 
 f2c = sqrt(2)*(sqrt(2)-1); // fillet to chamfer ratio
 me = ((gridx*l_grid-0.5)/n_divx)-nozzle*4-d_fo1-12.7-4;
@@ -161,7 +168,7 @@ module gridfinityBaseVase() {
         intersection() {
             block_base_blank(0);
             translate([0,0,-h_base-1])
-            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10], r_fo1+0.001, center=true);
+            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10], BASE_OUTSIDE_RADIUS+0.001, center=true);
         }
         translate([0,0,0.01])
         difference() {
@@ -229,7 +236,7 @@ module block_base_blank(o = 0) {
             rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
             mirror([0,0,1])
             linear_extrude(d_bottom)
-            rounded_square(l_grid-o-0.05, r_fo1, center=true);
+            rounded_square(l_grid-o-0.05, BASE_OUTSIDE_RADIUS, center=true);
         }
     }
 }

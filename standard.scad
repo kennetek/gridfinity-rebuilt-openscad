@@ -1,25 +1,15 @@
 
-// height of the base
-h_base = 5;
 // lower base chamfer "radius"
 r_c1 = 0.8;
-// upper base chamfer "radius"
-r_c2 = 2.4;
 // bottom thiccness of bin
 h_bot = 2.2;
-// outside radii 1
-r_fo1 = 7.5 / 2;
-// outside radii 2
-r_fo2 = 3.2 / 2;
-// outside radii 3
-r_fo3 = 1.6 / 2;
 // length of a grid unit
 l_grid = 42;
 
 
 // Outside rounded radius of bin
 // Per spec, matches radius of upper base section.
-r_base = r_fo1;
+r_base = 7.5 / 2;
 
 // Tollerance to make sure cuts don't leave a sliver behind,
 // and that items are properly connected to each other.
@@ -35,10 +25,11 @@ SCREW_HOLE_RADIUS = 3 / 2;
 MAGNET_HOLE_RADIUS = 6.5 / 2;
 MAGNET_HOLE_DEPTH = MAGNET_HEIGHT + (LAYER_HEIGHT * 2);
 
-// center-to-center distance between holes
-d_hole = 26;
 // distance of hole from side of bin
 d_hole_from_side=8;
+
+// Based on https://gridfinity.xyz/specification/
+HOLE_DISTANCE_FROM_BOTTOM_EDGE = 4.8;
 
 // Meassured diameter in Fusion360.
 // Smaller than the magnet to keep it squeezed.
@@ -62,6 +53,7 @@ CHAMFER_ANGLE = 45;
 BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS = 5/2;
 BASEPLATE_SCREW_COUNTERBORE_RADIUS = 5.5/2;
 BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
+
 // ****************************************
 
 // top edge fillet radius
@@ -108,6 +100,34 @@ stacking_lip_height =
 stacking_lip_support_wall_height_mm = 1.2;
 stacking_lip_support_height_mm =
     stacking_lip_support_wall_height_mm + d_wall2;
+
+// ****************************************
+// Base constants
+// Based on https://gridfinity.xyz/specification/
+// ****************************************
+BASE_OUTSIDE_RADIUS = r_base;
+
+BASE_PROFILE = [
+    [0, 0], // Innermost bottom point
+    [0.8, 0.8], // Up and out at a 45 degree angle
+    [0.8, (0.8+1.8)], // Straight up
+    [(0.8+2.15), (0.8+1.8+2.15)], // Up and out at a 45 degree angle
+    [0, (0.8+1.8+2.15)], // Go in to form a solid polygon
+    [0, 0] //Back to start
+];
+
+// Maximum [x,y] values/size of the base.
+BASE_PROFILE_MAX = BASE_PROFILE[3];
+
+// Each unit's base is 41.5mm x 41.5mm
+// Leaving 0.5mm gap with an l_grid of 42
+BASE_SIZE = 41.5;
+
+
+/**
+ * @summary Height of the raw base
+ */
+h_base = BASE_PROFILE_MAX.y;
 
 // ****************************************
 // Baseplate constants
@@ -159,8 +179,6 @@ bp_rcut_depth = 2;
 
 // ****************************************
 
-// Baseplate clearance offset
-bp_xy_clearance = 0.5;
 // radius of cutout for skeletonized baseplate
 r_skel = 2;
 // minimum baseplate thickness (when skeletonized)
