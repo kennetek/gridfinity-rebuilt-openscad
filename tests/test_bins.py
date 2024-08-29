@@ -37,6 +37,14 @@ class TestBinHoles(unittest.TestCase):
         vars["screw_holes"] = False
         self.scad_runner.create_image([], Path('no_holes.png'))
 
+    def test_only_corner_holes(self):
+        vars = self.scad_runner.parameters
+        vars["refined_holes"] = True
+        vars["magnet_holes"] = False
+        vars["screw_holes"] = False
+        vars["only_corners"] = True
+        self.scad_runner.create_image([], Path('only_corner_holes.png'))
+
     def test_refined_holes(self):
         vars = self.scad_runner.parameters
         vars["refined_holes"] = True

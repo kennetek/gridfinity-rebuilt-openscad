@@ -109,7 +109,7 @@ class OpenScadRunner:
     TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),150)
 
     common_arguments = [
-        #'--hardwarnings', // Does not work when setting variables by using functions
+        #'--hardwarnings', # Does not work when setting variables by using functions
         '--enable=fast-csg',
         '--enable=predictible-output',
         '--imgsize=1280,720',
@@ -127,9 +127,9 @@ class OpenScadRunner:
         self.camera_arguments = None
         self.parameters = None
 
-    def create_image(self, args: [str], image_file_name: str):
+    def create_image(self, args: [str], image_file_name: str) -> subprocess.CompletedProcess:
         """
-        Run the code, to create an image.
+        Run the code and create an image.
         @Important The only verification is that no errors occured.
                    There is no verification if the image was created, or the image contents.
         """
@@ -150,6 +150,18 @@ class OpenScadRunner:
                 json.dump(params, file, sort_keys=True, indent=2, cls=DataClassJSONEncoder)
                 file.close()
                 command_arguments += ["-p", file.name, "-P", "python_generated"]
-                return subprocess.run([self.openscad_binary_path]+command_arguments, check=True)
+                return self._run(command_arguments)
         else:
-            return subprocess.run([self.openscad_binary_path]+command_arguments, check=True)
+            return self._run(command_arguments)
+
+    def _run(self, args: [str]) -> subprocess.CompletedProcess:
+        """
+        Run openscad with the passed in arguments.
+        """
+        output = subprocess.run([self.openscad_binary_path]+args, capture_output=True)
+        error_strings = output.stderr.decode().strip().splitlines()
+        if any(line.startswith("ERROR:") for line in error_strings):
+            # OpenSCAD doesn't set an error return if it errors from bad SCAD code!
+            output.returncode = 11
+        output.check_returncode()
+        return output

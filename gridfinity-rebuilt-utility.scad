@@ -230,7 +230,7 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
         if(only_corners) {
             difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
-                block_base(gx, gy, l, dbnx, dbny, 0, off);
+                block_base(gx, gy, l, dbnx, dbny, bundle_hole_options(), off);
 
                 copy_mirror([0, 1, 0]) {
                     copy_mirror([1, 0, 0]) {
