@@ -56,8 +56,6 @@ BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
 
 // ****************************************
 
-// top edge fillet radius
-r_f1 = 0.6;
 // internal fillet radius
 r_f2 = 2.8;
 
@@ -74,8 +72,6 @@ d_tabh = 15.85;
 d_tabw = 42;
 // angle of tab
 a_tab = 36;
-// lip height
-h_lip = 3.548;
 
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div;
@@ -83,31 +79,58 @@ d_magic = -2*d_clear-2*d_wall+d_div;
 // ****************************************
 // Stacking Lip Constants
 // Based on https://gridfinity.xyz/specification/
+// Also includes a support base.
 // ****************************************
-stacking_lip_inner_slope_height_mm = 0.7;
-stacking_lip_wall_height_mm = 1.8;
-stacking_lip_outer_slope_height_mm = 1.9;
-stacking_lip_depth =
-    stacking_lip_inner_slope_height_mm +
-    stacking_lip_outer_slope_height_mm;
-stacking_lip_height =
-    stacking_lip_inner_slope_height_mm +
-    stacking_lip_wall_height_mm +
-    stacking_lip_outer_slope_height_mm;
 
-// Height of the innermost section.
-// Used to keep the innermost lip from just being a triangle.
-// Spec implicitly expects wall width to equal stacking lip depth,
-// so does not define this.
-stacking_lip_support_wall_height_mm = 1.2;
+/**
+ * @Summary Fillet so the stacking lip does not come to a sharp point.
+ */
+STACKING_LIP_FILLET_RADIUS = 0.6;
 
-// Support so the stacking lip is not floating in mid air
-// when wall width is less than stacking lip depth.
-stacking_lip_support_angle = 45;
+/**
+ * @Summary Height of the innermost section. In mm.
+ * @Details Used to keep the innermost lip from just being a triangle.
+ *          Spec implicitly expects wall width to equal stacking lip depth, so does not define this.
+ */
+STACKING_LIP_SUPPORT_HEIGHT = 1.2;
 
-stacking_lip_support_height_mm =
-    stacking_lip_support_wall_height_mm
-    + tan(90 - stacking_lip_support_angle) * stacking_lip_depth;
+/**
+ * @Summary Stacking lip as defined in the spec.  No support.
+ */
+RAW_STACKING_LIP = [
+    [0, 0], // Inner tip
+    [0.7, 0.7], // Go out 45 degrees
+    [0.7, (0.7+1.8)], // Vertical increase
+    [(0.7+1.9), (0.7+1.8+1.9)], // Go out 45 degrees
+];
+
+/**
+ * @Summary Size of the stacking lip.
+ * @Details "x": How deep the stacking lip protrudes into the bin.
+ *               Including wall thickness.
+ *          "y": The height of the stacking lip.
+ */
+STACKING_LIP_SIZE = RAW_STACKING_LIP[3];
+
+_stacking_lip_support_angle = 45;
+
+/**
+ * @Summary Calculated value for the overall height of the stacking lip.
+ *          Including support.
+ */
+_stacking_lip_support_height_mm =
+    STACKING_LIP_SUPPORT_HEIGHT
+    + tan(90 - _stacking_lip_support_angle) * STACKING_LIP_SIZE.x;
+
+/**
+ * @Summary Stacking lip with a support.
+ * @Details Support is so the stacking lip is not floating in mid air when wall width is less than stacking lip depth.
+ */
+STACKING_LIP = concat(RAW_STACKING_LIP, [
+    [STACKING_LIP_SIZE.x, -_stacking_lip_support_height_mm], // Down to support bottom
+    [0, -STACKING_LIP_SUPPORT_HEIGHT], // Up and in (to bottom inner support)
+    [0, 0] // Close the shape. Technically not needed.
+]);
 
 // ****************************************
 // Base constants

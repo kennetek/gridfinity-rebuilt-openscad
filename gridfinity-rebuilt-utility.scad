@@ -20,7 +20,7 @@ use <gridfinity-rebuilt-holes.scad>
  * @returns The final value in mm.
  */
 function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
-    gridfinityUnit*7 + (includeLipHeight ? h_lip : 0);
+    gridfinityUnit*7 + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
 
 /**
  * @Summary Height in mm including fixed heights.
@@ -30,7 +30,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + h_bot + h_base + (includeLipHeight ? h_lip : 0);
+    mmHeight + h_bot + h_base + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -42,14 +42,13 @@ function includingFixedHeights(mmHeight, includeLipHeight = false) =
 function hf (z, gridz_define, style_lip) =
         gridz_define==0 ? fromGridfinityUnits(z, style_lip==2) :
         gridz_define==1 ? includingFixedHeights(z, style_lip==2) :
-        z + ( // Just use z (possibly adding/subtracting lip)
-            style_lip==1 ? -h_lip :
-            style_lip==2 ? h_lip : 0
-        )
+        gridz_define==2 ? z + (style_lip==2 ? STACKING_LIP_SIZE.y : 0)  :
+        assert(false, "gridz_define must be 0, 1, or 2.")
     ;
 
 /**
  * @brief Calculates the proper height for bins. Three Functions in One.
+ * @Details Critically, this does not include the baseplate height.
  * @param z Height value
  * @param d gridz_define as explained in gridfinity-rebuilt-bins.scad
  * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
@@ -324,47 +323,55 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE]) {
  * @details Also includes a support base.
  */
 module stacking_lip() {
-    // Technique: Descriptive constant names are useful, but can be unweildy.
-    // Use abbreviations if they are going to be re-used repeatedly in a small piece of code.
-    inner_slope = stacking_lip_inner_slope_height_mm;
-    wall_height = stacking_lip_wall_height_mm;
-
-    support_wall = stacking_lip_support_wall_height_mm;
-    s_total = stacking_lip_support_height_mm;
-
-    polygon([
-        [0, 0], // Inner tip
-        [inner_slope, inner_slope], // Go out 45 degrees
-        [inner_slope, inner_slope+wall_height], // Vertical increase
-        [stacking_lip_depth, stacking_lip_height], // Go out 45 degrees
-        [stacking_lip_depth, -s_total], // Down to support bottom
-        [0, -support_wall], // Up and in
-        [0, 0] // Close the shape. Tehcnically not needed.
-    ]);
+    polygon(STACKING_LIP);
 }
 
 /**
- * @brief Stacking lip with a with a chamfered (rounded) top.
+ * @brief Stacking lip with a with a filleted (rounded) top.
  * @details Based on https://gridfinity.xyz/specification/
  *          Also includes a support base.
  */
-module stacking_lip_chamfered() {
-    radius_center_y = h_lip - r_f1;
+module stacking_lip_filleted() {
+    // Replace 2D edge with a radius.
+    // Method used: tangent, tangent, radius algorithm
+    // See:  https://math.stackexchange.com/questions/797828/calculate-center-of-circle-tangent-to-two-lines-in-space
+    before_fillet = STACKING_LIP[2];
+    to_fillet = STACKING_LIP[3]; // tip, Point to Chamfer
+    after_fillet = STACKING_LIP[4];
+
+    fillet_vectors = [
+        to_fillet - before_fillet,
+        after_fillet - to_fillet,
+        ];
+
+    to_fillet_angle = 180 + atan2(
+            cross(fillet_vectors[0], fillet_vectors[1]),
+            fillet_vectors[0] * fillet_vectors[1]
+        );
+    half_angle = to_fillet_angle / 2;
+
+    // Distance from tip to the center point of the circle.
+    distance_from_edge = STACKING_LIP_FILLET_RADIUS / sin(half_angle);
+
+    // Circle's center point
+    fillet_center_vector = distance_from_edge * [sin(half_angle), cos(half_angle)];
+    fillet_center_point = to_fillet - fillet_center_vector;
+
+    // Exact point edges intersect the circle
+    intersection_distance = fillet_center_vector.y;
+
+//    echo(final_lip_height=fillet_center_point.y + STACKING_LIP_FILLET_RADIUS);
 
     union() {
-        // Create rounded top
-        intersection() {
-            translate([0, radius_center_y, 0])
-            square([stacking_lip_depth, stacking_lip_height]);
-            offset(r = r_f1)
-            offset(delta = -r_f1)
-            stacking_lip();
-        }
-        // Remove pointed top
+        // Rounded top
+        translate(concat(fillet_center_point, [0]))
+        circle(r = STACKING_LIP_FILLET_RADIUS);
+
+        // Stacking lip with cutout for circle to fit in
         difference(){
-            stacking_lip();
-            translate([0, radius_center_y, 0])
-            square([stacking_lip_depth*2, stacking_lip_height*2]);
+            polygon(STACKING_LIP);
+            translate(concat(to_fillet, [0]))
+            circle(r = intersection_distance);
         }
     }
 }
@@ -375,10 +382,10 @@ module stacking_lip_chamfered() {
  */
 module profile_wall(height_mm) {
     assert(is_num(height_mm))
-    translate([r_base - stacking_lip_depth, 0, 0]){
+    translate([r_base - STACKING_LIP_SIZE.x, 0, 0]){
         translate([0, height_mm, 0])
-        stacking_lip_chamfered();
-        translate([stacking_lip_depth-d_wall/2, 0, 0])
+        stacking_lip_filleted();
+        translate([STACKING_LIP_SIZE.x-d_wall/2, 0, 0])
         square([d_wall/2, height_mm]);
     }
 }
@@ -415,7 +422,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
 
     v_len_tab = tab_height;
     v_len_lip = d_wall2-d_wall+1.2;
-    v_cut_tab = tab_height - (2*r_f1)/tan(a_tab);
+    v_cut_tab = tab_height - (2*STACKING_LIP_FILLET_RADIUS)/tan(a_tab);
     v_cut_lip = d_wall2-d_wall-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
