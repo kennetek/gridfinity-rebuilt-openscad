@@ -247,12 +247,12 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
         else if (only_edges) {
             pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
             block_base(gx, gy, l, dbnx, dbny, hole_options, off);
-            
+
             intersection() {
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, bundle_hole_options(), off);
-                
-               # cube([(gx-1)*l, (gy-1)*l, 14], center=true);
+
+                cube([(gx-1)*l, (gy-1)*l, 14], center=true);
             }
         }
         else {

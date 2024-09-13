@@ -83,6 +83,8 @@ div_base_y = 0;
 /* [Base Hole Options] */
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
+// Only cut magnet/screw holes at the edges of the bin to save print time. Not compatible with only_corners!
+only_edges = false;
 //Use gridfinity refined hole style. Not compatible with magnet_holes!
 refined_holes = true;
 // Base will have holes for 6mm Diameter x 2mm high magnets.
@@ -112,7 +114,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners, only_edges=only_edges);
 }
 
 
