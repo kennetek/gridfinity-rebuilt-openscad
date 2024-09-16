@@ -210,7 +210,7 @@ module profile_base() {
     ]);
 }
 
-module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, only_edges=false) {
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
     dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
     dbnx = 1/(dx==0 ? len(dbnxt) > 0 ? dbnxt[0] : 1 : round(dx));
@@ -242,6 +242,17 @@ module gridfinityBase(gx, gy, l, dx, dy, hole_options=bundle_hole_options(), off
                         block_base_hole(hole_options, off);
                     }
                 }
+            }
+        }
+        else if (only_edges) {
+            pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
+            block_base(gx, gy, l, dbnx, dbny, hole_options, off);
+
+            intersection() {
+                pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
+                block_base(gx, gy, l, dbnx, dbny, bundle_hole_options(), off);
+
+                cube([(gx-1)*l, (gy-1)*l, 14], center=true);
             }
         }
         else {
