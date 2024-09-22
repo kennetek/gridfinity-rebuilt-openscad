@@ -72,10 +72,19 @@ function height (z,d=0,l=0,enable_zsnap=true) =
 //          set n_div values to 0 for a solid bin
 // style_tab:   tab style for all compartments. see cut()
 // scoop_weight:    scoop toggle for all compartments. see cut()
-module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
+module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
     for (i = [1:n_divx])
     for (j = [1:n_divy])
-    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
+    {
+        if (
+            place_tab == 1 && (i != 1 || j != n_divy) // Top-Left Division
+        ) {
+            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, 5, scoop_weight);
+        }
+        else {
+            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
+        }
+    }
 }
 
 
