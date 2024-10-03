@@ -7,6 +7,7 @@
 include <standard.scad>
 use <generic-helpers.scad>
 use <gridfinity-rebuilt-holes.scad>
+use <threads.scad>
 
 // ===== User Modules ===== //
 
@@ -202,8 +203,9 @@ module cut_move(x, y, w, h) {
 /**
  *@summary Create the base of a gridfinity bin, or use it for a custom object.
  * @param length X,Y size of a single Gridfinity base.
+ * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false) {
+module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
     assert(
         is_num(gx) &&
         is_num(gy) &&
@@ -211,7 +213,8 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
         is_num(dx) &&
         is_num(dy) &&
         is_bool(final_cut) &&
-        is_bool(only_corners)
+        is_bool(only_corners) &&
+        is_bool(thumbscrew)
     );
 
     dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
@@ -242,7 +245,7 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
     if(only_corners) {
         difference(){
             pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
-            block_base(bundle_hole_options(), 0, individual_base_size_mm);
+            block_base(bundle_hole_options(), 0, individual_base_size_mm, thumbscrew=thumbscrew);
 
             copy_mirror([0, 1, 0]) {
                 copy_mirror([1, 0, 0]) {
@@ -258,7 +261,7 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
     }
     else {
         pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
-        block_base(hole_options, off, individual_base_size_mm);
+        block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
     }
 }
 
@@ -268,7 +271,7 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
  * @param off
  * @param size [x, y] size of a single base.  Only set if deviating from the standard!
  */
-module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE]) {
+module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=false) {
     assert(is_list(size) && len(size) == 2);
 
     // How far, in the +x direction,
@@ -291,15 +294,29 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE]) {
             translate([translation_x, 0, 0])
             polygon(BASE_PROFILE);
 
-            rounded_square(
-                [
-                    base_bottom_size.x + TOLLERANCE,
-                    base_bottom_size.y + TOLLERANCE,
-                    BASE_PROFILE_MAX.y
-                ],
-                translation_x,
-                center=true
-            );
+            if (thumbscrew) {
+                ScrewHole(15, 5, position=[0, 0, 0], pitch=1.5) {
+                    rounded_square(
+                        [
+                            base_bottom_size.x + TOLLERANCE,
+                            base_bottom_size.y + TOLLERANCE,
+                            BASE_PROFILE_MAX.y
+                        ],
+                        translation_x,
+                        center=true
+                    );
+                }
+            } else {
+                rounded_square(
+                    [
+                        base_bottom_size.x + TOLLERANCE,
+                        base_bottom_size.y + TOLLERANCE,
+                        BASE_PROFILE_MAX.y
+                    ],
+                    translation_x,
+                    center=true
+                );
+            }
         }
 
         // 4 holes

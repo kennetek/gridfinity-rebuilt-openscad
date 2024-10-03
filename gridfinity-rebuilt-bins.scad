@@ -95,6 +95,8 @@ crush_ribs = true;
 chamfer_holes = true;
 // Magnet/Screw holes will be printed so supports are not needed.
 printable_hole_top = true;
+// Enable "gridfinity-refined" thumbscrew hole in the center of each base: https://www.printables.com/model/413761-gridfinity-refined
+enable_thumbscrew = false;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 
@@ -112,7 +114,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners);
+gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
 }
 
 
