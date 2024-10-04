@@ -162,6 +162,18 @@ function affine_translate(vector) = [
 ];
 
 /**
+ * @brief Affine transformation matrix equivalent of `scale`
+ * @param vector @see `scale`
+ * @returns An affine transformation matrix for use with `multmatrix()`
+ */
+function affine_scale(vector) = [
+    [vector.x, 0, 0, 0],
+    [0, vector.y, 0, 0],
+    [0, 0, vector.z, 0],
+    [0, 0, 0, 1]
+];
+
+/**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
  *        Centered on origin.
  */

@@ -17,7 +17,7 @@ r_hole2| magnet hole radius
 d_hole| center-to-center distance between holes
 h_hole| magnet hole depth
 h_slit| slit depth (printer layer height)
-r_f1| top edge fillet radius
+STACKING_LIP_FILLET_RADIUS| top edge fillet radius
 r_f2 | internal fillet radius
 d_div | width of divider between compartments
 d_wall| minimum wall thickness
