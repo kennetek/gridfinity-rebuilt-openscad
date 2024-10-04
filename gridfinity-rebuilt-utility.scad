@@ -7,7 +7,7 @@
 include <standard.scad>
 use <generic-helpers.scad>
 use <gridfinity-rebuilt-holes.scad>
-use <threads.scad>
+use <external/threads-scad/threads.scad>
 
 // ===== User Modules ===== //
 
@@ -270,9 +270,14 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
  * @param hole_options @see block_base_hole.hole_options
  * @param off
  * @param size [x, y] size of a single base.  Only set if deviating from the standard!
+ * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
 module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=false) {
-    assert(is_list(size) && len(size) == 2);
+    assert(
+        is_list(size) &&
+        len(size) == 2 &&
+        is_bool(thumbscrew)
+    );
 
     // How far, in the +x direction,
     // the profile needs to be from it's [0, 0] point
@@ -287,6 +292,13 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=f
         str("Minimum size of a single base must be greater than ", outer_diameter)
     );
 
+    thumbscrew_outerdiam = 15;
+    thumbscrew_height = 5;
+    thumbscrew_tolerance = 0.4;
+    thumbscrew_tooth_angle = 30;
+    thumbscrew_pitch = 1.5;
+
+
     render(convexity = 2)
     difference() {
         union() {
@@ -294,31 +306,27 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=f
             translate([translation_x, 0, 0])
             polygon(BASE_PROFILE);
 
-            if (thumbscrew) {
-                ScrewHole(15, 5, position=[0, 0, 0], pitch=1.5) {
-                    rounded_square(
-                        [
-                            base_bottom_size.x + TOLLERANCE,
-                            base_bottom_size.y + TOLLERANCE,
-                            BASE_PROFILE_MAX.y
-                        ],
-                        translation_x,
-                        center=true
-                    );
-                }
-            } else {
-                rounded_square(
-                    [
-                        base_bottom_size.x + TOLLERANCE,
-                        base_bottom_size.y + TOLLERANCE,
-                        BASE_PROFILE_MAX.y
-                    ],
-                    translation_x,
-                    center=true
-                );
-            }
+            rounded_square(
+                [
+                    base_bottom_size.x + TOLLERANCE,
+                    base_bottom_size.y + TOLLERANCE,
+                    BASE_PROFILE_MAX.y
+                ],
+                translation_x,
+                center=true
+            );
         }
-
+        
+        if (thumbscrew) {
+            ScrewThread(
+                1.01 * thumbscrew_outerdiam + 1.25 * thumbscrew_tolerance,
+                thumbscrew_height,
+                thumbscrew_pitch,
+                thumbscrew_tooth_angle,
+                thumbscrew_tolerance,
+                tooth_height=0
+            );
+        }
         // 4 holes
         // Need this fancy code to support refined holes and non-square bases.
         for(a=[0:90:270]){
