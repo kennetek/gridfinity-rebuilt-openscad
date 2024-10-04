@@ -37,6 +37,10 @@ The printable holes allow your slicer to bridge the gap inside the countersunk m
 ## Recommendations
 For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the [development snapshots](https://openscad.org/downloads.html). To enable the feature, go to Edit > Preferences > Features > fast-csg. On my computer, this sped up rendering from 10 minutes down to a couple of seconds, even for comically large bins.
 
+## External libraries
+
+- `threads-scad` (https://github.com/rcolyer/threads-scad) is used for creating threaded holes, and is included in this project under `external/threads-scad/threads.scad`.
+
 ## Enjoy!
 
 [<img src="./images/spin.gif" width="160">]()
