@@ -9,14 +9,18 @@ include <gridfinity-rebuilt-utility.scad>
  comments like ' //.5' after variables are intentional and used by the customizer
  examples at end of file
 
- BIN HEIGHT
- the original gridfinity bins had the overall height defined by 7mm increments
- a bin would be 7*u millimeters tall
- the lip at the top of the bin (3.8mm) added onto this height
+ #BIN HEIGHT
+ The original gridfinity bins had the overall height defined by 7mm increments.
+ A bin would be 7*u millimeters tall with a stacking lip at the top of the bin (4.4mm) added onto this height.
  The stock bins have unit heights of 2, 3, and 6:
- Z unit 2 -> 7*2 + 3.8 -> 17.8mm
- Z unit 3 -> 7*3 + 3.8 -> 24.8mm
- Z unit 6 -> 7*6 + 3.8 -> 45.8mm
+ * Z unit 2 -> 7*2 + 4.4 -> 18.4mm
+ * Z unit 3 -> 7*3 + 4.4 -> 25.4mm
+ * Z unit 6 -> 7*6 + 4.4 -> 46.4mm
+
+ ## Note:
+ The stacking lip provided here has a 0.6mm fillet instead of coming to a sharp point.
+ Which has a height of 3.55147mm instead of the specified 4.4mm.
+ This **has no impact on stacking height, and can be ignored.**
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
 
