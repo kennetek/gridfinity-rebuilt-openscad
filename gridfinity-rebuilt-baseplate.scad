@@ -1,5 +1,6 @@
 include <gridfinity-rebuilt-utility.scad>
 include <standard.scad>
+include <pegmixer/pegmixer.scad>
 use <gridfinity-rebuilt-holes.scad>
 
 // ===== INFORMATION ===== //
@@ -63,6 +64,14 @@ crush_ribs = true;
 chamfer_holes = true;
 
 hole_options = bundle_hole_options(refined_hole=false, magnet_hole=enable_magnet, screw_hole=false, crush_ribs=crush_ribs, chamfer=chamfer_holes, supportless=false);
+
+/* [Pegboard mount] */
+// Add pegboard mounting plate and pegs.
+enable_pegboard = false;
+pegboard_spacing = 25;
+pegboard_thickness = 6;
+pegboard_hole_diameter = 6.35;
+pegboard_mount_plate_thickness = 3;
 
 // ===== IMPLEMENTATION ===== //
 
@@ -223,6 +232,10 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
             translate([0, 0, additional_height/2])
             cutter_screw_together(grid_size.x, grid_size.y, length);
         }
+    }
+
+    if (enable_pegboard) {
+        pegboard_mount(size_mm);
     }
 }
 
@@ -403,4 +416,16 @@ module cutter_screw_together(gx, gy, size = l_grid) {
         rotate([0,90,0])
         cylinder(h=size/2, d=d_screw, center = true);
     }
+}
+
+/**
+ * @brief Add pegboard mounting part to gridfinity base
+ * @param base_dimensions an array (X, Y, Z) of baseplate final dimensions
+ */
+module pegboard_mount(base_dimensions) {
+    plate_width = base_dimensions.x - (BASEPLATE_OUTSIDE_RADIUS * 2);
+    plate_height = (pegboard_spacing + (pegboard_hole_diameter * 2));
+    translate([0, (base_dimensions.y / 2) + (pegboard_mount_plate_thickness / 2), (plate_height / 2)])
+        pegmixer(spacing = pegboard_spacing, board_thickness = pegboard_thickness, hole_d = pegboard_hole_diameter, peg_hole_percentage = 0.75)
+            solid([plate_width, pegboard_mount_plate_thickness, plate_height]);
 }
