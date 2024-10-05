@@ -324,7 +324,7 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=f
     render(convexity = 2)
     difference() {
         union() {
-            sweep_rounded(base_profile_size.x, base_profile_size.y)
+            sweep_rounded(base_profile_size)
             translate([translation_x, 0, 0])
             polygon(BASE_PROFILE);
 
@@ -448,7 +448,7 @@ module profile_wall2(height_mm) {
 
 module block_wall(gx, gy, l) {
     translate([0,0,h_base])
-    sweep_rounded(gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001)
+    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
     children();
 }
 

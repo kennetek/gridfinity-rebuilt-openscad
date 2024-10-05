@@ -321,7 +321,7 @@ module baseplate_lip(height=0, width=l_grid, length=l_grid) {
 
     additional_height = height + BASEPLATE_CLEARANCE_HEIGHT;
 
-    sweep_rounded(width-2*BASEPLATE_OUTSIDE_RADIUS, length-2*BASEPLATE_OUTSIDE_RADIUS)
+    sweep_rounded([width-2*BASEPLATE_OUTSIDE_RADIUS, length-2*BASEPLATE_OUTSIDE_RADIUS])
     translate([translation_x, additional_height, 0])
     polygon(concat(BASEPLATE_LIP, [
         [0, -additional_height],

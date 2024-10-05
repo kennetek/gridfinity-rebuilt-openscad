@@ -175,11 +175,21 @@ function affine_scale(vector) = [
 
 /**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
- *        Centered on origin.
+ * @Details Centered on origin.
+ *          Result is on the X,Y plane.
+ *          Expects children to be a 2D shape in Quardrant 1 of the X,Y plane.
+ * @param size Dimensions of the resulting object.
+ *             Either a single number or [width, length]
  */
-module sweep_rounded(width=10, length=10) {
-    assert(width > 0 && length > 0);
+module sweep_rounded(size) {
+    assert((is_num(size) && size > 0) || (
+        is_list(size) && len(size) == 2 &&
+        is_num(size.x) && size.x > 0 && is_num(size.y) && size.y > 0
+        )
+    );
 
+    width = is_num(size) ? size : size.x;
+    length = is_num(size) ? size : size.y;
     half_width = width/2;
     half_length = length/2;
     path_points = [
