@@ -174,6 +174,17 @@ function affine_scale(vector) = [
 ];
 
 /**
+ * @brief Add something to each element in a list.
+ * @param list The list whos elements will be modified.
+ * @param to_add
+ * @returns a list with `to_add` added to each element in the list.
+ */
+function foreach_add(list, to_add) =
+    assert(is_list(list))
+    assert(!is_undef(to_add))
+    [for (item = list) item + to_add];
+
+/**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
  * @Details Centered on origin.
  *          Result is on the X,Y plane.
