@@ -72,6 +72,8 @@ pegboard_spacing = 25;
 pegboard_thickness = 6;
 pegboard_hole_diameter = 6.35;
 pegboard_mount_plate_thickness = 3;
+add_gussets = false;
+gussets_thickness = 3;
 
 // ===== IMPLEMENTATION ===== //
 
@@ -423,9 +425,25 @@ module cutter_screw_together(gx, gy, size = l_grid) {
  * @param base_dimensions an array (X, Y, Z) of baseplate final dimensions
  */
 module pegboard_mount(base_dimensions) {
-    plate_width = base_dimensions.x - (BASEPLATE_OUTSIDE_RADIUS * 2);
+    // If Gussets are enabled, add its width to the plate
+    plate_width = base_dimensions.x + (add_gussets? (gussets_thickness * 2) : -(BASEPLATE_OUTSIDE_RADIUS * 2));
     plate_height = (pegboard_spacing + (pegboard_hole_diameter * 2));
+
     translate([0, (base_dimensions.y / 2) + (pegboard_mount_plate_thickness / 2), (plate_height / 2)])
         pegmixer(spacing = pegboard_spacing, board_thickness = pegboard_thickness, hole_d = pegboard_hole_diameter, peg_hole_percentage = 0.75)
             solid([plate_width, pegboard_mount_plate_thickness, plate_height]);
+    
+    if(add_gussets) {
+        // Add right gusset
+        translate([(base_dimensions.x / 2) + gussets_thickness, 0, 0])
+        rotate([0, -90, 0])
+        linear_extrude(height = gussets_thickness)
+        polygon(points = [[0, -((base_dimensions.y / 2) - BASEPLATE_OUTSIDE_RADIUS)], [plate_height, (base_dimensions.y / 2)], [0, (base_dimensions.y / 2)]]);
+
+        // Add left gusset
+        translate([-(base_dimensions.x / 2), 0, 0])
+        rotate([0, -90, 0])
+        linear_extrude(height = gussets_thickness)
+        polygon(points = [[0, -((base_dimensions.y / 2) - BASEPLATE_OUTSIDE_RADIUS)], [plate_height, (base_dimensions.y / 2)], [0, (base_dimensions.y / 2)]]);
+    }
 }
