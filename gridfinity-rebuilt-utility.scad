@@ -316,7 +316,7 @@ module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=f
                 center=true
             );
         }
-        
+
         if (thumbscrew) {
             ScrewThread(
                 1.01 * thumbscrew_outerdiam + 1.25 * thumbscrew_tolerance,
