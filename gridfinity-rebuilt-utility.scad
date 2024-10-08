@@ -224,18 +224,21 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
     // Final size in number of bases
     grid_size = [gx/dbnx, gy/dbny];
 
-    // Per spec, there's a 0.5mm gap between each base,
-    // But that needs to be scaled based on everything else.
-    individual_base_size_mm = [dbnx, dbny] * BASE_SIZE;
-    base_center_distance_mm = [dbnx, dbny] * length;
-    gap_mm = base_center_distance_mm - individual_base_size_mm;
+    // Per spec, there's a 0.5mm gap between each base.
+    // This must be kept constant or half bins may not work correctly.
+    gap_mm = l_grid - BASE_SIZE;
+
+    base_center_distance_mm = [dbnx, dbny] * length;  // Per spec this should be 42.
+    individual_base_size_mm = [base_center_distance_mm.x - gap_mm, base_center_distance_mm.y - gap_mm];
 
     // Final size of the base top. In mm.
+    // subtracting gap_mm here to remove an outer lip along the peremiter.
     grid_size_mm = [
-        base_center_distance_mm.x * grid_size.x,
-        base_center_distance_mm.y * grid_size.y,
-    ] - gap_mm;
+        base_center_distance_mm.x * grid_size.x - gap_mm,
+        base_center_distance_mm.y * grid_size.y - gap_mm
+    ];
 
+    // Top which ties all bases together
     if (final_cut) {
         translate([0, 0, h_base-TOLLERANCE])
         rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_OUTSIDE_RADIUS, center=true);
