@@ -72,6 +72,7 @@ function height (z,d=0,l=0,enable_zsnap=true) =
 //          set n_div values to 0 for a solid bin
 // style_tab:   tab style for all compartments. see cut()
 // scoop_weight:    scoop toggle for all compartments. see cut()
+// place_tab:   tab suppression for all compartments. see "gridfinity-rebuilt-bins.scad"
 module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
     for (i = [1:n_divx])
     for (j = [1:n_divy])
