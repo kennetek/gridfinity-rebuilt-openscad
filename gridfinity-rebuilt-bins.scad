@@ -59,6 +59,8 @@ cd = 10; // .1
 ch = 1;  //.1
 // spacing to lid
 c_depth = 1;
+// fillet between indentation and walls
+c_fillet = false;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
@@ -115,7 +117,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
 
     } else if (cdivx > 0 && cdivy > 0) {
 
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, cutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer,cutout_fillet=c_fillet);
     }
 }
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
@@ -172,6 +174,30 @@ gridfinityInit(3, 3, height(6), 0, 42) {
 }
 gridfinityBase(3, 3, 42, 0, 0, 1);
 */
+
+// Shapes can also be cut in an indentation by using cut_indent() instead of cut_move(). To cut multiple shapes into one indented compartment use indent() in combination with cut_move().
+/*
+gridfinityInit(2, 2, height(6), 0, 42) {
+
+    cut_indent(14, 0, 0, 1, 1, enable_fillet=false)
+        sphere(12);
+
+    indent(height(4), 1, 0, 1, 2) {
+        cut_move($indent_x, $indent_y, $indent_w, $indent_h/2) {
+            cube([20,20,20], true);
+            rotate([0,0,45]) cube([20,20,20], true);
+        }
+
+        cut_move($indent_x, $indent_y+1, $indent_w, $indent_h/2)
+            translate([0, 0, -10])
+                cylinder(20, r=12, true);
+    }
+
+    cut(0, 1, 1, 1);
+}
+gridfinityBase(2, 2, 42, 0, 0, 1);
+//*/
+
 
 // You can use loops as well as the bin dimensions to make different parametric functions, such as this one, which divides the box into columns, with a small 1x1 top compartment and a long vertical compartment below
 /*
