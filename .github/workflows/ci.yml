@@ -13,19 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 💾 Check out repository
-      uses: actions/checkout@v3
-
-    - name: 🪝 Cache pre-commit hooks
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pre-commit
-        key: "pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml')
-          }}"
-
+      uses: actions/checkout@v4
+    - uses: actions/setup-python@v3 # WARNING: This must be v3
     - name: ✨ Install pre-commit
-      shell: bash
-      run: python3 -m pip install pre-commit
-
+      uses: pre-commit/action@v3.0.1
     - name: 🔥 Test
       run: pre-commit run --show-diff-on-failure --all-files
 
