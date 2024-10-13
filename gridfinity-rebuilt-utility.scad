@@ -91,27 +91,34 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
 // chamfer: chamfer around the top rim of the holes
 module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, coutout_depth=0, orientation=0, chamfer=0.5) {
     rotation = (orientation == 0)
-            ? [0,90,0]
+            ? [0, 90, 0]
             : (orientation == 1)
-                ? [90,0,0]
-                : [0,0,0];
+                ? [90, 0, 0]
+                : [0, 0, 0];
 
-    gridx_mm = $gxx*l_grid;
-    gridy_mm = $gyy*l_grid;
+    // When oriented vertically along the z axis, half of the cutting cylinder is in the air
+    // When oriented along the x or y axes, the entire height of the cylinder is cut out
+    cylinder_height = (orientation == 2) ? cylinder_height * 2 : cylinder_height;
+
+    // Chamfer is only enabled for vertical, since it doesn't make sense in other orientations
+    chamfer = (orientation == 2) ? chamfer : 0;
+
+    gridx_mm = $gxx * l_grid;
+    gridy_mm = $gyy * l_grid;
     padding = 2;
-    cutout_x = gridx_mm - d_wall*2;
-    cutout_y = gridy_mm - d_wall*2;
+    cutout_x = gridx_mm - d_wall * 2;
+    cutout_y = gridy_mm - d_wall * 2;
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
-        translate([0,0,-coutout_depth]) {
-            rounded_rectangle(cutout_x, cutout_y, coutout_depth*2, r_base);
+        translate([0, 0, -coutout_depth]) {
+            rounded_rectangle(cutout_x, cutout_y, coutout_depth * 2, r_base);
 
-            pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding)/n_divx, sy=(gridy_mm - padding)/n_divy)
+            pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding) / n_divx, sy=(gridy_mm - padding) / n_divy)
                 rotate(rotation)
                     union() {
-                        cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true);
+                        cylinder(d=cylinder_diameter, h=cylinder_height, center=true);
                         if (chamfer > 0) {
-                            translate([0,0,-chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter+4*chamfer, h=2*chamfer);
+                            translate([0, 0, -chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter + 4 * chamfer, h=2 * chamfer);
                         }
                     };
         }
