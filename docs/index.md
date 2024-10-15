@@ -6,7 +6,7 @@ The [project](https://github.com/kennetek/gridfinity-rebuilt-openscad/) has expa
 Models are generated subtractively. First, the solid bin and bases are constructed, and then the compartments and holes are removed. This allows for internal fillets that nearly match the originals. However, they are not exactly perfect. There are some fillets that are too small and too difficult to be worth implementing, as most printers do not have a high enough resolution for it to matter.
 
 ## Getting Started
-For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the [development snapshots](https://openscad.org/downloads.html). To enable the feature, go to Edit > Preferences > Features > fast-csg. This can speed up rendering from 10 minutes down to a couple of seconds, even for comically large bins. It is not a requirement to use development versions of OpenSCAD.
+For best results, use a [development snapshots](https://openscad.org/downloads.html) version of OpenSCAD. This can speed up rendering from 10 minutes down to a couple of seconds, even for comically large bins. It is not a requirement to use development versions of OpenSCAD.
 
 Most files will come ready-to-run, so parameters can be changed using OpenSCAD's built-in customizer window, and the bins will automatically generate. However, all modules are packed up nicely, so any module can be imported into other files or have more custom modifications beyond tweaking the parameters.
 
