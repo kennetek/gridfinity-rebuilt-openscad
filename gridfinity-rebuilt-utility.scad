@@ -218,41 +218,47 @@ module cut_move(x, y, w, h) {
 
 /**
  *@summary Create the base of a gridfinity bin, or use it for a custom object.
- * @param length X,Y size of a single Gridfinity base.
+ * @param grid_size Number of bases in each dimension. [x, y]
+ * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=[l_grid, l_grid], hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+    assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
+        grid_dimensions.x > 0 && grid_dimensions.y > 0);
+    assert(is_list(grid_size) && len(grid_size) == 2 &&
+        grid_size.x > 0 && grid_size.y > 0);
     assert(
-        is_num(gx) &&
-        is_num(gy) &&
-        is_num(length) &&
-        is_num(dx) &&
-        is_num(dy) &&
         is_bool(final_cut) &&
         is_bool(only_corners) &&
         is_bool(thumbscrew)
     );
 
-    dbnxt = [for (i=[1:5]) if (abs(gx*i)%1 < 0.001 || abs(gx*i)%1 > 0.999) i];
-    dbnyt = [for (i=[1:5]) if (abs(gy*i)%1 < 0.001 || abs(gy*i)%1 > 0.999) i];
-    dbnx = 1/(dx != 0 ? round(dx) : (len(dbnxt) > 0 ? dbnxt[0] : 1));
-    dbny = 1/(dy != 0 ? round(dy) : (len(dbnyt) > 0 ? dbnyt[0] : 1));
+    // Per spec, there's a 0.5mm gap between each base.
+    // This must be kept constant or half bins may not work correctly.
+    gap_mm = l_grid - BASE_SIZE;
+
+    // Divisions per grid
+    // Normal, half, or quarter grid sizes supported.
+    // Automatically calculated using floating point comparisons.
+    dbnxt = [for (i=[1,2,4]) if (abs(grid_size.x*i)%1 < 0.001 || abs(grid_size.x*i)%1 > 0.999) i];
+    dbnyt = [for (i=[1,2,4]) if (abs(grid_size.y*i)%1 < 0.001 || abs(grid_size.y*i)%1 > 0.999) i];
+    assert(len(dbnxt) > 0 && len(dbnyt) > 0, "Base only supports half and quarter grid spacing.");
+    divisions_per_grid = [dbnxt[0], dbnyt[0]];
 
     // Final size in number of bases
-    grid_size = [gx/dbnx, gy/dbny];
+    final_grid_size = [grid_size.x * divisions_per_grid.x, grid_size.y * divisions_per_grid.y];
 
-    // Per spec, there's a 0.5mm gap between each base,
-    // But that needs to be scaled based on everything else.
-    individual_base_size_mm = [dbnx, dbny] * BASE_SIZE;
-    base_center_distance_mm = [dbnx, dbny] * length;
-    gap_mm = base_center_distance_mm - individual_base_size_mm;
+    base_center_distance_mm = [grid_dimensions.x / divisions_per_grid.x, grid_dimensions.y / divisions_per_grid.y];
+    individual_base_size_mm = [base_center_distance_mm.x - gap_mm, base_center_distance_mm.y - gap_mm];
 
     // Final size of the base top. In mm.
+    // subtracting gap_mm here to remove an outer lip along the peremiter.
     grid_size_mm = [
-        base_center_distance_mm.x * grid_size.x,
-        base_center_distance_mm.y * grid_size.y,
-    ] - gap_mm;
+        base_center_distance_mm.x * final_grid_size.x - gap_mm,
+        base_center_distance_mm.y * final_grid_size.y - gap_mm
+    ];
 
+    // Top which ties all bases together
     if (final_cut) {
         translate([0, 0, h_base-TOLLERANCE])
         rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_OUTSIDE_RADIUS, center=true);
@@ -260,7 +266,7 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
 
     if(only_corners) {
         difference(){
-            pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
+            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
             block_base(bundle_hole_options(), 0, individual_base_size_mm, thumbscrew=thumbscrew);
 
             copy_mirror([0, 1, 0]) {
@@ -276,7 +282,7 @@ module gridfinityBase(gx, gy, length, dx, dy, hole_options=bundle_hole_options()
         }
     }
     else {
-        pattern_linear(grid_size.x, grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
+        pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
         block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
     }
 }

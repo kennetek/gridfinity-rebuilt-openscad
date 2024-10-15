@@ -16,9 +16,9 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 3;
+gridx = 3; //.5
 // number of bases along y-axis
-gridy = 3;
+gridy = 3; //.5
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6;
 
@@ -41,10 +41,6 @@ gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments -
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 
 /* [Base] */
-// number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
-div_base_x = 0;
-// number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
-div_base_y = 0;
 // thickness of bottom layer
 bottom_layer = 1;
 
@@ -70,27 +66,27 @@ hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, cru
 
 // Input all the cutter types in here
 color("tomato")
-gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, div_base_x, div_base_y, hole_options, only_corners) {
+gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, hole_options, only_corners) {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, div_base_x, div_base_y, style_hole, only_corners) {
+module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, style_hole, only_corners) {
     height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
     union() {
         difference() {
             union() {
                 gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
                 children();
-                gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, only_corners=only_corners);
+                gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, only_corners=only_corners);
             }
 
             difference() {
                 union() {
                     intersection() {
                         difference() {
-                            gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, -d_wall*2, false, only_corners=only_corners);
+                            gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
                             translate([-gridx*length/2,-gridy*length/2,2*h_base])
                             cube([gridx*length,gridy*length,1000]);
                         }
@@ -123,7 +119,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
 
                                 intersection() {
                                     difference() {
-                                        gridfinityBase(gridx, gridy, length, div_base_x, div_base_y, style_hole, -d_wall*2, false, only_corners=only_corners);
+                                        gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
                                         translate([-gridx*length/2,-gridy*length/2,2*h_base])
                                         cube([gridx*length,gridy*length,1000]);
                                     }

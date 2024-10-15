@@ -80,12 +80,6 @@ style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and 
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
 scoop = 1; //[0:0.1:1]
 
-/* [Base] */
-// number of divisions per 1 unit of base along the X axis. (default 1, only use integers. 0 means automatically guess the right division)
-div_base_x = 0;
-// number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
-div_base_y = 0;
-
 /* [Base Hole Options] */
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
@@ -120,7 +114,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
+gridfinityBase([gridx, gridy], hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
 }
 
 
@@ -131,7 +125,7 @@ gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, hole_options, only_
 gridfinityInit(3, 3, height(6), 0, 42) {
 	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 0);
 }
-gridfinityBase(3, 3, 42, 0, 0, 1);
+gridfinityBase([3, 3]);
 */
 
 // Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop.
@@ -148,7 +142,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
     cut(1.5, 0, 1.5, 5/3, 2);
     cut(1.5, 5/3, 1.5, 4/3, 4);
 }
-gridfinityBase(3, 3, 42, 0, 0, 1);
+gridfinityBase([3, 3]);
 */
 
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin.
@@ -172,7 +166,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
         pattern_linear(x=1, y=3, sx=42/2)
             cylinder(r=5, h=1000, center=true);
 }
-gridfinityBase(3, 3, 42, 0, 0, 1);
+gridfinityBase([3, 3]);
 */
 
 // You can use loops as well as the bin dimensions to make different parametric functions, such as this one, which divides the box into columns, with a small 1x1 top compartment and a long vertical compartment below
@@ -185,7 +179,7 @@ gridfinityInit(gx, gy, height(6), 0, 42) {
         cut(i,gx-1,1,1);
     }
 }
-gridfinityBase(gx, gy, 42, 0, 0, 1);
+gridfinityBase([gx, gy]);
 */
 
 // Pyramid scheme bin
@@ -197,5 +191,5 @@ gridfinityInit(gx, gy, height(6), 0, 42) {
     for (j = [0:i])
     cut(j*gx/(i+1),gy-i-1,gx/(i+1),1,0);
 }
-gridfinityBase(gx, gy, 42, 0, 0, 1);
+gridfinityBase([gx, gy]);
 */
