@@ -1,7 +1,24 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
+  - id: fix-byte-order-marker
   - id: trailing-whitespace
+    args: [--markdown-linebreak-ext=md]
+  - id: check-case-conflict
+  - id: check-illegal-windows-names
+  - id: check-json
+  - id: check-yaml
+  #- id: name-tests-test  # Ensure's pytest files end in "_test.py
+  - id: no-commit-to-branch  # Prevent accidental commits to main
+
+- repo: local
+  hooks:
+  - id: no-stl
+    name: Forbid STL files
+    entry: Do not commit STL files.
+    language: fail
+    files: \.stl
+    types: [binary]
