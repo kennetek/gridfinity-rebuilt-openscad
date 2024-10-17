@@ -5,9 +5,9 @@
  */
 
 include <standard.scad>
-use <generic-helpers.scad>
 use <gridfinity-rebuilt-holes.scad>
-use <external/threads-scad/threads.scad>
+use <../helpers/generic-helpers.scad>
+use <../external/threads-scad/threads.scad>
 
 // ===== User Modules ===== //
 

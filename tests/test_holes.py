@@ -10,7 +10,7 @@ from openscad_runner import *
 
 @pytest.fixture
 def openscad_runner(pytestconfig) -> OpenScadRunner:
-    scad_path = pytestconfig.rootpath.joinpath('gridfinity-rebuilt-holes.scad')
+    scad_path = pytestconfig.rootpath.joinpath('src/core/gridfinity-rebuilt-holes.scad')
     scad_runner = OpenScadRunner(scad_path)
     scad_runner.image_folder_base = pytestconfig.rootpath.joinpath('images/hole_cutouts/')
     scad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledTop, 50)
