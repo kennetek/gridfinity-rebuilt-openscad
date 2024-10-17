@@ -4,7 +4,7 @@
  */
 
 include <standard.scad>
-use <generic-helpers.scad>
+use <../helpers/generic-helpers.scad>
 
 /**
  * @brief Determines the number of fragments in a circle. Aka, Circle resolution.

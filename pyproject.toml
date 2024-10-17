@@ -1,0 +1,2 @@
+# Marks this as the root directory for all tests.
+[tool.pytest.ini_options]
