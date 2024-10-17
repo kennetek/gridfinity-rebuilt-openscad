@@ -4,7 +4,7 @@ use <gridfinity-rebuilt-holes.scad>
 
 // ===== INFORMATION ===== //
 /*
- IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
+ IMPORTANT: rendering will be better in development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins.
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
 
