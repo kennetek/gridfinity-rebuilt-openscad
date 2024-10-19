@@ -1,6 +1,6 @@
 // ===== INFORMATION ===== //
 /*
- IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
+ IMPORTANT: rendering will be better in development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins.
  the magnet holes can have an extra cut in them to make it easier to print without supports
  tabs will automatically be disabled when gridz is less than 3, as the tabs take up too much space
  base functions can be found in "gridfinity-rebuilt-utility.scad"

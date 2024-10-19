@@ -110,7 +110,6 @@ class OpenScadRunner:
 
     common_arguments = [
         #'--hardwarnings', # Does not work when setting variables by using functions
-        '--enable=fast-csg',
         '--enable=predictible-output',
         '--imgsize=1280,720',
         '--view=axes',

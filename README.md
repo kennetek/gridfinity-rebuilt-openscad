@@ -35,7 +35,7 @@ The printable holes allow your slicer to bridge the gap inside the countersunk m
 [<img src="./images/slicer_holes_top.png" height="200">]()
 
 ## Recommendations
-For best results, use a version of OpenSCAD with the fast-csg feature. As of writing, this feature is only implemented in the [development snapshots](https://openscad.org/downloads.html). To enable the feature, go to Edit > Preferences > Features > fast-csg. On my computer, this sped up rendering from 10 minutes down to a couple of seconds, even for comically large bins.
+For best results, use a [development snapshots](https://openscad.org/downloads.html) version of OpenSCAD. This can speed up rendering from 10 minutes down to a couple of seconds, even for comically large bins. It is not a requirement to use development versions of OpenSCAD.
 
 ## External libraries
 
