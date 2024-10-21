@@ -77,6 +77,7 @@ gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_gri
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, style_hole, only_corners) {
     height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
+    render()
     union() {
         difference() {
             union() {
