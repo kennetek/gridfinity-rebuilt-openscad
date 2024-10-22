@@ -31,7 +31,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + h_bot + h_base + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
+    mmHeight + h_bot + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -63,7 +63,7 @@ function height (z,d=0,l=0,enable_zsnap=true) =
         hf(z,d,l)+7-abs(hf(z,d,l))%7
     )
     :hf(z,d,l)
-    ) -h_base;
+    ) - BASE_HEIGHT;
 
 // Creates equally divided cutters for the bin
 //
@@ -169,7 +169,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 // s:   toggle the rounded back corner that allows for easy removal
 
 module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
-    translate([0,0,-$dh-h_base])
+    translate([0, 0, -$dh - BASE_HEIGHT])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);
 }
@@ -209,7 +209,7 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
-    translate([0,0,$dh0==0?$dh+h_base:$dh0+h_base])
+    translate([0, 0, ($dh0==0 ? $dh : $dh0) + BASE_HEIGHT])
     cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
     children();
 }
@@ -260,7 +260,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     // Top which ties all bases together
     if (final_cut) {
-        translate([0, 0, h_base-TOLLERANCE])
+        translate([0, 0, BASE_HEIGHT])
         rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_TOP_RADIUS, center=true);
     }
 
@@ -338,8 +338,8 @@ module block_base(hole_options, off=0, top_dimensions=BASE_TOP_DIMENSIONS, thumb
             sweep_rounded(sweep_inner)
                 base_polygon();
 
-            translate([0, 0, BASE_PROFILE_MAX.y/2])
-            cube([cube_size.x, cube_size.y, BASE_PROFILE_MAX.y], center=true);
+            translate([0, 0, BASE_HEIGHT/2])
+            cube([cube_size.x, cube_size.y, BASE_HEIGHT], center=true);
         }
 
         if (thumbscrew) {
@@ -450,13 +450,13 @@ module profile_wall2(height_mm) {
 }
 
 module block_wall(gx, gy, l) {
-    translate([0,0,h_base])
+    translate([0, 0, BASE_HEIGHT])
     sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
     children();
 }
 
 module block_bottom( h = 2.2, gx, gy, l ) {
-    translate([0,0,h_base+0.1])
+    translate([0, 0, BASE_HEIGHT + 0.1])
     rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
@@ -482,7 +482,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     ycutlast = abs(y+h-$gyy)<0.001 && $style_lip == 0;
     xcutfirst = x == 0 && $style_lip == 0;
     xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
-    zsmall = ($dh+h_base)/7 < 3;
+    zsmall = ($dh+BASE_HEIGHT)/7 < 3;
 
     ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div;
     xlen = w*($gxx*l_grid+d_magic)/$gxx-d_div;
@@ -494,7 +494,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
 
-    translate([0,ylen/2,h_base+h_bot])
+    translate([0, ylen/2, BASE_HEIGHT+h_bot])
     rotate([90,0,-90]) {
 
     if (!zsmall && xlen - tab_width > 4*r_f2 && (t != 0 && t != 5)) {

@@ -266,7 +266,7 @@ module hole_pattern(){
 }
 
 module cutter_countersink(){
-    screw_hole(SCREW_HOLE_RADIUS + d_clear, 2*h_base,
+    screw_hole(SCREW_HOLE_RADIUS + d_clear, 2*BASE_HEIGHT,
         false, BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS);
 }
 
@@ -274,7 +274,7 @@ module cutter_counterbore(){
     screw_radius = SCREW_HOLE_RADIUS + d_clear;
     counterbore_height = BASEPLATE_SCREW_COUNTERBORE_HEIGHT + 2*LAYER_HEIGHT;
     union(){
-        cylinder(h=2*h_base, r=screw_radius);
+        cylinder(h=2*BASE_HEIGHT, r=screw_radius);
         difference() {
             cylinder(h = counterbore_height, r=BASEPLATE_SCREW_COUNTERBORE_RADIUS);
             make_hole_printable(screw_radius, BASEPLATE_SCREW_COUNTERBORE_RADIUS, counterbore_height);

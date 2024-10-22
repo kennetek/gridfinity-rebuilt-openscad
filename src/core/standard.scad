@@ -174,6 +174,11 @@ BASE_TOP_DIMENSIONS = [41.5, 41.5];
 BASE_PROFILE_MAX = BASE_PROFILE[3];
 
 /**
+ * @Summary Height of the base.
+ */
+BASE_HEIGHT = BASE_PROFILE_MAX.y;
+
+/**
  * @Summary Corner radius of the bottom of the base.
  * @Details This is also how much BASE_PROFILE needs to be translated
  *          to use `sweep_rounded(...)`.
@@ -190,12 +195,6 @@ function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
         && is_num(top_dimensions.x) && is_num(top_dimensions.y))
     [top_dimensions.x - 2*BASE_PROFILE_MAX.x,
     top_dimensions.y - 2*BASE_PROFILE_MAX.x];
-
-/**
- * @summary Height of the raw base
- * @Deprecated
- */
-h_base = BASE_PROFILE_MAX.y;
 
 // ****************************************
 // Baseplate constants

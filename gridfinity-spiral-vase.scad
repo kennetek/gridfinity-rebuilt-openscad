@@ -85,8 +85,8 @@ d_hole = 26;  // center-to-center distance between holes
 d_bottom = layer*(max(bottom_layer,1));
 x_l = l_grid/2;
 
-dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+h_base : gridz-(enable_lip?3.8:0);
-d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-h_base;
+dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+BASE_HEIGHT : gridz-(enable_lip?3.8:0);
+d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-BASE_HEIGHT;
 
 d_fo1 = 2*+BASE_TOP_RADIUS;
 
@@ -170,18 +170,18 @@ module gridfinityBaseVase() {
     difference() {
         intersection() {
             block_base_blank(0);
-            translate([0,0,-h_base-1])
-            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, h_base*10], BASE_TOP_RADIUS+0.001, center=true);
+            translate([0,0,-BASE_HEIGHT-1])
+            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, BASE_HEIGHT*10], BASE_TOP_RADIUS+0.001, center=true);
         }
         translate([0,0,0.01])
         difference() {
             block_base_blank(nozzle*4);
-            translate([0,0,-h_base])
+            translate([0,0,-BASE_HEIGHT])
             cube([l_grid*2,l_grid*2,d_bottom*2],center=true);
         }
         // magic slice
         rotate([0,0,90])
-        translate([0,0,-h_base+d_bottom+0.01])
+        translate([0,0,-BASE_HEIGHT+d_bottom+0.01])
         cube([0.001,l_grid*gridx,d_height+d_bottom*2]);
 
     }
@@ -189,7 +189,7 @@ module gridfinityBaseVase() {
     pattern_circular(4)
     intersection() {
         rotate([0,0,45])
-        translate([-nozzle,3,-h_base+d_bottom+0.01])
+        translate([-nozzle,3,-BASE_HEIGHT+d_bottom+0.01])
         cube([nozzle*2,l_grid*gridx,d_height+d_bottom*2]);
 
         block_base_blank(nozzle*4-0.1);
@@ -202,8 +202,8 @@ module gridfinityBaseVase() {
     pattern_circular(4)
     block_magnet_blank(0, false);
 
-    translate([0,0,h_base/2])
-    cube([l_grid*2, l_grid*2, h_base], center = true);
+    translate([0,0,BASE_HEIGHT/2])
+    cube([l_grid*2, l_grid*2, BASE_HEIGHT], center = true);
     }
 
     if (style_base != 4)
@@ -214,24 +214,24 @@ module gridfinityBaseVase() {
 module block_magnet_blank(o = 0, half = true) {
     magnet_radius = MAGNET_HOLE_RADIUS + o;
 
-    translate([d_hole/2,d_hole/2,-h_base+0.1])
+    translate([d_hole/2,d_hole/2,-BASE_HEIGHT+0.1])
     difference() {
         hull() {
             cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
-            cylinder(r = magnet_radius-(h_base+0.1-MAGNET_HOLE_DEPTH), h = (h_base+0.1)*2, center = true);
+            cylinder(r = magnet_radius-(BASE_HEIGHT+0.1-MAGNET_HOLE_DEPTH), h = (BASE_HEIGHT+0.1)*2, center = true);
         }
         if (half)
         mirror([0,0,1])
-        cylinder(r=magnet_radius*2, h = (h_base+0.1)*4);
+        cylinder(r=magnet_radius*2, h = (BASE_HEIGHT+0.1)*4);
     }
 }
 
 module block_base_blank(o = 0) {
     mirror([0,0,1]) {
         hull() {
-            linear_extrude(h_base)
+            linear_extrude(BASE_HEIGHT)
             rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, r_fo3, center=true);
-            linear_extrude(h_base-r_c1)
+            linear_extrude(BASE_HEIGHT-r_c1)
             rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
         }
         hull() {
@@ -247,7 +247,7 @@ module block_base_blank(o = 0) {
 module block_pinch(height_mm) {
     assert(is_num(height_mm));
 
-    translate([0, 0, -h_base])
+    translate([0, 0, -BASE_HEIGHT])
     block_wall(gridx, gridy, l_grid) {
         translate([d_wall2-nozzle*2-d_clear*2,0,0])
         profile_wall(height_mm);
@@ -360,7 +360,7 @@ module block_funnel_outside() {
 module block_vase_base() {
     difference() {
         // base
-        translate([0,0,-h_base]) {
+        translate([0,0,-BASE_HEIGHT]) {
             translate([0,0,-0.1])
             color("firebrick")
             block_bottom(d_bottom, gridx, gridy, l_grid);

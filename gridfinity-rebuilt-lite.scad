@@ -90,7 +90,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                     intersection() {
                         difference() {
                             gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
-                            translate([-gridx*length/2,-gridy*length/2,2*h_base])
+                            translate([-gridx*length/2,-gridy*length/2,2*BASE_HEIGHT])
                             cube([gridx*length,gridy*length,1000]);
                         }
                         translate([0,0,-1])
@@ -98,11 +98,11 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                         translate([0,0,bottom_layer])
                         rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
                     }
-                    translate([0,0,h_base+d_clear])
-                    rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, h_base, r_f2);
+                    translate([0,0,BASE_HEIGHT+d_clear])
+                    rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, BASE_HEIGHT, r_f2);
                 }
 
-                translate([0,0,-4*h_base])
+                translate([0,0,-4*BASE_HEIGHT])
                 gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
                 children();
             }
@@ -120,7 +120,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                         intersection() {
                             difference() {
                                 gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
-                                translate([-gridx*length/2,-gridy*length/2,2*h_base])
+                                translate([-gridx*length/2,-gridy*length/2,2*BASE_HEIGHT])
                                 cube([gridx*length,gridy*length,1000]);
                             }
                             translate([0,0,-1])
@@ -129,7 +129,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                             rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
                         }
 
-                        translate([0,0,-4*h_base])
+                        translate([0,0,-4*BASE_HEIGHT])
                         gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
                         children();
                     }
