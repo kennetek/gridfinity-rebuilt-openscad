@@ -3,9 +3,16 @@
 r_c1 = 0.8;
 // bottom thiccness of bin
 h_bot = 2.2;
-// length of a grid unit
-l_grid = 42;
 
+/**
+ * @brief Size of a single gridfinity unit. [Length, Width] In millimeters.
+ */
+GRID_DIMENSIONS_MM = [42, 42];
+
+/**
+ * @deprecated Use GRID_DIMENSIONS_MM instead.
+ */
+l_grid = GRID_DIMENSIONS_MM.x;
 
 // Outside rounded radius of bin
 // Per spec, matches radius of upper base section.
@@ -96,8 +103,9 @@ STACKING_LIP_SUPPORT_HEIGHT = 1.2;
 
 /**
  * @Summary Stacking lip as defined in the spec.  No support.
+ * @Details This is just a line, and will not create a solid polygon.
  */
-RAW_STACKING_LIP = [
+STACKING_LIP_LINE = [
     [0, 0], // Inner tip
     [0.7, 0.7], // Go out 45 degrees
     [0.7, (0.7+1.8)], // Vertical increase
@@ -110,7 +118,7 @@ RAW_STACKING_LIP = [
  *               Including wall thickness.
  *          "y": The height of the stacking lip.
  */
-STACKING_LIP_SIZE = RAW_STACKING_LIP[3];
+STACKING_LIP_SIZE = STACKING_LIP_LINE[3];
 
 _stacking_lip_support_angle = 45;
 
@@ -123,40 +131,69 @@ _stacking_lip_support_height_mm =
     + tan(90 - _stacking_lip_support_angle) * STACKING_LIP_SIZE.x;
 
 /**
- * @Summary Stacking lip with a support.
+ * @Summary Stacking lip with a support. Used to create a polygon.
  * @Details Support is so the stacking lip is not floating in mid air when wall width is less than stacking lip depth.
  */
-STACKING_LIP = concat(RAW_STACKING_LIP, [
+STACKING_LIP = concat(STACKING_LIP_LINE, [
     [STACKING_LIP_SIZE.x, -_stacking_lip_support_height_mm], // Down to support bottom
     [0, -STACKING_LIP_SUPPORT_HEIGHT], // Up and in (to bottom inner support)
-    [0, 0] // Close the shape. Technically not needed.
+    //[0, 0] // Implicit back to start
 ]);
 
 // ****************************************
 // Base constants
 // Based on https://gridfinity.xyz/specification/
 // ****************************************
-BASE_OUTSIDE_RADIUS = r_base;
 
+/**
+ * @Summary Profile of a Gridfinity base as described in the spec.
+ * @Details This is just a line, and will not create a solid polygon.
+ */
 BASE_PROFILE = [
     [0, 0], // Innermost bottom point
     [0.8, 0.8], // Up and out at a 45 degree angle
     [0.8, (0.8+1.8)], // Straight up
-    [(0.8+2.15), (0.8+1.8+2.15)], // Up and out at a 45 degree angle
-    [0, (0.8+1.8+2.15)], // Go in to form a solid polygon
-    [0, 0] //Back to start
+    [(0.8+2.15), (0.8+1.8+2.15)] // Up and out at a 45 degree angle
 ];
 
-// Maximum [x,y] values/size of the base.
+/**
+ * @Summary Corner radius of the top of the base.
+ */
+BASE_TOP_RADIUS = r_base;
+
+/**
+ * @Summary Size of the top of the base. [Length, Width]
+ * @Details Each unit's base is 41.5mm x 41.5mm
+ *          Leaving 0.5mm gap with an l_grid of 42
+ */
+BASE_TOP_DIMENSIONS = [41.5, 41.5];
+
+/**
+ * @Summary Maximum [x,y] values/size of the base.
+ */
 BASE_PROFILE_MAX = BASE_PROFILE[3];
 
-// Each unit's base is 41.5mm x 41.5mm
-// Leaving 0.5mm gap with an l_grid of 42
-BASE_SIZE = 41.5;
+/**
+ * @Summary Corner radius of the bottom of the base.
+ * @Details This is also how much BASE_PROFILE needs to be translated
+ *          to use `sweep_rounded(...)`.
+ */
+BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - BASE_PROFILE_MAX.x;
 
+/**
+ * @Summary Dimensions of the bottom of the base. [Length, Width]
+ * @Details Supports arbitrary top sizes.
+ * @param top_dimensions [Length, Width] of the top of the base.
+ */
+function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
+    assert(is_list(top_dimensions) && len(top_dimensions) == 2
+        && is_num(top_dimensions.x) && is_num(top_dimensions.y))
+    [top_dimensions.x - 2*BASE_PROFILE_MAX.x,
+    top_dimensions.y - 2*BASE_PROFILE_MAX.x];
 
 /**
  * @summary Height of the raw base
+ * @Deprecated
  */
 h_base = BASE_PROFILE_MAX.y;
 
@@ -174,7 +211,7 @@ BASEPLATE_LIP = [
     [0.7, (0.7+1.8)], // Straight up
     [(0.7+2.15), (0.7+1.8+2.15)], // Up and out at a 45 degree angle
     [(0.7+2.15), 0], // Straight down
-    [0, 0] //Back to start
+    //[0, 0] // Implicit back to start
 ];
 
 // Height of the baseplate lip.

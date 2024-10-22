@@ -341,7 +341,7 @@ module square_baseplate_lip(height=0, size = l_grid) {
 
     corner_center_distance = size/2 - BASEPLATE_OUTSIDE_RADIUS;
 
-    render(convexity = 2) // Fixes ghosting in preview
+    //render(convexity = 2) // Fixes ghosting in preview
     union() {
         baseplate_lip(height, size, size);
         pattern_circular(4)
