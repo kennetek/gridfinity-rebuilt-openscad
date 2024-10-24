@@ -106,45 +106,41 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
                 gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
                 children();
             }
-
         }
         difference() {
             translate([0,0,-1.6])
+            difference() {
                 difference() {
-                    difference() {
-                        union() {
-
-                            gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
-                            children();
-                        }
-
-                        difference() {
-
-                                intersection() {
-                                    difference() {
-                                        gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
-                                        translate([-gridx*length/2,-gridy*length/2,2*h_base])
-                                        cube([gridx*length,gridy*length,1000]);
-                                    }
-                                    translate([0,0,-1])
-                                    rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
-                                    translate([0,0,bottom_layer])
-                                    rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
-                                }
-
-
-                            translate([0,0,-4*h_base])
-                            gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
-                            children();
-                        }
-
+                    union() {
+                        gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
+                        children();
                     }
-                    translate([0,0,9])
-                    rounded_rectangle(gridx*1000, gridy*1000, gridz*1000, gridz);
+
+                    difference() {
+                        intersection() {
+                            difference() {
+                                gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
+                                translate([-gridx*length/2,-gridy*length/2,2*h_base])
+                                cube([gridx*length,gridy*length,1000]);
+                            }
+                            translate([0,0,-1])
+                            rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
+                            translate([0,0,bottom_layer])
+                            rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
+                        }
+
+                        translate([0,0,-4*h_base])
+                        gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
+                        children();
+                    }
+
                 }
-                    translate([0,0,0])
-                    rounded_rectangle(gridx*1000, gridy*1000, 5, r_f2);
+                translate([0,0,9])
+                rounded_rectangle(gridx*1000, gridy*1000, gridz*1000, gridz);
             }
+            translate([0,0,0])
+            rounded_rectangle(gridx*1000, gridy*1000, 5, r_f2);
+       }
 
     }
 }
