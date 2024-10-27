@@ -266,10 +266,19 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     if(only_corners) {
         difference(){
-            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
-            block_base(bundle_hole_options(), 0, individual_base_size_mm, thumbscrew=thumbscrew);
+            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y) {
+                base_solid(individual_base_size_mm);
+            }
+
+            if(thumbscrew) {
+                thumbscrew_position = grid_size_mm - individual_base_size_mm;
+                pattern_linear(2, 2, thumbscrew_position.x, thumbscrew_position.y) {
+                    _base_thumbscrew();
+                }
+            }
 
             _base_holes(hole_options, off, grid_size_mm);
+            _base_preview_fix();
         }
     }
     else {
@@ -365,7 +374,6 @@ module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, th
 
     base_bottom = base_bottom_dimensions(top_dimensions);
 
-    render(convexity = 2)
     difference() {
         base_solid(top_dimensions);
 
@@ -373,6 +381,19 @@ module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, th
             _base_thumbscrew();
         }
         _base_holes(hole_options, offset, top_dimensions);
+        _base_preview_fix();
+    }
+}
+
+/**
+ * @brief Internal code.  Fix base preview rendering issues.
+ * @details Preview does not like perfect top/bottoms.
+ */
+module _base_preview_fix() {
+    if($preview){
+        cube([10000, 10000, 0.01], center=true);
+        translate([0, 0, BASE_HEIGHT])
+        cube([10000, 10000, 0.01], center=true);
     }
 }
 
