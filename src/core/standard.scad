@@ -196,6 +196,14 @@ function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
     [top_dimensions.x - 2*BASE_PROFILE_MAX.x,
     top_dimensions.y - 2*BASE_PROFILE_MAX.x];
 
+// ***************
+// Gridfinity Refined Thumbscrew
+// See https://www.printables.com/model/413761-gridfinity-refined
+// ***************
+
+BASE_THUMBSCREW_OUTER_DIAMETER=15;
+BASE_THUMBSCREW_PITCH=1.5;
+
 // ****************************************
 // Baseplate constants
 // Based on https://gridfinity.xyz/specification/

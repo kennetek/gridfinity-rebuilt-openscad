@@ -307,6 +307,18 @@ module base_polygon() {
 }
 
 /**
+ * @brief Internal function to create the negative for a Gridfinity Refined thumbscrew hole.
+ * @details Magic constants are what the threads.ScrewHole function does.
+ */
+module _base_thumbscrew() {
+    ScrewThread(
+        1.01 * BASE_THUMBSCREW_OUTER_DIAMETER + 1.25 * 0.4,
+        BASE_HEIGHT,
+        BASE_THUMBSCREW_PITCH
+    );
+}
+
+/**
  * @brief A single Gridfinity base.  With holes (if set).
  * @param hole_options @see block_base_hole.hole_options
  * @param off
@@ -325,13 +337,6 @@ module block_base(hole_options, off=0, top_dimensions=BASE_TOP_DIMENSIONS, thumb
         str("Minimum size of a single base must be greater than ", 2*BASE_TOP_RADIUS)
     );
 
-    thumbscrew_outerdiam = 15;
-    thumbscrew_height = 5;
-    thumbscrew_tolerance = 0.4;
-    thumbscrew_tooth_angle = 30;
-    thumbscrew_pitch = 1.5;
-
-
     render(convexity = 2)
     difference() {
         union(){
@@ -343,14 +348,7 @@ module block_base(hole_options, off=0, top_dimensions=BASE_TOP_DIMENSIONS, thumb
         }
 
         if (thumbscrew) {
-            ScrewThread(
-                1.01 * thumbscrew_outerdiam + 1.25 * thumbscrew_tolerance,
-                thumbscrew_height,
-                thumbscrew_pitch,
-                thumbscrew_tooth_angle,
-                thumbscrew_tolerance,
-                tooth_height=0
-            );
+            _base_thumbscrew();
         }
         // 4 holes
         // Need this fancy code to support refined holes and non-square bases.
