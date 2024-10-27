@@ -386,6 +386,31 @@ module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, th
 }
 
 /**
+ * @brief Outer shell of a Gridfinity base.
+ * @param wall_thickness How thick the walls are.
+ * @param bottom_thickness How thick the bottom is.
+ * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
+ */
+module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TOP_DIMENSIONS) {
+    assert(is_num(wall_thickness) && wall_thickness > 0);
+    assert((is_num(bottom_thickness) && bottom_thickness > 0));
+
+    union(){
+        difference(){
+            base_solid(top_dimensions=top_dimensions);
+            base_solid(top_dimensions=foreach_add(top_dimensions, -2*wall_thickness));
+            _base_preview_fix();
+        }
+        //Bottom
+        intersection() {
+            translate([0, 0, bottom_thickness/2])
+            cube([top_dimensions.x, top_dimensions.y, bottom_thickness], center=true);
+            base_solid(top_dimensions=top_dimensions);
+        }
+    }
+}
+
+/**
  * @brief Internal code.  Fix base preview rendering issues.
  * @details Preview does not like perfect top/bottoms.
  */

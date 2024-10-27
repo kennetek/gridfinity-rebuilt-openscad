@@ -69,16 +69,13 @@ a_tab = 40;
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
-if (type != 0) gridfinityBaseVase(); // Generate a single base
+if (type != 0) gridfinityBaseVase(2*nozzle, d_bottom); // Generate a single base
 else gridfinityVase(); // Generate the bin
 
 
 // ===== CONSTRUCTION ===== //
 
 //Deprecated Variables
-r_fo2 = 3.2 / 2;  // outside radii 2
-r_fo3 = 1.6 / 2;  // outside radii 3
-r_c2 = 2.4; // upper base chamfer "radius"
 d_hole = 26;  // center-to-center distance between holes
 //End Deprecated Variables
 
@@ -164,57 +161,45 @@ module gridfinityVase() {
     }
 }
 
-module gridfinityBaseVase() {
+module gridfinityBaseVase(wall_thickness, bottom_thickness) {
     difference() {
-    union() {
-    difference() {
-        intersection() {
-            block_base_blank(0);
-            translate([0,0,-BASE_HEIGHT-1])
-            rounded_square([l_grid-0.5-0.005, l_grid-0.5-0.005, BASE_HEIGHT*10], BASE_TOP_RADIUS+0.001, center=true);
+        union() {
+            base_outer_shell(wall_thickness, bottom_thickness);
+            intersection() {
+                pattern_circular(4){
+                    rotate([0,0,45])
+                    translate([-wall_thickness/2, 3, 0])
+                    cube([wall_thickness, l_grid, BASE_PROFILE_MAX.y]);
+
+                    if (enable_holes) {
+                        block_magnet_blank(wall_thickness);
+                    }
+                }
+                base_solid();
+            }
+            if (style_base != 4) {
+                translate([0, 0, BASE_PROFILE_MAX.y])
+                linear_extrude(bottom_thickness)
+                profile_x(0.1);
+            }
         }
-        translate([0,0,0.01])
-        difference() {
-            block_base_blank(nozzle*4);
-            translate([0,0,-BASE_HEIGHT])
-            cube([l_grid*2,l_grid*2,d_bottom*2],center=true);
+        if (enable_holes) {
+            pattern_circular(4)
+            block_magnet_blank(0, false);
         }
+
         // magic slice
-        rotate([0,0,90])
-        translate([0,0,-BASE_HEIGHT+d_bottom+0.01])
-        cube([0.001,l_grid*gridx,d_height+d_bottom*2]);
-
+        // Tricks slicer into not ignoring the center.
+        rotate([0, 0, 90])
+        translate([0, 0, bottom_thickness])
+        cube([0.005, 2*l_grid, 2*BASE_HEIGHT]);
     }
-
-    pattern_circular(4)
-    intersection() {
-        rotate([0,0,45])
-        translate([-nozzle,3,-BASE_HEIGHT+d_bottom+0.01])
-        cube([nozzle*2,l_grid*gridx,d_height+d_bottom*2]);
-
-        block_base_blank(nozzle*4-0.1);
-    }
-    if (enable_holes)
-    pattern_circular(4)
-    block_magnet_blank(nozzle);
-    }
-    if (enable_holes)
-    pattern_circular(4)
-    block_magnet_blank(0, false);
-
-    translate([0,0,BASE_HEIGHT/2])
-    cube([l_grid*2, l_grid*2, BASE_HEIGHT], center = true);
-    }
-
-    if (style_base != 4)
-    linear_extrude(d_bottom)
-    profile_x(0.1);
 }
 
 module block_magnet_blank(o = 0, half = true) {
     magnet_radius = MAGNET_HOLE_RADIUS + o;
 
-    translate([d_hole/2,d_hole/2,-BASE_HEIGHT+0.1])
+    translate([d_hole/2, d_hole/2, 0.1])
     difference() {
         hull() {
             cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
@@ -223,24 +208,6 @@ module block_magnet_blank(o = 0, half = true) {
         if (half)
         mirror([0,0,1])
         cylinder(r=magnet_radius*2, h = (BASE_HEIGHT+0.1)*4);
-    }
-}
-
-module block_base_blank(o = 0) {
-    mirror([0,0,1]) {
-        hull() {
-            linear_extrude(BASE_HEIGHT)
-            rounded_square(l_grid-o-0.05-2*r_c2-2*r_c1, r_fo3, center=true);
-            linear_extrude(BASE_HEIGHT-r_c1)
-            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
-        }
-        hull() {
-            linear_extrude(r_c2)
-            rounded_square(l_grid-o-0.05-2*r_c2, r_fo2, center=true);
-            mirror([0,0,1])
-            linear_extrude(d_bottom)
-            rounded_square(l_grid-o-0.05, BASE_TOP_RADIUS, center=true);
-        }
     }
 }
 
