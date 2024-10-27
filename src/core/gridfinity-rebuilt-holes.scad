@@ -263,7 +263,7 @@ module assert_hole_options_valid(hole_options) {
  * @brief A single magnet/screw hole.  To be cut out of the base.
  * @details Supports multiple options that can be mixed and matched.
  * @pram hole_options @see bundle_hole_options
- * @param o Offset
+ * @param o offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  */
 module block_base_hole(hole_options, o=0) {
     assert_hole_options_valid(hole_options);

@@ -249,7 +249,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     final_grid_size = [grid_size.x * divisions_per_grid.x, grid_size.y * divisions_per_grid.y];
 
     base_center_distance_mm = [grid_dimensions.x / divisions_per_grid.x, grid_dimensions.y / divisions_per_grid.y];
-    individual_base_size_mm = [base_center_distance_mm.x, base_center_distance_mm.y] - gap_mm;
+    individual_base_size_mm = base_center_distance_mm - gap_mm;
 
     // Final size of the base top. In mm.
     // subtracting gap_mm here to remove an outer lip along the peremiter.
@@ -265,24 +265,11 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     }
 
     if(only_corners) {
-        hole_position = foreach_add(
-            grid_size_mm/2,
-            - HOLE_DISTANCE_FROM_BOTTOM_EDGE - BASE_PROFILE_MAX.x
-        );
         difference(){
             pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
             block_base(bundle_hole_options(), 0, individual_base_size_mm, thumbscrew=thumbscrew);
 
-            copy_mirror([0, 1, 0]) {
-                copy_mirror([1, 0, 0]) {
-                    translate([
-                        hole_position.x,
-                        hole_position.y,
-                        0
-                    ])
-                    block_base_hole(hole_options, off);
-                }
-            }
+            _base_holes(hole_options, off, grid_size_mm);
         }
     }
     else {
@@ -307,6 +294,30 @@ module base_polygon() {
 }
 
 /**
+ * @brief A single solid Gridfinity base.
+ * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
+ */
+module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
+    assert(is_list(top_dimensions) && len(top_dimensions) == 2);
+
+    base_bottom = base_bottom_dimensions(top_dimensions);
+    sweep_inner = foreach_add(base_bottom, -2*BASE_BOTTOM_RADIUS);
+    cube_size = foreach_add(base_bottom, -BASE_BOTTOM_RADIUS);
+
+    assert(sweep_inner.x > 0 && sweep_inner.y > 0,
+        str("Minimum size of a single base must be greater than ", 2*BASE_TOP_RADIUS)
+    );
+
+    union(){
+        sweep_rounded(sweep_inner)
+            base_polygon();
+
+        translate([0, 0, BASE_HEIGHT/2])
+        cube([cube_size.x, cube_size.y, BASE_HEIGHT], center=true);
+    }
+}
+
+/**
  * @brief Internal function to create the negative for a Gridfinity Refined thumbscrew hole.
  * @details Magic constants are what the threads.ScrewHole function does.
  */
@@ -319,51 +330,49 @@ module _base_thumbscrew() {
 }
 
 /**
+ * @brief Internal Code. Generates the 4 holes for a single base.
+ * @details Need this fancy code to support refined holes and non-square bases.
+ * @param hole_options @see bundle_hole_options
+ * @param offset @see block_base_hole.offset
+ */
+module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
+    hole_position = foreach_add(
+        base_bottom_dimensions(top_dimensions)/2,
+        -HOLE_DISTANCE_FROM_BOTTOM_EDGE
+    );
+
+    for(a=[0:90:270]){
+        // i and j represent the 4 quadrants.
+        // The +1 is used to keep any values from being exactly 0.
+        j = sign(sin(a+1));
+        i = sign(cos(a+1));
+        translate([i * hole_position.x, j * hole_position.y, 0])
+        rotate([0, 0, a])
+        block_base_hole(hole_options, offset);
+    }
+}
+
+/**
  * @brief A single Gridfinity base.  With holes (if set).
  * @param hole_options @see block_base_hole.hole_options
- * @param off
+ * @param offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module block_base(hole_options, off=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
+module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
     assert(is_list(top_dimensions) && len(top_dimensions) == 2);
     assert(is_bool(thumbscrew));
 
     base_bottom = base_bottom_dimensions(top_dimensions);
-    sweep_inner = foreach_add(base_bottom, -2*BASE_BOTTOM_RADIUS);
-    cube_size = foreach_add(base_bottom, -BASE_BOTTOM_RADIUS);
-
-    assert(sweep_inner.x > 0 && sweep_inner.y > 0,
-        str("Minimum size of a single base must be greater than ", 2*BASE_TOP_RADIUS)
-    );
 
     render(convexity = 2)
     difference() {
-        union(){
-            sweep_rounded(sweep_inner)
-                base_polygon();
-
-            translate([0, 0, BASE_HEIGHT/2])
-            cube([cube_size.x, cube_size.y, BASE_HEIGHT], center=true);
-        }
+        base_solid(top_dimensions);
 
         if (thumbscrew) {
             _base_thumbscrew();
         }
-        // 4 holes
-        // Need this fancy code to support refined holes and non-square bases.
-        for(a=[0:90:270]){
-            // i and j represent the 4 quadrants.
-            // The +1 is used to keep any values from being exactly 0.
-            j = sign(sin(a+1));
-            i = sign(cos(a+1));
-            translate([
-                i * (base_bottom.x/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
-                j * (base_bottom.y/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
-                0])
-            rotate([0, 0, a])
-            block_base_hole(hole_options, off);
-        }
+        _base_holes(hole_options, offset, top_dimensions);
     }
 }
 
