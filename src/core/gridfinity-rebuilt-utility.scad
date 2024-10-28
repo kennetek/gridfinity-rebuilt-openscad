@@ -288,6 +288,68 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 }
 
 /**
+ * @brief Create the base of a gridfinity bin, or use it for a custom object.
+ * @param length X,Y size of a single Gridfinity base.
+ * @param grid_size Size in number of bases. [x, y]
+ * @param wall_thickness How thick the walls, and holes (if enabled) are.
+ * @param top_bottom_thickness How thick the top and bottom is.
+ * @param hole_options @see block_base_hole.hole_options
+ * @param only_corners Only put holes on each corner.
+ */
+module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
+    assert(is_list(grid_size) && len(grid_size) == 2 && grid_size.x > 0 && grid_size.y > 0);
+    assert(is_num(wall_thickness) && wall_thickness > 0);
+    assert(is_num(top_bottom_thickness) && top_bottom_thickness > 0);
+    assert(is_bool(only_corners));
+
+    grid_dimensions = GRID_DIMENSIONS_MM;
+
+    // Per spec, there's a 0.5mm gap between each base.
+    // This must be kept constant or half bins may not work correctly.
+    gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
+
+    // Final size of the base top. In mm.
+    // Gap needs to be removed to prevent an unwanted overhang off the edges.
+    grid_size_mm = [grid_dimensions.x * grid_size.x, grid_dimensions.y * grid_size.y] -gap_mm;
+
+    //Bridging structure to tie the bases together
+    difference() {
+        translate([0, 0, BASE_HEIGHT-top_bottom_thickness])
+        rounded_square([grid_size_mm.x, grid_size_mm.y, top_bottom_thickness], BASE_TOP_RADIUS, center=true);
+
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+        translate([0, 0, top_bottom_thickness])
+        base_solid();
+    }
+
+    render()
+    if(only_corners) {
+        difference() {
+            union() {
+                pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+                base_outer_shell(wall_thickness, top_bottom_thickness);
+                _base_holes(hole_options, -wall_thickness, grid_size_mm);
+            }
+
+            _base_holes(hole_options, 0, grid_size_mm);
+            _base_preview_fix();
+        }
+    }
+    else {
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
+            difference() {
+                union() {
+                    base_outer_shell(wall_thickness, top_bottom_thickness);
+                    _base_holes(hole_options, -wall_thickness);
+                }
+                _base_holes(hole_options, 0);
+                _base_preview_fix();
+            }
+        }
+    }
+}
+
+/**
  * @brief Solid polygon of a gridfinity base.
  * @details Ready for use with `sweep_rounded(...)`.
  */
