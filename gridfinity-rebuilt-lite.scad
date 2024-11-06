@@ -69,6 +69,7 @@ hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, cru
 
 // Input all the cutter types in here
 color("tomato")
+render()
 gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, hole_options, only_corners) {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
@@ -77,70 +78,24 @@ gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_gri
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, style_hole, only_corners) {
     height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
-    union() {
+
+    // Lower the bin start point by this amount.
+    // Made up for in bin height.
+    // Ensures divider walls smoothly transition to the bottom
+    lower_by_mm = BASE_HEIGHT + bottom_layer;
+
+    difference() {
+        translate([0, 0, -lower_by_mm])
+        gridfinityInit(gridx, gridy, height_mm+lower_by_mm, 0, length, sl=style_lip)
+        children();
+
+        // Underside of the base. Keep out zone.
+        render()
         difference() {
-            union() {
-                gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
-                children();
-                gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, only_corners=only_corners);
-            }
-
-            difference() {
-                union() {
-                    intersection() {
-                        difference() {
-                            gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
-                            translate([-gridx*length/2,-gridy*length/2,2*h_base])
-                            cube([gridx*length,gridy*length,1000]);
-                        }
-                        translate([0,0,-1])
-                        rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
-                        translate([0,0,bottom_layer])
-                        rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
-                    }
-                    translate([0,0,h_base+d_clear])
-                    rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, h_base, r_f2);
-                }
-
-                translate([0,0,-4*h_base])
-                gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
-                children();
-            }
+            cube([gridx*length, gridy*length, BASE_HEIGHT*2], center=true);
+            gridfinityBase([gridx, gridy], hole_options=style_hole, only_corners=only_corners);
         }
-        difference() {
-            translate([0,0,-1.6])
-            difference() {
-                difference() {
-                    union() {
-                        gridfinityInit(gridx, gridy, height_mm, 0, length, sl=style_lip)
-                        children();
-                    }
-
-                    difference() {
-                        intersection() {
-                            difference() {
-                                gridfinityBase([gridx, gridy], [length, length], hole_options=style_hole, -d_wall*2, false, only_corners=only_corners);
-                                translate([-gridx*length/2,-gridy*length/2,2*h_base])
-                                cube([gridx*length,gridy*length,1000]);
-                            }
-                            translate([0,0,-1])
-                            rounded_rectangle(gridx*length-0.5005-d_wall*2, gridy*length-0.5005-d_wall*2, 1000, r_f2);
-                            translate([0,0,bottom_layer])
-                            rounded_rectangle(gridx*1000, gridy*1000, 1000, r_f2);
-                        }
-
-                        translate([0,0,-4*h_base])
-                        gridfinityInit(gridx, gridy, height(20,0), 0, length, sl=style_lip)
-                        children();
-                    }
-
-                }
-                translate([0,0,9])
-                rounded_rectangle(gridx*1000, gridy*1000, gridz*1000, gridz);
-            }
-            translate([0,0,0])
-            rounded_rectangle(gridx*1000, gridy*1000, 5, r_f2);
-       }
-
     }
+
+    gridfinity_base_lite([gridx, gridy], d_wall, bottom_layer, hole_options=style_hole, only_corners=only_corners);
 }

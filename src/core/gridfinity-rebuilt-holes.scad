@@ -263,7 +263,7 @@ module assert_hole_options_valid(hole_options) {
  * @brief A single magnet/screw hole.  To be cut out of the base.
  * @details Supports multiple options that can be mixed and matched.
  * @pram hole_options @see bundle_hole_options
- * @param o Offset
+ * @param o offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  */
 module block_base_hole(hole_options, o=0) {
     assert_hole_options_valid(hole_options);
@@ -280,7 +280,7 @@ module block_base_hole(hole_options, o=0) {
     screw_radius = SCREW_HOLE_RADIUS - (o/2);
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
     magnet_inner_radius = MAGNET_HOLE_CRUSH_RIB_INNER_RADIUS - (o/2);
-    screw_depth = h_base-o;
+    screw_depth = BASE_HEIGHT - o;
     // If using supportless / printable mode, need to add additional layers, so they can be removed later.
     supportless_additional_layers = screw_hole ? 2 : 3;
     magnet_depth = MAGNET_HOLE_DEPTH - o +

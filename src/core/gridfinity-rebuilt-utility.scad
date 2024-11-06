@@ -31,7 +31,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + h_bot + h_base + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
+    mmHeight + h_bot + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -63,7 +63,7 @@ function height (z,d=0,l=0,enable_zsnap=true) =
         hf(z,d,l)+7-abs(hf(z,d,l))%7
     )
     :hf(z,d,l)
-    ) -h_base;
+    ) - BASE_HEIGHT;
 
 // Creates equally divided cutters for the bin
 //
@@ -169,7 +169,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 // s:   toggle the rounded back corner that allows for easy removal
 
 module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
-    translate([0,0,-$dh-h_base])
+    translate([0, 0, -$dh - BASE_HEIGHT])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);
 }
@@ -209,7 +209,7 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
-    translate([0,0,$dh0==0?$dh+h_base:$dh0+h_base])
+    translate([0, 0, ($dh0==0 ? $dh : $dh0) + BASE_HEIGHT])
     cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
     children();
 }
@@ -217,12 +217,12 @@ module cut_move(x, y, w, h) {
 // ===== Modules ===== //
 
 /**
- *@summary Create the base of a gridfinity bin, or use it for a custom object.
+ * @brief Create the base of a gridfinity bin, or use it for a custom object.
  * @param grid_size Number of bases in each dimension. [x, y]
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(grid_size, grid_dimensions=[l_grid, l_grid], hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
@@ -235,7 +235,7 @@ module gridfinityBase(grid_size, grid_dimensions=[l_grid, l_grid], hole_options=
 
     // Per spec, there's a 0.5mm gap between each base.
     // This must be kept constant or half bins may not work correctly.
-    gap_mm = l_grid - BASE_SIZE;
+    gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
 
     // Divisions per grid
     // Normal, half, or quarter grid sizes supported.
@@ -249,36 +249,36 @@ module gridfinityBase(grid_size, grid_dimensions=[l_grid, l_grid], hole_options=
     final_grid_size = [grid_size.x * divisions_per_grid.x, grid_size.y * divisions_per_grid.y];
 
     base_center_distance_mm = [grid_dimensions.x / divisions_per_grid.x, grid_dimensions.y / divisions_per_grid.y];
-    individual_base_size_mm = [base_center_distance_mm.x - gap_mm, base_center_distance_mm.y - gap_mm];
+    individual_base_size_mm = base_center_distance_mm - gap_mm;
 
     // Final size of the base top. In mm.
     // subtracting gap_mm here to remove an outer lip along the peremiter.
     grid_size_mm = [
-        base_center_distance_mm.x * final_grid_size.x - gap_mm,
-        base_center_distance_mm.y * final_grid_size.y - gap_mm
-    ];
+        base_center_distance_mm.x * final_grid_size.x,
+        base_center_distance_mm.y * final_grid_size.y
+    ] - gap_mm;
 
     // Top which ties all bases together
     if (final_cut) {
-        translate([0, 0, h_base-TOLLERANCE])
-        rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_OUTSIDE_RADIUS, center=true);
+        translate([0, 0, BASE_HEIGHT])
+        rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_TOP_RADIUS, center=true);
     }
 
     if(only_corners) {
         difference(){
-            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
-            block_base(bundle_hole_options(), 0, individual_base_size_mm, thumbscrew=thumbscrew);
+            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y) {
+                base_solid(individual_base_size_mm);
+            }
 
-            copy_mirror([0, 1, 0]) {
-                copy_mirror([1, 0, 0]) {
-                    translate([
-                        grid_size_mm.x/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE - BASE_PROFILE_MAX.x,
-                        grid_size_mm.y/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE - BASE_PROFILE_MAX.x,
-                        0
-                    ])
-                    block_base_hole(hole_options, off);
+            if(thumbscrew) {
+                thumbscrew_position = grid_size_mm - individual_base_size_mm;
+                pattern_linear(2, 2, thumbscrew_position.x, thumbscrew_position.y) {
+                    _base_thumbscrew();
                 }
             }
+
+            _base_holes(hole_options, off, grid_size_mm);
+            _base_preview_fix();
         }
     }
     else {
@@ -288,81 +288,199 @@ module gridfinityBase(grid_size, grid_dimensions=[l_grid, l_grid], hole_options=
 }
 
 /**
+ * @brief Create the base of a gridfinity bin, or use it for a custom object.
+ * @param length X,Y size of a single Gridfinity base.
+ * @param grid_size Size in number of bases. [x, y]
+ * @param wall_thickness How thick the walls, and holes (if enabled) are.
+ * @param top_bottom_thickness How thick the top and bottom is.
+ * @param hole_options @see block_base_hole.hole_options
+ * @param only_corners Only put holes on each corner.
+ */
+module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
+    assert(is_list(grid_size) && len(grid_size) == 2 && grid_size.x > 0 && grid_size.y > 0);
+    assert(is_num(wall_thickness) && wall_thickness > 0);
+    assert(is_num(top_bottom_thickness) && top_bottom_thickness > 0);
+    assert(is_bool(only_corners));
+
+    grid_dimensions = GRID_DIMENSIONS_MM;
+
+    // Per spec, there's a 0.5mm gap between each base.
+    // This must be kept constant or half bins may not work correctly.
+    gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
+
+    // Final size of the base top. In mm.
+    // Gap needs to be removed to prevent an unwanted overhang off the edges.
+    grid_size_mm = [grid_dimensions.x * grid_size.x, grid_dimensions.y * grid_size.y] -gap_mm;
+
+    //Bridging structure to tie the bases together
+    difference() {
+        translate([0, 0, BASE_HEIGHT-top_bottom_thickness])
+        rounded_square([grid_size_mm.x, grid_size_mm.y, top_bottom_thickness], BASE_TOP_RADIUS, center=true);
+
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+        translate([0, 0, top_bottom_thickness])
+        base_solid();
+    }
+
+    render()
+    if(only_corners) {
+        difference() {
+            union() {
+                pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+                base_outer_shell(wall_thickness, top_bottom_thickness);
+                _base_holes(hole_options, -wall_thickness, grid_size_mm);
+            }
+
+            _base_holes(hole_options, 0, grid_size_mm);
+            _base_preview_fix();
+        }
+    }
+    else {
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
+            difference() {
+                union() {
+                    base_outer_shell(wall_thickness, top_bottom_thickness);
+                    _base_holes(hole_options, -wall_thickness);
+                }
+                _base_holes(hole_options, 0);
+                _base_preview_fix();
+            }
+        }
+    }
+}
+
+/**
+ * @brief Solid polygon of a gridfinity base.
+ * @details Ready for use with `sweep_rounded(...)`.
+ */
+module base_polygon() {
+    translated_line = foreach_add(BASE_PROFILE, [BASE_BOTTOM_RADIUS, 0]);
+    solid_profile = concat(translated_line,
+        [
+            [0, BASE_PROFILE_MAX.y],  // Go in to form a solid polygon
+            [0, 0],  // Needed since start has been translated.
+        ]
+    );
+    polygon(solid_profile);
+}
+
+/**
+ * @brief A single solid Gridfinity base.
+ * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
+ */
+module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
+    assert(is_list(top_dimensions) && len(top_dimensions) == 2);
+
+    base_bottom = base_bottom_dimensions(top_dimensions);
+    sweep_inner = foreach_add(base_bottom, -2*BASE_BOTTOM_RADIUS);
+    cube_size = foreach_add(base_bottom, -BASE_BOTTOM_RADIUS);
+
+    assert(sweep_inner.x > 0 && sweep_inner.y > 0,
+        str("Minimum size of a single base must be greater than ", 2*BASE_TOP_RADIUS)
+    );
+
+    union(){
+        sweep_rounded(sweep_inner)
+            base_polygon();
+
+        translate([0, 0, BASE_HEIGHT/2])
+        cube([cube_size.x, cube_size.y, BASE_HEIGHT], center=true);
+    }
+}
+
+/**
+ * @brief Internal function to create the negative for a Gridfinity Refined thumbscrew hole.
+ * @details Magic constants are what the threads.ScrewHole function does.
+ */
+module _base_thumbscrew() {
+    ScrewThread(
+        1.01 * BASE_THUMBSCREW_OUTER_DIAMETER + 1.25 * 0.4,
+        BASE_HEIGHT,
+        BASE_THUMBSCREW_PITCH
+    );
+}
+
+/**
+ * @brief Internal Code. Generates the 4 holes for a single base.
+ * @details Need this fancy code to support refined holes and non-square bases.
+ * @param hole_options @see bundle_hole_options
+ * @param offset @see block_base_hole.offset
+ */
+module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
+    hole_position = foreach_add(
+        base_bottom_dimensions(top_dimensions)/2,
+        -HOLE_DISTANCE_FROM_BOTTOM_EDGE
+    );
+
+    for(a=[0:90:270]){
+        // i and j represent the 4 quadrants.
+        // The +1 is used to keep any values from being exactly 0.
+        j = sign(sin(a+1));
+        i = sign(cos(a+1));
+        translate([i * hole_position.x, j * hole_position.y, 0])
+        rotate([0, 0, a])
+        block_base_hole(hole_options, offset);
+    }
+}
+
+/**
  * @brief A single Gridfinity base.  With holes (if set).
  * @param hole_options @see block_base_hole.hole_options
- * @param off
- * @param size [x, y] size of a single base.  Only set if deviating from the standard!
+ * @param offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
+ * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module block_base(hole_options, off=0, size=[BASE_SIZE, BASE_SIZE], thumbscrew=false) {
-    assert(
-        is_list(size) &&
-        len(size) == 2 &&
-        is_bool(thumbscrew)
-    );
+module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
+    assert(is_list(top_dimensions) && len(top_dimensions) == 2);
+    assert(is_bool(thumbscrew));
 
-    // How far, in the +x direction,
-    // the profile needs to be from it's [0, 0] point
-    // such that when swept by 90 degrees to produce a corner,
-    // the outside edge has the desired radius.
-    translation_x = BASE_OUTSIDE_RADIUS - BASE_PROFILE_MAX.x;
+    base_bottom = base_bottom_dimensions(top_dimensions);
 
-    outer_diameter = [2*BASE_OUTSIDE_RADIUS, 2*BASE_OUTSIDE_RADIUS];
-    base_profile_size = size - outer_diameter;
-    base_bottom_size = base_profile_size + [2*translation_x, 2*translation_x];
-    assert(base_profile_size.x > 0 && base_profile_size.y > 0,
-        str("Minimum size of a single base must be greater than ", outer_diameter)
-    );
-
-    thumbscrew_outerdiam = 15;
-    thumbscrew_height = 5;
-    thumbscrew_tolerance = 0.4;
-    thumbscrew_tooth_angle = 30;
-    thumbscrew_pitch = 1.5;
-
-
-    render(convexity = 2)
     difference() {
-        union() {
-            sweep_rounded(base_profile_size.x, base_profile_size.y)
-            translate([translation_x, 0, 0])
-            polygon(BASE_PROFILE);
-
-            rounded_square(
-                [
-                    base_bottom_size.x + TOLLERANCE,
-                    base_bottom_size.y + TOLLERANCE,
-                    BASE_PROFILE_MAX.y
-                ],
-                translation_x,
-                center=true
-            );
-        }
+        base_solid(top_dimensions);
 
         if (thumbscrew) {
-            ScrewThread(
-                1.01 * thumbscrew_outerdiam + 1.25 * thumbscrew_tolerance,
-                thumbscrew_height,
-                thumbscrew_pitch,
-                thumbscrew_tooth_angle,
-                thumbscrew_tolerance,
-                tooth_height=0
-            );
+            _base_thumbscrew();
         }
-        // 4 holes
-        // Need this fancy code to support refined holes and non-square bases.
-        for(a=[0:90:270]){
-            // i and j represent the 4 quadrants.
-            // The +1 is used to keep any values from being exactly 0.
-            j = sign(sin(a+1));
-            i = sign(cos(a+1));
-            translate([
-                i * (base_bottom_size.x/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
-                j * (base_bottom_size.y/2 - HOLE_DISTANCE_FROM_BOTTOM_EDGE),
-                0])
-            rotate([0, 0, a])
-            block_base_hole(hole_options, off);
+        _base_holes(hole_options, offset, top_dimensions);
+        _base_preview_fix();
+    }
+}
+
+/**
+ * @brief Outer shell of a Gridfinity base.
+ * @param wall_thickness How thick the walls are.
+ * @param bottom_thickness How thick the bottom is.
+ * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
+ */
+module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TOP_DIMENSIONS) {
+    assert(is_num(wall_thickness) && wall_thickness > 0);
+    assert((is_num(bottom_thickness) && bottom_thickness > 0));
+
+    union(){
+        difference(){
+            base_solid(top_dimensions=top_dimensions);
+            base_solid(top_dimensions=foreach_add(top_dimensions, -2*wall_thickness));
+            _base_preview_fix();
         }
+        //Bottom
+        intersection() {
+            translate([0, 0, bottom_thickness/2])
+            cube([top_dimensions.x, top_dimensions.y, bottom_thickness], center=true);
+            base_solid(top_dimensions=top_dimensions);
+        }
+    }
+}
+
+/**
+ * @brief Internal code.  Fix base preview rendering issues.
+ * @details Preview does not like perfect top/bottoms.
+ */
+module _base_preview_fix() {
+    if($preview){
+        cube([10000, 10000, 0.01], center=true);
+        translate([0, 0, BASE_HEIGHT])
+        cube([10000, 10000, 0.01], center=true);
     }
 }
 
@@ -447,13 +565,13 @@ module profile_wall2(height_mm) {
 }
 
 module block_wall(gx, gy, l) {
-    translate([0,0,h_base])
-    sweep_rounded(gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001)
+    translate([0, 0, BASE_HEIGHT])
+    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
     children();
 }
 
 module block_bottom( h = 2.2, gx, gy, l ) {
-    translate([0,0,h_base+0.1])
+    translate([0, 0, BASE_HEIGHT + 0.1])
     rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
@@ -479,7 +597,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     ycutlast = abs(y+h-$gyy)<0.001 && $style_lip == 0;
     xcutfirst = x == 0 && $style_lip == 0;
     xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
-    zsmall = ($dh+h_base)/7 < 3;
+    zsmall = ($dh+BASE_HEIGHT)/7 < 3;
 
     ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div;
     xlen = w*($gxx*l_grid+d_magic)/$gxx-d_div;
@@ -491,7 +609,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
 
-    translate([0,ylen/2,h_base+h_bot])
+    translate([0, ylen/2, BASE_HEIGHT+h_bot])
     rotate([90,0,-90]) {
 
     if (!zsmall && xlen - tab_width > 4*r_f2 && (t != 0 && t != 5)) {
