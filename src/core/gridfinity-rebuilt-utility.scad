@@ -119,7 +119,7 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     cutout_x = gridx_mm - d_wall * 2;
     cutout_y = gridy_mm - d_wall * 2;
 
-    cut_move(x=0, y=0, w=$gxx, h=$gyy) {
+    cutMove(x=0, y=0, w=$gxx, h=$gyy) {
         translate([0, 0, -coutout_depth]) {
             rounded_rectangle(cutout_x, cutout_y, coutout_depth * 2, r_base);
 
@@ -170,7 +170,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 
 module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
     translate([0, 0, -$dh - BASE_HEIGHT])
-    cut_move(x,y,w,h)
+    cutMove(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);
 }
 
@@ -206,13 +206,18 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
     }
 }
 
+module cutMove(x, y, w, h) {
+    translate([0, 0, ($dh0==0 ? $dh : $dh0) + BASE_HEIGHT])
+        _cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
+            children();
+}
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
 module cut_move(x, y, w, h) {
-    translate([0, 0, ($dh0==0 ? $dh : $dh0) + BASE_HEIGHT])
-    cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
-    children();
+    echo("cut_move is deprecated, please use cutMove instead");
+    cutMove(x, y, w, h) children();
 }
+
 
 // ===== Modules ===== //
 
@@ -575,7 +580,7 @@ module block_bottom( h = 2.2, gx, gy, l ) {
     rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
-module cut_move_unsafe(x, y, w, h) {
+module _cut_move_unsafe(x, y, w, h) {
     xx = ($gxx*l_grid+d_magic);
     yy = ($gyy*l_grid+d_magic);
     translate([(x)*xx/$gxx,(y)*yy/$gyy,0])
