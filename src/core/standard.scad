@@ -218,7 +218,7 @@ BASEPLATE_LIP = [
     [0.7, (0.7+1.8)], // Straight up
     [(0.7+2.15), (0.7+1.8+2.15)], // Up and out at a 45 degree angle
     [(0.7+2.15), 0], // Straight down
-    //[0, 0] // Implicit back to start
+    [0, 0] // Implicit back to start
 ];
 
 // Height of the baseplate lip.
