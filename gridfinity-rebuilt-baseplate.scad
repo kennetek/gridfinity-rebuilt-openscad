@@ -156,36 +156,38 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
     difference() {
         union() {
             // Baseplate itself
-            pattern_linear(grid_size.x, grid_size.y, length) {
-                // Single Baseplate piece
-                difference() {
-                    if (minimal) {
-                        square_baseplate_lip(additional_height);
-                    } else {
-                        solid_square_baseplate(additional_height);
-                    }
+            if (grid_size.x > 0 && grid_size.y > 0) {
+                pattern_linear(grid_size.x, grid_size.y, length) {
+                    // Single Baseplate piece
+                    difference() {
+                        if (minimal) {
+                            square_baseplate_lip(additional_height);
+                        } else {
+                            solid_square_baseplate(additional_height);
+                        }
 
-                    // Bottom/through pattern for the solid baseplates.
-                    if (sp == 1) {
-                        cutter_weight();
-                    } else if (sp == 2 || sp == 3) {
-                        translate([0,0,-TOLLERANCE])
-                        linear_extrude(additional_height + (2 * TOLLERANCE))
-                        profile_skeleton();
-                    }
+                        // Bottom/through pattern for the solid baseplates.
+                        if (sp == 1) {
+                            cutter_weight();
+                        } else if (sp == 2 || sp == 3) {
+                            translate([0,0,-TOLLERANCE])
+                            linear_extrude(additional_height + (2 * TOLLERANCE))
+                            profile_skeleton();
+                        }
 
-                    // Add holes to the solid baseplates.
-                    hole_pattern(){
-                        // Manget hole
-                        translate([0, 0, additional_height+TOLLERANCE])
-                        mirror([0, 0, 1])
-                        block_base_hole(hole_options);
+                        // Add holes to the solid baseplates.
+                        hole_pattern(){
+                            // Manget hole
+                            translate([0, 0, additional_height+TOLLERANCE])
+                            mirror([0, 0, 1])
+                            block_base_hole(hole_options);
 
-                        translate([0,0,-TOLLERANCE])
-                        if (sh == 1) {
-                            cutter_countersink();
-                        } else if (sh == 2) {
-                            cutter_counterbore();
+                            translate([0,0,-TOLLERANCE])
+                            if (sh == 1) {
+                                cutter_countersink();
+                            } else if (sh == 2) {
+                                cutter_counterbore();
+                            }
                         }
                     }
                 }
