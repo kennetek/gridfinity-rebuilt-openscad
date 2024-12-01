@@ -156,36 +156,38 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
     difference() {
         union() {
             // Baseplate itself
-            pattern_linear(grid_size.x, grid_size.y, length) {
-                // Single Baseplate piece
-                difference() {
-                    if (minimal) {
-                        square_baseplate_lip(additional_height);
-                    } else {
-                        solid_square_baseplate(additional_height);
-                    }
+            if (grid_size.x > 0 && grid_size.y > 0) {
+                pattern_linear(grid_size.x, grid_size.y, length) {
+                    // Single Baseplate piece
+                    difference() {
+                        if (minimal) {
+                            square_baseplate_lip(additional_height);
+                        } else {
+                            solid_square_baseplate(additional_height);
+                        }
 
-                    // Bottom/through pattern for the solid baseplates.
-                    if (sp == 1) {
-                        cutter_weight();
-                    } else if (sp == 2 || sp == 3) {
-                        translate([0,0,-TOLLERANCE])
-                        linear_extrude(additional_height + (2 * TOLLERANCE))
-                        profile_skeleton();
-                    }
+                        // Bottom/through pattern for the solid baseplates.
+                        if (sp == 1) {
+                            cutter_weight();
+                        } else if (sp == 2 || sp == 3) {
+                            translate([0,0,-TOLLERANCE])
+                            linear_extrude(additional_height + (2 * TOLLERANCE))
+                            profile_skeleton();
+                        }
 
-                    // Add holes to the solid baseplates.
-                    hole_pattern(){
-                        // Manget hole
-                        translate([0, 0, additional_height+TOLLERANCE])
-                        mirror([0, 0, 1])
-                        block_base_hole(hole_options);
+                        // Add holes to the solid baseplates.
+                        hole_pattern(){
+                            // Manget hole
+                            translate([0, 0, additional_height+TOLLERANCE])
+                            mirror([0, 0, 1])
+                            block_base_hole(hole_options);
 
-                        translate([0,0,-TOLLERANCE])
-                        if (sh == 1) {
-                            cutter_countersink();
-                        } else if (sh == 2) {
-                            cutter_counterbore();
+                            translate([0,0,-TOLLERANCE])
+                            if (sh == 1) {
+                                cutter_countersink();
+                            } else if (sh == 2) {
+                                cutter_counterbore();
+                            }
                         }
                     }
                 }
@@ -222,7 +224,7 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
 
         if (screw_together) {
             translate([0, 0, additional_height/2])
-            cutter_screw_together(grid_size.x, grid_size.y, length);
+            cutter_screw_together(grid_size, padding_mm, length);
         }
     }
 }
@@ -390,18 +392,26 @@ module profile_skeleton(size=l_grid) {
     }
 }
 
-module cutter_screw_together(gx, gy, size = l_grid) {
+module cutter_screw_together(grid_size, padding_mm, size = l_grid) {
+    gx = grid_size.x > 0 ? grid_size.x : 0;
+    gy = grid_size.y > 0 ? grid_size.y : 0;
+    gh = (grid_size.x == 0 ? padding_mm.x : (grid_size.y == 0 ? padding_mm.y : size)) + 1;
 
-    screw(gx, gy);
-    rotate([0,0,90])
-    screw(gy, gx);
+    screw(gx, gy, gh);
+    rotate([0,0,90]) screw(gy, gx, gh);
 
-    module screw(a, b) {
-        copy_mirror([1,0,0])
-        translate([a*size/2, 0, 0])
-        pattern_linear(1, b, 1, size)
-        pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
-        rotate([0,90,0])
-        cylinder(h=size/2, d=d_screw, center = true);
+    module screw(a, b, h = size) {
+        copy_mirror([1,0,0]) 
+            translate([a*h/2, 0, 0])
+            pattern_linear(1, b, 1, size)
+            pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
+            rotate([0,90,0])
+            cylinder(h=h, d=d_screw, center=true);
+
+        translate([a*h/2, 0, 0])
+            pattern_linear(1, b, 1, size)
+            pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
+            rotate([0,90,0])
+            cylinder(h=h, d=(style_hole == 2) ? d_screw*1.8 : d_screw, center=false);
     }
 }
