@@ -148,43 +148,6 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     }
 }
 
-// Create two or four cutters for the bin divided by the given ratio (max 4 cutouts per bin)
-//
-// rx:  ratio to divide x-axis by
-// ry:  ratio to divide y-axis by
-// style_tab:   tab style for all compartments. see cut()
-// scoop_weight:    scoop toggle for all compartments. see cut()
-// place_tab:   tab suppression for all compartments. see "gridfinity-rebuilt-bins.scad"
-module cutByRatio(rx=1, ry=1, style_tab=1, scoop_weight=1, place_tab=1) {
-    n_divx=rx > 0 && rx < 1 ? 2 : 1;
-    n_divy=ry > 0 && ry < 1 ? 2 : 1;
-
-    // opposite cut ratio
-    orx=1 - rx;
-    ory=1 - ry;
-
-    for (i = [1:n_divx])
-    for (j = [1:n_divy]) {
-        // disable style_tab if only Top-Left Division checked
-        tab_style=place_tab == 1 && (i != 1 || j != n_divy) ? 5 : style_tab;
-
-        cut(
-          (i - 1)*rx*$gxx,
-          (j - 1)*ry*$gyy,
-          (i == 1 ? rx : orx)*$gxx,
-          (j == 1 ? ry : ory)*$gyy,
-          tab_style,
-          scoop_weight,
-          offsets=[
-            ($extrax < 0 ? (i == 1 ? 1 : orx) : (i-1)*rx)*$extrax,
-            ($extray < 0 ? (j == 1 ? 1 : ory) : (j-1)*ry)*$extray,
-            (i == 1 ? rx : orx)*abs($extrax),
-            (j == 1 ? ry : ory)*abs($extray)
-          ]
-        );
-    }
-}
-
 // initialize gridfinity
 // sl:  lip style of this bin.
 //      0:Regular lip, 1:Remove lip subtractively, 2:Remove lip and retain height

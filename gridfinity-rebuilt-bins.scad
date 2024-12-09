@@ -68,13 +68,6 @@ c_depth = 1;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
-/* [Split Compartments] */
-// divide into 2 compartments by this ratio
-ratiox = 0; // [0:0.001:1]
-// divide into 2 compartments by this ratio
-ratioy = 0; // [0:0.001:1]
-
-
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
@@ -120,11 +113,7 @@ hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, cru
 color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip, extra=[extrax,extray]) {
 
-    if ((ratiox > 0 && ratiox < 1) || (ratioy > 0 && ratioy < 1)) {
-
-        cutByRatio(rx = ratiox, ry = ratioy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
-
-    } else if (divx > 0 && divy > 0) {
+    if (divx > 0 && divy > 0) {
 
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
