@@ -40,6 +40,11 @@ gridx = 3; //.5
 gridy = 2; //.5
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6; //.1
+/* [General Advanced Settings] */
+// extend width (in mm, negative is to left, pos to right)
+extrax=0; // [-41.99:0.01:41.99]
+// extend length (in mm, negative is to left, pos to right)
+extray=0; // [-41.99:0.01:41.99]
 
 /* [Linear Compartments] */
 // number of X Divisions (set to zero to have solid bin)
@@ -62,6 +67,13 @@ ch = 1;  //.1
 c_depth = 1;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
+
+/* [Split Compartments] */
+// divide into 2 compartments by this ratio
+ratiox = 0; // [0:0.001:1]
+// divide into 2 compartments by this ratio
+ratioy = 0; // [0:0.001:1]
+
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
@@ -98,24 +110,31 @@ chamfer_holes = true;
 printable_hole_top = true;
 // Enable "gridfinity-refined" thumbscrew hole in the center of each base: https://www.printables.com/model/413761-gridfinity-refined
 enable_thumbscrew = false;
+// Align holes to the left of the base for half grid bases
+half_grid_hole_alignment = 0; // [0: Upper left corner, 1: Base pattern but left aligned, 2: Normal base pattern]
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
+gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip, extra=[extrax,extray]) {
 
-    if (divx > 0 && divy > 0) {
+    if ((ratiox > 0 && ratiox < 1) || (ratioy > 0 && ratioy < 1)) {
+
+        cutByRatio(rx = ratiox, ry = ratioy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
+
+    } else if (divx > 0 && divy > 0) {
 
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
     } else if (cdivx > 0 && cdivy > 0) {
 
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+
     }
 }
-gridfinityBase([gridx, gridy], hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
+gridfinityBase([gridx, gridy], hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew, half_grid_hole_alignment=half_grid_hole_alignment, extra=[extrax, extray]);
 }
 
 

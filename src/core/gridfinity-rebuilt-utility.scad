@@ -77,14 +77,27 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
     for (i = [1:n_divx])
     for (j = [1:n_divy])
     {
-        if (
-            place_tab == 1 && (i != 1 || j != n_divy) // Top-Left Division
-        ) {
-            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, 5, scoop_weight);
-        }
-        else {
-            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
-        }
+        // disable style_tab if only Top-Left Division checked
+        tab_style = place_tab == 1 && (i != 1 || j != n_divy) ? 5 : style_tab;
+
+        // equally divide extra dimensions
+        ex=(i - 1)*$extrax/n_divx;
+        ey=(j - 1)*$extray/n_divy;
+
+        cut(
+          (i-1)*$gxx/n_divx,
+          (j-1)*$gyy/n_divy,
+          $gxx/n_divx,
+          $gyy/n_divy,
+          tab_style,
+          scoop_weight,
+          offsets=[
+            $extrax < 0 ? $extrax-ex : ex,
+            $extray < 0 ? $extray-ey : ey,
+            abs($extrax)/n_divx,
+            abs($extray)/n_divy
+          ]
+        );
     }
 }
 
@@ -135,22 +148,61 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     }
 }
 
+// Create two or four cutters for the bin divided by the given ratio (max 4 cutouts per bin)
+//
+// rx:  ratio to divide x-axis by
+// ry:  ratio to divide y-axis by
+// style_tab:   tab style for all compartments. see cut()
+// scoop_weight:    scoop toggle for all compartments. see cut()
+// place_tab:   tab suppression for all compartments. see "gridfinity-rebuilt-bins.scad"
+module cutByRatio(rx=1, ry=1, style_tab=1, scoop_weight=1, place_tab=1) {
+    n_divx=rx > 0 && rx < 1 ? 2 : 1;
+    n_divy=ry > 0 && ry < 1 ? 2 : 1;
+
+    // opposite cut ratio
+    orx=1 - rx;
+    ory=1 - ry;
+
+    for (i = [1:n_divx])
+    for (j = [1:n_divy]) {
+        // disable style_tab if only Top-Left Division checked
+        tab_style=place_tab == 1 && (i != 1 || j != n_divy) ? 5 : style_tab;
+
+        cut(
+          (i - 1)*rx*$gxx,
+          (j - 1)*ry*$gyy,
+          (i == 1 ? rx : orx)*$gxx,
+          (j == 1 ? ry : ory)*$gyy,
+          tab_style,
+          scoop_weight,
+          offsets=[
+            ($extrax < 0 ? (i == 1 ? 1 : orx) : (i-1)*rx)*$extrax,
+            ($extray < 0 ? (j == 1 ? 1 : ory) : (j-1)*ry)*$extray,
+            (i == 1 ? rx : orx)*abs($extrax),
+            (j == 1 ? ry : ory)*abs($extray)
+          ]
+        );
+    }
+}
+
 // initialize gridfinity
 // sl:  lip style of this bin.
 //      0:Regular lip, 1:Remove lip subtractively, 2:Remove lip and retain height
-module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
+module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0, extra=[0,0]) {
     $gxx = gx;
     $gyy = gy;
     $dh = h;
     $dh0 = h0;
     $style_lip = sl;
+    $extrax=extra[0];
+    $extray=extra[1];
     difference() {
         color("firebrick")
-        block_bottom(h0==0?$dh-0.1:h0, gx, gy, l);
+        block_bottom(h0==0?$dh-0.1:h0, gx, gy, l, extra=extra);
         children();
     }
     color("royalblue")
-    block_wall(gx, gy, l) {
+    block_wall(gx, gy, l, extra=extra) {
         if ($style_lip == 0) profile_wall(h);
         else profile_wall2(h);
     }
@@ -167,11 +219,18 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
 //      0:full, 1:auto, 2:left, 3:center, 4:right, 5:none
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else.
 // s:   toggle the rounded back corner that allows for easy removal
-
-module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
+// offsets: the [x,y,w,h] offsets of the current cut to accomodate the extra x/y dimensions
+module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh, offsets=[0,0,0,0]) {
     translate([0, 0, -$dh - BASE_HEIGHT])
-    cut_move(x,y,w,h)
-    block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);
+    cut_move(x,y,w,h,offsets)
+    block_cutter(
+      clp(x,0,$gxx),
+      clp(y,0,$gyy),
+      clp(w,0,$gxx-x),
+      clp(h,0,$gyy-y),
+      t, s, tab_width, tab_height,
+      offsets=offsets
+    );
 }
 
 
@@ -208,9 +267,15 @@ module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, styl
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
 // See cut() module for parameter descriptions
-module cut_move(x, y, w, h) {
+module cut_move(x, y, w, h, offsets=[0,0,0,0]) {
     translate([0, 0, ($dh0==0 ? $dh : $dh0) + BASE_HEIGHT])
-    cut_move_unsafe(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y))
+    cut_move_unsafe(
+      clp(x,0,$gxx),
+      clp(y,0,$gyy),
+      clp(w,0,$gxx-x),
+      clp(h,0,$gyy-y),
+      offsets
+    )
     children();
 }
 
@@ -222,7 +287,7 @@ module cut_move(x, y, w, h) {
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false, half_grid_hole_alignment=0, extra=[0,0]) {
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
@@ -232,6 +297,9 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         is_bool(only_corners) &&
         is_bool(thumbscrew)
     );
+
+    extrax=extra[0];
+    extray=extra[1];
 
     // Per spec, there's a 0.5mm gap between each base.
     // This must be kept constant or half bins may not work correctly.
@@ -260,8 +328,8 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     // Top which ties all bases together
     if (final_cut) {
-        translate([0, 0, BASE_HEIGHT])
-        rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_TOP_RADIUS, center=true);
+        translate([extrax/2, extray/2, BASE_HEIGHT])
+        rounded_square([grid_size_mm.x+abs(extrax), grid_size_mm.y+abs(extray), h_bot], BASE_TOP_RADIUS, center=true);
     }
 
     if(only_corners) {
@@ -283,7 +351,53 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     }
     else {
         pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
-        block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+        block_base(
+          hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew,
+          directions=[
+            $is_odd_x || half_grid_hole_alignment != 2 ? 1 : -1,
+            $is_odd_y || half_grid_hole_alignment == 0 ? 1 : -1]
+        );
+    }
+
+    // check if we should extend the base to accomodate extra x/y
+    add_to_x=extrax != 0 && abs(extrax) > BASE_TOP_RADIUS*2;
+    add_to_y=extray != 0 && abs(extray) > BASE_TOP_RADIUS*2;
+
+    if (!add_to_x && extrax != 0) {
+      echo("WARNING: extrax should be at least 2*BASE_TOP_RADIUS to be able to add a bottom notch");
+    }
+    if (!add_to_y && extray != 0) {
+      echo("WARNING: extray should be at least 2*BASE_TOP_RADIUS to be able to add a bottom notch");
+    }
+
+    // configure where to add extra bases
+    extra_bases=[
+      add_to_x ? [1,0] : undef,
+      add_to_y ? [0,1] : undef,
+      add_to_x && add_to_y ? [1,1] : undef,
+    ];
+
+    for(base=extra_bases) {
+        if (base != undef) {
+            assert(len(base) == 2, "extra_bases should have a length of 2");
+
+            base_size_mm = [
+              base[0] == 1 ? abs(extrax) : individual_base_size_mm[0],
+              base[1] == 1 ? abs(extray) : individual_base_size_mm[1]
+            ];
+
+            translate([
+              base[0] * (final_grid_size.x/2 * base_center_distance_mm.x * sign(extrax) + extrax/2),
+              base[1] * (final_grid_size.y/2 * base_center_distance_mm.y * sign(extray) + extray/2)
+            ])
+            pattern_linear(
+              base[0] == 1 ? 1 : final_grid_size.x,
+              base[1] == 1 ? 1 : final_grid_size.y,
+              base_center_distance_mm.x,
+              base_center_distance_mm.y
+            )
+            block_base(hole_options, off, base_size_mm, thumbscrew=thumbscrew, directions=[sign(extrax),1]);
+        }
     }
 }
 
@@ -405,21 +519,46 @@ module _base_thumbscrew() {
  * @details Need this fancy code to support refined holes and non-square bases.
  * @param hole_options @see bundle_hole_options
  * @param offset @see block_base_hole.offset
+ * @param directions The directions into which the base/hole are added
  */
-module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
+module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, directions=[1,1]) {
     hole_position = foreach_add(
         base_bottom_dimensions(top_dimensions)/2,
         -HOLE_DISTANCE_FROM_BOTTOM_EDGE
     );
 
-    for(a=[0:90:270]){
-        // i and j represent the 4 quadrants.
-        // The +1 is used to keep any values from being exactly 0.
-        j = sign(sin(a+1));
-        i = sign(cos(a+1));
-        translate([i * hole_position.x, j * hole_position.y, 0])
-        rotate([0, 0, a])
-        block_base_hole(hole_options, offset);
+    // calculate the minimum required dimensions that are needed to add a hole
+    base_hole_pos = _base_hole_position(hole_options);
+    has_min_x = top_dimensions.x >= 2*base_hole_pos[0] + base_hole_pos[2];
+    has_min_y = top_dimensions.y >= 2*base_hole_pos[1] + base_hole_pos[3];
+
+    is_full_x = top_dimensions.x == BASE_TOP_DIMENSIONS.x;
+    is_full_y = top_dimensions.y == BASE_TOP_DIMENSIONS.y;
+
+    // don't print any holes if the base is too small
+    if (has_min_x && has_min_y) {
+        angles = concat(
+          is_full_x ? [0, 180] : [],
+          is_full_y ? [90, 270] : [],
+          has_min_x
+            ? (directions[0] == 1 ? [0] : [270])
+            : (directions[1] == 1 ? [180] : [90])
+        );
+
+        for(a=angles){
+            // i and j represent the 4 quadrants.
+            // The +1 is used to keep any values from being exactly 0.
+            // Don't rotate each hole when base does not span full size,
+            // to better fit refined holes
+            j = is_full_y ? sign(sin(a+1)) : -sign(directions[1]);
+            i = is_full_x ? sign(cos(a+1)) : -sign(directions[0]);
+            x = i * hole_position.x;
+            y = j * hole_position.y;
+
+            translate([x, y, 0])
+            rotate([0, 0, a])
+            block_base_hole(hole_options, offset);
+        }
     }
 }
 
@@ -429,8 +568,9 @@ module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
  * @param offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
+ * @param directions The directions into which the base/hole are added
  */
-module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
+module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false, directions=[1,1]) {
     assert(is_list(top_dimensions) && len(top_dimensions) == 2);
     assert(is_bool(thumbscrew));
 
@@ -442,7 +582,7 @@ module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, th
         if (thumbscrew) {
             _base_thumbscrew();
         }
-        _base_holes(hole_options, offset, top_dimensions);
+        _base_holes(hole_options, offset, top_dimensions, directions);
         _base_preview_fix();
     }
 }
@@ -471,6 +611,26 @@ module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TO
         }
     }
 }
+
+/**
+ * @brief Internal code.  Calculate base hole position & dimension.
+ * @param hole_options @see block_base_hole.hole_options
+ * @details Position is from edge not center, used to position holes on partial bases
+ */
+function _base_hole_position(hole_options) =
+  let(
+    refined_hole = hole_options[0],
+    magnet_hole = hole_options[1],
+    chamfer = hole_options[4],
+    magnet_hole_size = 2*(MAGNET_HOLE_RADIUS + (chamfer ? CHAMFER_ADDITIONAL_RADIUS : 0)),
+  )
+  // Treat magnet & refined holes the same (i.e. don't care about the poke through of refined holes)
+  magnet_hole || refined_hole ? [
+    HOLE_DISTANCE_FROM_BOTTOM_EDGE, // x
+    HOLE_DISTANCE_FROM_BOTTOM_EDGE, // y
+    magnet_hole_size, // w
+    magnet_hole_size  // l
+  ] : [0,0,0,0];
 
 /**
  * @brief Internal code.  Fix base preview rendering issues.
@@ -564,28 +724,41 @@ module profile_wall2(height_mm) {
     square([d_wall, height_mm]);
 }
 
-module block_wall(gx, gy, l) {
-    translate([0, 0, BASE_HEIGHT])
-    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
+module block_wall(gx, gy, l, extra=[0,0]) {
+    extrax=extra[0];
+    extray=extra[1];
+
+    translate([extrax/2, extray/2, BASE_HEIGHT])
+    sweep_rounded([
+      gx*l-2*r_base-0.5-0.001+abs(extrax),
+      gy*l-2*r_base-0.5-0.001+abs(extray)
+    ])
     children();
 }
 
-module block_bottom( h = 2.2, gx, gy, l ) {
-    translate([0, 0, BASE_HEIGHT + 0.1])
-    rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
+module block_bottom(h = 2.2, gx, gy, l, extra=[0,0]) {
+    extrax=extra[0];
+    extray=extra[1];
+
+    translate([extrax/2, extray/2, BASE_HEIGHT + 0.1])
+    rounded_rectangle(
+      gx*l-0.5-d_wall/4+abs(extrax),
+      gy*l-0.5-d_wall/4+abs(extray),
+      h,
+      r_base+0.01
+    );
 }
 
-module cut_move_unsafe(x, y, w, h) {
+module cut_move_unsafe(x, y, w, h, offsets=[0,0,0,0]) {
     xx = ($gxx*l_grid+d_magic);
     yy = ($gyy*l_grid+d_magic);
     translate([(x)*xx/$gxx,(y)*yy/$gyy,0])
     translate([(-xx+d_div)/2,(-yy+d_div)/2,0])
-    translate([(w*xx/$gxx-d_div)/2,(h*yy/$gyy-d_div)/2,0])
+    translate([(w*xx/$gxx-d_div)/2+offsets[0],(h*yy/$gyy-d_div)/2+offsets[1],0])
     children();
 }
 
-module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
-
+module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh, offsets=[0,0,0,0]) {
     v_len_tab = tab_height;
     v_len_lip = d_wall2-d_wall+1.2;
     v_cut_tab = tab_height - (2*STACKING_LIP_FILLET_RADIUS)/tan(a_tab);
@@ -599,8 +772,8 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
     zsmall = ($dh+BASE_HEIGHT)/7 < 3;
 
-    ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div;
-    xlen = w*($gxx*l_grid+d_magic)/$gxx-d_div;
+    ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div+offsets[3];
+    xlen = w*($gxx*l_grid+d_magic)/$gxx-d_div+offsets[2];
 
     height = $dh;
     extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall-d_clear : 0);
@@ -609,7 +782,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
 
-    translate([0, ylen/2, BASE_HEIGHT+h_bot])
+    translate([offsets[2]/2, ylen/2+offsets[3]/2, BASE_HEIGHT+h_bot])
     rotate([90,0,-90]) {
 
     if (!zsmall && xlen - tab_width > 4*r_f2 && (t != 0 && t != 5)) {
@@ -627,6 +800,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
             translate([0,0,-(xlen/2-r_f2)-v_cut_lip])
             cube([ylen,height,v_cut_lip*2]);
         }
+
         if (t != 0 && t != 5)
         fillet_cutter(2,"indigo")
         difference() {
@@ -689,8 +863,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
         transform_main(2*ylen)
         profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
     }
-
-    }
+  }
 }
 
 module transform_main(xlen) {
@@ -716,6 +889,13 @@ module fillet_cutter(t = 0, c = "goldenrod") {
     }
 }
 
+/**
+ * @brief Create the shape to cutout of the block.
+ * @param h Height of cutout
+ * @param l Length of cutout
+ * @param s Scoop weight
+ * @param yoffset Move cutout to accomodate extra dimensions
+ */
 module profile_cutter(h, l, s) {
     scoop = max(s*$dh/2-r_f2,0);
     translate([r_f2,r_f2])
@@ -738,7 +918,9 @@ module profile_cutter(h, l, s) {
                     circle(scoop);
                     mirror([0,1]) square(2*scoop);
                 }
-            } else mirror([1,0]) square(0.1);
+            } else {
+              mirror([1,0]) square(0.1);
+            }
             translate([l-scoop-2*r_f2,-1])
             square([-(l-scoop-2*r_f2),2*h]);
 
