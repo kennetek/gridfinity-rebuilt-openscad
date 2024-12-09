@@ -40,10 +40,10 @@ gridx = 3; //.5
 gridy = 2; //.5
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6; //.1
-/* [General Advanced Settings] */
-// extend width (in mm, negative is to left, pos to right)
+/* [Advanced Settings] */
+// extend total grid width (in mm, negative is to left, pos to right)
 extrax=0; // [-41.99:0.01:41.99]
-// extend length (in mm, negative is to front, pos to back)
+// extend total grid length (in mm, negative is to front, pos to back)
 extray=0; // [-41.99:0.01:41.99]
 
 /* [Linear Compartments] */
