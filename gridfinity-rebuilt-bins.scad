@@ -43,7 +43,7 @@ gridz = 6; //.1
 /* [General Advanced Settings] */
 // extend width (in mm, negative is to left, pos to right)
 extrax=0; // [-41.99:0.01:41.99]
-// extend length (in mm, negative is to left, pos to right)
+// extend length (in mm, negative is to front, pos to back)
 extray=0; // [-41.99:0.01:41.99]
 
 /* [Linear Compartments] */
