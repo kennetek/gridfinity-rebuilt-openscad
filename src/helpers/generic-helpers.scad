@@ -74,9 +74,12 @@ module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
     yy = sy <= 0 ? sx : sy;
     translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
     for (i = [1:ceil(x)])
-    for (j = [1:ceil(y)])
-    translate([(i-1)*sx,(j-1)*yy,0])
-    children();
+    for (j = [1:ceil(y)]) {
+      $is_odd_x = (i%2) == 1;
+      $is_odd_y = (j%2) == 1;
+      translate([(i-1)*sx,(j-1)*yy,0])
+      children();
+    }
 }
 
 module pattern_circular(n=2) {

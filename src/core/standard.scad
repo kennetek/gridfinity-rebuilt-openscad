@@ -38,7 +38,7 @@ d_hole_from_side=8;
 // Based on https://gridfinity.xyz/specification/
 HOLE_DISTANCE_FROM_BOTTOM_EDGE = 4.8;
 
-// Meassured diameter in Fusion360.
+// Measured diameter in Fusion360.
 // Smaller than the magnet to keep it squeezed.
 REFINED_HOLE_RADIUS = 5.86 / 2;
 REFINED_HOLE_HEIGHT = MAGNET_HEIGHT - 0.1;
