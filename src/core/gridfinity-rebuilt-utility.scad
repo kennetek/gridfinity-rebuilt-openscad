@@ -222,7 +222,7 @@ module cut_move(x, y, w, h) {
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false, labels=[]) {
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
@@ -264,6 +264,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_TOP_RADIUS, center=true);
     }
 
+    difference() {
     if(only_corners) {
         difference(){
             pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y) {
@@ -284,6 +285,22 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     else {
         pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
         block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+    }
+
+    // If specified and there is room etch the labels
+    if (len(labels) > 0 && divisions_per_grid == [1, 1]) {
+        for (l = [0 : len(labels)-1]) {
+            offset = ((len(labels) - 1) / 2) - l;
+
+            translate([-(final_grid_size.x-1)*base_center_distance_mm.x/2,-(final_grid_size.y-1)*base_center_distance_mm.y/2,0])
+                mirror([1, 0, 0])
+                translate([0, offset * 8, 0])
+                linear_extrude(1)
+                text(text=labels[l],
+                    font=".SF NS Mono:style=Bold",
+                    halign="center", valign="center", size=5);
+        }
+    }
     }
 }
 
