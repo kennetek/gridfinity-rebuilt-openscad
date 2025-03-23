@@ -117,6 +117,7 @@ STACKING_LIP_LINE = [
  * @Details "x": How deep the stacking lip protrudes into the bin.
  *               Including wall thickness.
  *          "y": The height of the stacking lip.
+ * @WARNING: Height does NOT include STACKING_LIP_SUPPORT_HEIGHT.
  */
 STACKING_LIP_SIZE = STACKING_LIP_LINE[3];
 
