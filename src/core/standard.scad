@@ -1,4 +1,5 @@
 
+
 // lower base chamfer "radius"
 r_c1 = 0.8;
 // bottom thiccness of bin
@@ -204,36 +205,6 @@ function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
 BASE_THUMBSCREW_OUTER_DIAMETER=15;
 BASE_THUMBSCREW_PITCH=1.5;
 
-// ****************************************
-// Baseplate constants
-// Based on https://gridfinity.xyz/specification/
-// ****************************************
-BASEPLATE_OUTSIDE_RADIUS = 8 / 2;
-
-// Polygon describing the raw baseplate lip.
-// Does NOT include clearance height.
-BASEPLATE_LIP = [
-    [0, 0], // Innermost bottom point
-    [0.7, 0.7], // Up and out at a 45 degree angle
-    [0.7, (0.7+1.8)], // Straight up
-    [(0.7+2.15), (0.7+1.8+2.15)], // Up and out at a 45 degree angle
-    [(0.7+2.15), 0], // Straight down
-    [0, 0] // Implicit back to start
-];
-
-// Height of the baseplate lip.
-// This ads clearance height to the polygon
-// that ensures the base makes contact with the baseplate lip.
-BASEPLATE_LIP_HEIGHT = 5;
-
-// The minimum height between the baseplate lip and anything below it.
-// Needed to make sure the base always makes contact with the baseplate lip.
-BASEPLATE_CLEARANCE_HEIGHT = BASEPLATE_LIP_HEIGHT - BASEPLATE_LIP[3].y;
-assert(BASEPLATE_CLEARANCE_HEIGHT > 0, "Negative clearance doesn't make sense.");
-
-// Maximum [x,y] values/size of the baseplate lip.
-// Includes clearance height!
-BASEPLATE_LIP_MAX = [BASEPLATE_LIP[3].x, BASEPLATE_LIP_HEIGHT];
 
 // ****************************************
 // Weighted Baseplate

@@ -7,6 +7,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 */
 
 include <src/core/standard.scad>
+include <src/core/gridfinity-baseplate.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/helpers/generic-helpers.scad>
@@ -102,7 +103,7 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
     additional_height = calculate_offset(sp, hole_options[1], sh);
 
     // Final height of the baseplate. In mm.
-    baseplate_height_mm = additional_height + BASEPLATE_LIP_MAX.y;
+    baseplate_height_mm = additional_height + BASEPLATE_HEIGHT;
 
     // Final size in number of bases
     grid_size = [for (i = [0:1])
@@ -156,54 +157,42 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
     difference() {
         union() {
             // Baseplate itself
-            pattern_linear(grid_size.x, grid_size.y, length) {
-                // Single Baseplate piece
-                difference() {
+            difference() {
+                translate(padding_start_point)
+                cube(size_mm);
+                // Replicated Single Baseplate piece
+                pattern_linear(grid_size.x, grid_size.y, length) {
                     if (minimal) {
-                        square_baseplate_lip(additional_height);
+                        translate([0, 0, -TOLLERANCE/2])
+                        baseplate_cutter([length, length], baseplate_height_mm+TOLLERANCE);
                     } else {
-                        solid_square_baseplate(additional_height);
-                    }
+                        translate([0, 0, additional_height+TOLLERANCE/2])
+                        baseplate_cutter([length, length]);
 
-                    // Bottom/through pattern for the solid baseplates.
-                    if (sp == 1) {
-                        cutter_weight();
-                    } else if (sp == 2 || sp == 3) {
-                        translate([0,0,-TOLLERANCE])
-                        linear_extrude(additional_height + (2 * TOLLERANCE))
-                        profile_skeleton();
-                    }
+                        // Bottom/through pattern for the solid baseplates.
+                        if (sp == 1) {
+                            cutter_weight();
+                        } else if (sp == 2 || sp == 3) {
+                            translate([0,0,-TOLLERANCE])
+                            linear_extrude(additional_height + (2 * TOLLERANCE))
+                            profile_skeleton();
+                        }
 
-                    // Add holes to the solid baseplates.
-                    hole_pattern(){
-                        // Manget hole
-                        translate([0, 0, additional_height+TOLLERANCE])
-                        mirror([0, 0, 1])
-                        block_base_hole(hole_options);
+                        // Add holes to the solid baseplates.
+                        hole_pattern(){
+                            // Manget hole
+                            translate([0, 0, additional_height+TOLLERANCE])
+                            mirror([0, 0, 1])
+                            block_base_hole(hole_options);
 
-                        translate([0,0,-TOLLERANCE])
-                        if (sh == 1) {
-                            cutter_countersink();
-                        } else if (sh == 2) {
-                            cutter_counterbore();
+                            translate([0,0,-TOLLERANCE])
+                            if (sh == 1) {
+                                cutter_countersink();
+                            } else if (sh == 2) {
+                                cutter_counterbore();
+                            }
                         }
                     }
-                }
-            }
-
-            // Padding
-            if (is_padding_needed) {
-                render()
-                difference() {
-                    translate(padding_start_point)
-                    cube(size_mm);
-
-                    translate([
-                        -grid_size_mm.x/2,
-                        -grid_size_mm.y/2,
-                        0
-                    ])
-                    cube(grid_size_mm);
                 }
             }
         }
@@ -212,8 +201,8 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
         for(i = [0:len(corner_points) - 1]) {
                 point = corner_points[i];
                 translate([
-                point.x + (BASEPLATE_OUTSIDE_RADIUS * -sign(point.x)),
-                point.y + (BASEPLATE_OUTSIDE_RADIUS * -sign(point.y)),
+                point.x + (BASEPLATE_OUTER_RADIUS * -sign(point.x)),
+                point.y + (BASEPLATE_OUTER_RADIUS * -sign(point.y)),
                 0
             ])
             rotate([0, 0, i*90])
@@ -294,77 +283,11 @@ module square_baseplate_corner(height=0, subtract=false) {
     subtract_ammount = subtract ? TOLLERANCE : 0;
 
     translate([0, 0, -subtract_ammount])
-    linear_extrude(height + BASEPLATE_LIP_MAX.y + (2 * subtract_ammount))
+    linear_extrude(height + BASEPLATE_HEIGHT + (2 * subtract_ammount))
     difference() {
-        square(BASEPLATE_OUTSIDE_RADIUS + subtract_ammount , center=false);
+        square(BASEPLATE_OUTER_RADIUS + subtract_ammount , center=false);
         // TOLLERANCE needed to prevent a gap
-        circle(r=BASEPLATE_OUTSIDE_RADIUS - TOLLERANCE);
-    }
-}
-
-/**
- * @brief Outer edge/lip of the baseplate.
- * @details Includes clearance to ensure the base touches the lip
- *          instead of the bottom.
- * @param height Baseplate's height excluding lip and clearance height.
- * @param width How wide a single baseplate is.  Only set if deviating from the standard!
- * @param length How long a single baseplate is.  Only set if deviating from the standard!
- */
-module baseplate_lip(height=0, width=l_grid, length=l_grid) {
-    assert(height >= 0);
-
-    // How far, in the +x direction,
-    // the lip needs to be from it's [0, 0] point
-    // such that when swept by 90 degrees to produce a corner,
-    // the outside edge has the desired radius.
-    translation_x = BASEPLATE_OUTSIDE_RADIUS - BASEPLATE_LIP_MAX.x;
-
-    additional_height = height + BASEPLATE_CLEARANCE_HEIGHT;
-
-    sweep_rounded([width-2*BASEPLATE_OUTSIDE_RADIUS, length-2*BASEPLATE_OUTSIDE_RADIUS])
-    translate([translation_x, additional_height, 0])
-    polygon(concat(BASEPLATE_LIP, [
-        [0, -additional_height],
-        [BASEPLATE_LIP_MAX.x, -additional_height],
-        [BASEPLATE_LIP_MAX.x, 0]
-    ]));
-}
-
-/**
- * @brief Outer edge/lip of the baseplate, with square corners.
- * @details Needed to prevent gaps when joining multiples together.
- * @param height Baseplate's height excluding lip and clearance height.
- * @param size Width/Length of a single baseplate.  Only set if deviating from the standard!
- */
-module square_baseplate_lip(height=0, size = l_grid) {
-    assert(height >= 0 && size/2 >= BASEPLATE_OUTSIDE_RADIUS);
-
-    corner_center_distance = size/2 - BASEPLATE_OUTSIDE_RADIUS;
-
-    //render(convexity = 2) // Fixes ghosting in preview
-    union() {
-        baseplate_lip(height, size, size);
-        pattern_circular(4)
-        translate([corner_center_distance, corner_center_distance, 0])
-        square_baseplate_corner(height);
-    }
-}
-
-/**
- * @brief A single baseplate with square corners, a solid inner section, lip and the set clearance height.
- * @param height Baseplate's height excluding lip and clearance height.
- * @param size Width/Length of a single baseplate.  Only set if deviating from the standard!
- * @details A height of zero is the equivalent of just calling square_baseplate_lip()
- */
-module solid_square_baseplate(height=0, size = l_grid) {
-    assert(height >= 0 && size > 0);
-
-    union() {
-        square_baseplate_lip(height, size);
-        if (height > 0) {
-            linear_extrude(height)
-            square(size - BASEPLATE_OUTSIDE_RADIUS, center=true);
-        }
+        circle(r=BASEPLATE_OUTER_RADIUS - TOLLERANCE);
     }
 }
 
@@ -378,7 +301,7 @@ module solid_square_baseplate(height=0, size = l_grid) {
  *          }
  */
 module profile_skeleton(size=l_grid) {
-    l = size - 2*BASEPLATE_LIP_MAX.x;
+    l = baseplate_inner_size([size, size]).x;
 
     offset(r_skel)
     difference() {
