@@ -146,11 +146,13 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
     $style_lip = sl;
     difference() {
         color("firebrick")
-        block_bottom(h0==0?$dh-0.1:h0, gx, gy, l);
+        translate([0, 0, BASE_HEIGHT + 0.1])
+        rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h0==0?$dh-0.1:h0, r_base+0.01);
         children();
     }
     color("royalblue")
-    block_wall(gx, gy, l) {
+    translate([0, 0, BASE_HEIGHT])
+    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001]) {
         if ($style_lip == 0) profile_wall(h);
         else profile_wall2(h);
     }
@@ -562,17 +564,6 @@ module profile_wall2(height_mm) {
     translate([r_base,0,0])
     mirror([1,0,0])
     square([d_wall, height_mm]);
-}
-
-module block_wall(gx, gy, l) {
-    translate([0, 0, BASE_HEIGHT])
-    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
-    children();
-}
-
-module block_bottom( h = 2.2, gx, gy, l ) {
-    translate([0, 0, BASE_HEIGHT + 0.1])
-    rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
 module cut_move_unsafe(x, y, w, h) {
