@@ -318,7 +318,7 @@ module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hol
         rounded_square([grid_size_mm.x, grid_size_mm.y, max(top_bottom_thickness/4, 0.5)], BASE_TOP_RADIUS, center=true);
 
         pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
-        translate([0, 0, top_bottom_thickness/3])
+        translate([0, 0, max(top_bottom_thickness/3, 0.5)])
         base_solid();
     }
 
