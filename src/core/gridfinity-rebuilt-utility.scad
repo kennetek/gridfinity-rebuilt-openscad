@@ -37,7 +37,7 @@ function includingFixedHeights(mmHeight, includeLipHeight = false) =
  * @brief Three Functions in One. For height calculations.
  * @param z Height value
  * @param gridz_define As explained in gridfinity-rebuilt-bins.scad
- * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
+ * @param style_lip as explained in gridfinity-rebuilt-bins.scad
  * @returns Height in mm
  */
 function hf (z, gridz_define, style_lip) =
@@ -135,24 +135,48 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     }
 }
 
-// initialize gridfinity
-// sl:  lip style of this bin.
-//      0:Regular lip, 1:Remove lip subtractively, 2:Remove lip and retain height
-module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
+/**
+ * @Summary Initialize A Gridfinity Bin
+ * @Details Creates the top portion of a bin, and sets some gloal variables.
+ * @TODO: Remove dependence on global variables.
+ * @param sl Lip style of this bin.
+ *        0:Regular lip,
+ *        1:Remove lip subtractively,
+ *        2:Remove lip and retain height
+ * @param fill_height Height of the solid which fills a bin.  Set to 0 for automatic.
+ * @param grid_dimensions [length, width] of a single Gridfinity base.
+ */
+module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSIONS_MM, sl = 0) {
     $gxx = gx;
     $gyy = gy;
     $dh = h;
-    $dh0 = h0;
+    $dh0 = fill_height;
     $style_lip = sl;
+
+    fill_height_real = fill_height != 0 ? fill_height : h - STACKING_LIP_SUPPORT_HEIGHT;
+    grid_size_mm = [gx * grid_dimensions.x, gy * grid_dimensions.y];
+
+    // Inner Fill
     difference() {
         color("firebrick")
-        block_bottom(h0==0?$dh-0.1:h0, gx, gy, l);
+        translate([0, 0, BASE_HEIGHT])
+        linear_extrude(fill_height_real)
+        rounded_square(foreach_add(grid_size_mm, -d_wall/2),
+                       BASE_TOP_RADIUS,
+                       center=true);
         children();
     }
+
+    // Outer Wall
     color("royalblue")
-    block_wall(gx, gy, l) {
-        if ($style_lip == 0) profile_wall(h);
-        else profile_wall2(h);
+    translate([0, 0, BASE_HEIGHT])
+    //todo: Remove these constants
+    sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS-0.5-0.001)) {
+        if ($style_lip == 0) {
+            profile_wall(h);
+        } else {
+            profile_wall2(h);
+        }
     }
 }
 // Function to include in the custom() module to individually slice bins
@@ -562,17 +586,6 @@ module profile_wall2(height_mm) {
     translate([r_base,0,0])
     mirror([1,0,0])
     square([d_wall, height_mm]);
-}
-
-module block_wall(gx, gy, l) {
-    translate([0, 0, BASE_HEIGHT])
-    sweep_rounded([gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001])
-    children();
-}
-
-module block_bottom( h = 2.2, gx, gy, l ) {
-    translate([0, 0, BASE_HEIGHT + 0.1])
-    rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
 }
 
 module cut_move_unsafe(x, y, w, h) {
