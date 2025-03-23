@@ -338,11 +338,11 @@ module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hol
 
     //Bridging structure to tie the bases together
     difference() {
-        translate([0, 0, BASE_HEIGHT-top_bottom_thickness])
-        rounded_square([grid_size_mm.x, grid_size_mm.y, top_bottom_thickness], BASE_TOP_RADIUS, center=true);
+        translate([0, 0, BASE_HEIGHT])
+        rounded_square([grid_size_mm.x, grid_size_mm.y, max(top_bottom_thickness/4, 0.5)], BASE_TOP_RADIUS, center=true);
 
         pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
-        translate([0, 0, top_bottom_thickness])
+        translate([0, 0, max(top_bottom_thickness/3, 0.5)])
         base_solid();
     }
 
