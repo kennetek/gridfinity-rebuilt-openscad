@@ -1,0 +1,2 @@
+# Automatic CRLF handling for OpenScad files
+*.scad text=auto
