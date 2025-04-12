@@ -101,6 +101,10 @@ enable_thumbscrew = false;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 
+/* [Base Minimum Divisions] */
+div_base_x = 1;
+div_base_y = 1;
+
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
@@ -115,7 +119,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase([gridx, gridy], hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
+gridfinityBase([gridx, gridy], hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew,min_base_div=[div_base_x,div_base_y]);
 }
 
 

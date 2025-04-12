@@ -184,6 +184,14 @@ function foreach_add(list, to_add) =
     assert(!is_undef(to_add))
     [for (item = list) item + to_add];
 
+    
+// list/Vector helper function:
+// this will return the scalar value from a list (l) indicated (by index), use the last value in the list if the index would go past the end of the list, or return the scalar value of (l) if it is not a list
+// this function allows elegantly using parameters passed as scalar values, or as lists of scalar values
+// for example, a scale that applies equally to all axies, or a list with separate scales for each axis
+function valueOfListElementOrLast(l,index) = (index>=0)?(is_list(l)?((index<len(l))?l[index]:l[len(l)-1]):l):0; 
+    
+    
 /**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
  * @Details Centered on origin.

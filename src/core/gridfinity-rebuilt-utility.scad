@@ -245,8 +245,9 @@ module cut_move(x, y, w, h) {
  * @param grid_size Number of bases in each dimension. [x, y]
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
+ * @param min_base_div as a scalar or list of values to determine the minimum divisor for the base grid, 1/2/4 will automatically be determined and applied but this can override.  For example a 3.5x2 bin will automatically use x-axis base divisor of 2 but only y-axis base divisor of 1.  by supplying 2, or [2,2], both will be forced to divisor of 2.
  */
-module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false,min_base_div=[1,1]) {    
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
@@ -267,7 +268,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     dbnxt = [for (i=[1,2,4]) if (abs(grid_size.x*i)%1 < 0.001 || abs(grid_size.x*i)%1 > 0.999) i];
     dbnyt = [for (i=[1,2,4]) if (abs(grid_size.y*i)%1 < 0.001 || abs(grid_size.y*i)%1 > 0.999) i];
     assert(len(dbnxt) > 0 && len(dbnyt) > 0, "Base only supports half and quarter grid spacing.");
-    divisions_per_grid = [dbnxt[0], dbnyt[0]];
+    divisions_per_grid = [max(dbnxt[0],valueOfListElementOrLast(min_base_div,0)), max(dbnyt[0],valueOfListElementOrLast(min_base_div,1))];
 
     // Final size in number of bases
     final_grid_size = [grid_size.x * divisions_per_grid.x, grid_size.y * divisions_per_grid.y];
