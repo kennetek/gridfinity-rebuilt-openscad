@@ -575,8 +575,8 @@ module profile_wall(height_mm) {
     translate([r_base - STACKING_LIP_SIZE.x, 0, 0]){
         translate([0, height_mm, 0])
         stacking_lip_filleted();
-        translate([STACKING_LIP_SIZE.x-d_wall/2, 0, 0])
-        square([d_wall/2, height_mm]);
+        translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
+        square([d_wall, height_mm]);
     }
 }
 
