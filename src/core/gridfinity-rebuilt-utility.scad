@@ -261,25 +261,13 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     // This must be kept constant or half bins may not work correctly.
     gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
 
-    // Divisions per grid
-    // Normal, half, or quarter grid sizes supported.
-    // Automatically calculated using floating point comparisons.
-    dbnxt = [for (i=[1,2,4]) if (abs(grid_size.x*i)%1 < 0.001 || abs(grid_size.x*i)%1 > 0.999) i];
-    dbnyt = [for (i=[1,2,4]) if (abs(grid_size.y*i)%1 < 0.001 || abs(grid_size.y*i)%1 > 0.999) i];
-    assert(len(dbnxt) > 0 && len(dbnyt) > 0, "Base only supports half and quarter grid spacing.");
-    divisions_per_grid = [dbnxt[0], dbnyt[0]];
-
-    // Final size in number of bases
-    final_grid_size = [grid_size.x * divisions_per_grid.x, grid_size.y * divisions_per_grid.y];
-
-    base_center_distance_mm = [grid_dimensions.x / divisions_per_grid.x, grid_dimensions.y / divisions_per_grid.y];
-    individual_base_size_mm = base_center_distance_mm - gap_mm;
+    individual_base_size_mm = grid_dimensions - gap_mm;
 
     // Final size of the base top. In mm.
-    // subtracting gap_mm here to remove an outer lip along the peremiter.
+    // Subtracting gap_mm to remove an outer lip along the peremiter.
     grid_size_mm = [
-        base_center_distance_mm.x * final_grid_size.x,
-        base_center_distance_mm.y * final_grid_size.y
+        grid_dimensions.x * grid_size.x,
+        grid_dimensions.y * grid_size.y
     ] - gap_mm;
 
     // Top which ties all bases together
@@ -290,7 +278,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     if(only_corners) {
         difference(){
-            pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y) {
+            pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
                 base_solid(individual_base_size_mm);
             }
 
@@ -306,35 +294,38 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         }
     }
     else {
-        pattern_linear(final_grid_size.x, final_grid_size.y, base_center_distance_mm.x, base_center_distance_mm.y)
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
         block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
     }
 }
 
 /**
  * @brief Create the base of a gridfinity bin, or use it for a custom object.
- * @param length X,Y size of a single Gridfinity base.
  * @param grid_size Size in number of bases. [x, y]
+ * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param wall_thickness How thick the walls, and holes (if enabled) are.
  * @param top_bottom_thickness How thick the top and bottom is.
  * @param hole_options @see block_base_hole.hole_options
  * @param only_corners Only put holes on each corner.
  */
-module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
+module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
     assert(is_list(grid_size) && len(grid_size) == 2 && grid_size.x > 0 && grid_size.y > 0);
     assert(is_num(wall_thickness) && wall_thickness > 0);
     assert(is_num(top_bottom_thickness) && top_bottom_thickness > 0);
     assert(is_bool(only_corners));
-
-    grid_dimensions = GRID_DIMENSIONS_MM;
 
     // Per spec, there's a 0.5mm gap between each base.
     // This must be kept constant or half bins may not work correctly.
     gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
 
     // Final size of the base top. In mm.
-    // Gap needs to be removed to prevent an unwanted overhang off the edges.
-    grid_size_mm = [grid_dimensions.x * grid_size.x, grid_dimensions.y * grid_size.y] -gap_mm;
+    // Subtracting gap_mm to remove an outer lip along the peremiter.
+    grid_size_mm = [
+        grid_dimensions.x * grid_size.x,
+        grid_dimensions.y * grid_size.y
+    ] - gap_mm;
+
+    individual_base_size_mm = grid_dimensions - gap_mm;
 
     //Bridging structure to tie the bases together
     difference() {
@@ -343,7 +334,7 @@ module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hol
 
         pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
         translate([0, 0, top_bottom_thickness])
-        base_solid();
+        base_solid(individual_base_size_mm);
     }
 
     render()
@@ -351,7 +342,7 @@ module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hol
         difference() {
             union() {
                 pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
-                base_outer_shell(wall_thickness, top_bottom_thickness);
+                base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
                 _base_holes(hole_options, -wall_thickness, grid_size_mm);
             }
 
@@ -363,10 +354,10 @@ module gridfinity_base_lite(grid_size, wall_thickness, top_bottom_thickness, hol
         pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
             difference() {
                 union() {
-                    base_outer_shell(wall_thickness, top_bottom_thickness);
-                    _base_holes(hole_options, -wall_thickness);
+                    base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
+                    _base_holes(hole_options, -wall_thickness, individual_base_size_mm);
                 }
-                _base_holes(hole_options, 0);
+                _base_holes(hole_options, 0, individual_base_size_mm);
                 _base_preview_fix();
             }
         }

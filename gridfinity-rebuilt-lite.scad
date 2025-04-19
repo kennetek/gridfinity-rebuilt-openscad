@@ -19,11 +19,13 @@ $fs = 0.25;
 
 /* [General Settings] */
 // number of bases along x-axis
-gridx = 3; //.5
+gridx = 3;
 // number of bases along y-axis
-gridy = 3; //.5
+gridy = 3;
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6;
+// Half grid sized bins.  Implies "only corners".
+half_grid = false;
 
 /* [Compartments] */
 // number of X Divisions
@@ -64,19 +66,20 @@ chamfer_holes = true;
 printable_hole_top = true;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
+grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
 
 // ===== IMPLEMENTATION ===== //
 
 // Input all the cutter types in here
 color("tomato")
 render()
-gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, l_grid, hole_options, only_corners) {
+gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, grid_dimensions, hole_options, only_corners || half_grid) {
     cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
 }
 
 // ===== CONSTRUCTION ===== //
 
-module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, length, style_hole, only_corners) {
+module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, grid_dimensions, style_hole, only_corners) {
     height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
 
     // Lower the bin start point by this amount.
@@ -86,16 +89,16 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
 
     difference() {
         translate([0, 0, -lower_by_mm])
-        gridfinityInit(gridx, gridy, height_mm+lower_by_mm, 0, length, sl=style_lip)
+        gridfinityInit(gridx, gridy, height_mm+lower_by_mm, 0, grid_dimensions, sl=style_lip)
         children();
 
         // Underside of the base. Keep out zone.
         render()
         difference() {
-            cube([gridx*length, gridy*length, BASE_HEIGHT*2], center=true);
-            gridfinityBase([gridx, gridy], hole_options=style_hole, only_corners=only_corners);
+            cube([gridx*grid_dimensions.x, gridy*grid_dimensions.y, BASE_HEIGHT*2], center=true);
+            gridfinityBase([gridx, gridy], grid_dimensions, hole_options=style_hole, only_corners=only_corners);
         }
     }
 
-    gridfinity_base_lite([gridx, gridy], d_wall, bottom_layer, hole_options=style_hole, only_corners=only_corners);
+    gridfinity_base_lite([gridx, gridy], grid_dimensions, d_wall, bottom_layer, hole_options=style_hole, only_corners=only_corners);
 }
