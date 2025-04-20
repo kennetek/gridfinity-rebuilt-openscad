@@ -158,7 +158,9 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
     $style_lip = sl;
 
     fill_height_real = fill_height != 0 ? fill_height : h - STACKING_LIP_SUPPORT_HEIGHT;
-    grid_size_mm = [gx * grid_dimensions.x, gy * grid_dimensions.y];
+
+    // Subtracting BASE_GAP_MM to remove the perimeter overhang.
+    grid_size_mm = [gx * grid_dimensions.x, gy * grid_dimensions.y]  - BASE_GAP_MM;
 
     // Inner Fill
     difference() {
@@ -174,8 +176,7 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
     // Outer Wall
     color("royalblue")
     translate([0, 0, BASE_HEIGHT])
-    //todo: Remove these constants
-    sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS-0.5-0.001)) {
+    sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS)) {
         if ($style_lip == 0) {
             profile_wall(h);
         } else {

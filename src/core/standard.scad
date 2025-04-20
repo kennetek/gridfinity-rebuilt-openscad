@@ -164,6 +164,14 @@ BASE_TOP_RADIUS = 7.5 / 2;
 BASE_TOP_DIMENSIONS = [41.5, 41.5];
 
 /**
+ * @Summary How much overhang is expected by the standard per base.
+ * @Details There should be a 0.5mm gap between each base.
+ *          This must be kept constant, even at half/quarter grid sizes.
+ *          Otherwise, they won't fit in normal grids.
+ */
+BASE_GAP_MM = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
+
+/**
  * @Summary Maximum [x,y] values/size of the base.
  */
 BASE_PROFILE_MAX = BASE_PROFILE[3];

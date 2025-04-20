@@ -28,18 +28,14 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         is_bool(thumbscrew)
     );
 
-    // Per spec, there's a 0.5mm gap between each base.
-    // This must be kept constant or half bins may not work correctly.
-    gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
-
-    individual_base_size_mm = grid_dimensions - gap_mm;
+    individual_base_size_mm = grid_dimensions - BASE_GAP_MM;
 
     // Final size of the base top. In mm.
-    // Subtracting gap_mm to remove an outer lip along the peremiter.
+    // Subtracting BASE_GAP_MM to remove the perimeter overhang.
     grid_size_mm = [
         grid_dimensions.x * grid_size.x,
         grid_dimensions.y * grid_size.y
-    ] - gap_mm;
+    ] - BASE_GAP_MM;
 
     // Top which ties all bases together
     if (final_cut) {
@@ -86,18 +82,15 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
     assert(is_num(top_bottom_thickness) && top_bottom_thickness > 0);
     assert(is_bool(only_corners));
 
-    // Per spec, there's a 0.5mm gap between each base.
-    // This must be kept constant or half bins may not work correctly.
-    gap_mm = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
+    individual_base_size_mm = grid_dimensions - BASE_GAP_MM;
 
     // Final size of the base top. In mm.
-    // Subtracting gap_mm to remove an outer lip along the peremiter.
+    // Subtracting BASE_GAP_MM to remove the perimeter overhang.
     grid_size_mm = [
         grid_dimensions.x * grid_size.x,
         grid_dimensions.y * grid_size.y
-    ] - gap_mm;
+    ] - BASE_GAP_MM;
 
-    individual_base_size_mm = grid_dimensions - gap_mm;
 
     //Bridging structure to tie the bases together
     difference() {
