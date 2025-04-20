@@ -27,6 +27,8 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
+use <src/core/gridfinity-base.scad>
+
 
 // ===== PARAMETERS ===== //
 
@@ -107,7 +109,7 @@ grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
 
 // ===== IMPLEMENTATION ===== //
 
-//color("tomato") {
+color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
 
     if (divx > 0 && divy > 0) {
@@ -120,7 +122,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
     }
 }
 gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
-//}
+}
 
 
 // ===== EXAMPLES ===== //
