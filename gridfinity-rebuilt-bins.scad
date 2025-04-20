@@ -27,6 +27,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
+use <src/core/base.scad>
 use <src/helpers/grid.scad>
 
 // ===== PARAMETERS ===== //
