@@ -81,8 +81,10 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 place_tab = 0; // [0:Everywhere-Normal,1:Top-Left Division]
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
-// scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
-scoop = 1; //[0:0.1:1]
+// front scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop. (>1 are extreme scoops but may have use)
+scoopF = 0; //[0:0.1:3]
+// back (tab side of bin) scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
+scoopB = 0; //[0:0.1:3]
 
 /* [Base Hole Options] */
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
@@ -106,6 +108,7 @@ hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, cru
 grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
 
 // ===== IMPLEMENTATION ===== //
+scoop = [scoopF,scoopB];
 
 //color("tomato") {
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
