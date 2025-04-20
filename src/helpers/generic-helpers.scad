@@ -160,12 +160,21 @@ function affine_scale(vector) = [
  * @brief Add something to each element in a list.
  * @param list The list whos elements will be modified.
  * @param to_add
- * @returns a list with `to_add` added to each element in the list.
+ * @returns A list with `to_add` added to each element in the list.
  */
 function foreach_add(list, to_add) =
     assert(is_list(list))
     assert(!is_undef(to_add))
     [for (item = list) item + to_add];
+
+/**
+ * @brief Scale each element in a vector by the corresponding element in another vector.
+ * @param vector1
+ * @param vector2
+ * @returns The equivalent of `[vector1.x * vector2.x, vector1.y * vector2.y]`
+ */
+function vector_scale(vector1, vector2) = assert(len(vector1) == len(vector2))
+    [for(i=[0:len(vector1)-1]) vector1[i] * vector2[i] ];
 
 /**
  * @breif Simple helper to print affine matrices in an easier to read manner.
