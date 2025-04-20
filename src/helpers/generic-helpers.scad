@@ -168,6 +168,23 @@ function foreach_add(list, to_add) =
     [for (item = list) item + to_add];
 
 /**
+ * @breif Simple helper to print affine matrices in an easier to read manner.
+ * @details If a multidimensional matrix is provided, then each item is printed to a separate line.
+ * @param object Object to print.
+ */
+module pprint(object) {
+    if(is_list(object) && len(object) != len([for(i=object)each i])) {
+        echo("[");
+        for(i = object) {
+            echo(i);
+        };
+        echo("]");
+    } else {
+        echo(object);
+    }
+}
+
+/**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
  * @Details Centered on origin.
  *          Result is on the X,Y plane.
