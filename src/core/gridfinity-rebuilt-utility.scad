@@ -122,7 +122,7 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
         translate([0, 0, -coutout_depth]) {
-            rounded_rectangle(cutout_x, cutout_y, coutout_depth * 2, r_base);
+            rounded_rectangle(cutout_x, cutout_y, coutout_depth * 2, BASE_TOP_RADIUS);
 
             pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding) / n_divx, sy=(gridy_mm - padding) / n_divy)
                 rotate(rotation)
@@ -305,7 +305,7 @@ module stacking_lip_filleted() {
  */
 module profile_wall(height_mm) {
     assert(is_num(height_mm))
-    translate([r_base - STACKING_LIP_SIZE.x, 0, 0]){
+    translate([BASE_TOP_RADIUS - STACKING_LIP_SIZE.x, 0, 0]){
         translate([0, height_mm, 0])
         stacking_lip_filleted();
         translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
@@ -316,7 +316,7 @@ module profile_wall(height_mm) {
 // lipless profile
 module profile_wall2(height_mm) {
     assert(is_num(height_mm))
-    translate([r_base,0,0])
+    translate([BASE_TOP_RADIUS,0,0])
     mirror([1,0,0])
     square([d_wall, height_mm]);
 }
