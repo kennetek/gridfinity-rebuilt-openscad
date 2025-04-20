@@ -15,10 +15,6 @@ GRID_DIMENSIONS_MM = [42, 42];
  */
 l_grid = GRID_DIMENSIONS_MM.x;
 
-// Outside rounded radius of bin
-// Per spec, matches radius of upper base section.
-r_base = 7.5 / 2;
-
 // Tollerance to make sure cuts don't leave a sliver behind,
 // and that items are properly connected to each other.
 TOLLERANCE = 0.01;
@@ -80,9 +76,6 @@ d_tabh = 15.85;
 d_tabw = 42;
 // angle of tab
 a_tab = 36;
-
-d_wall2 = r_base-r_c1-d_clear*sqrt(2);
-d_magic = -2*d_clear-2*d_wall+d_div;
 
 // ****************************************
 // Stacking Lip Constants
@@ -161,7 +154,7 @@ BASE_PROFILE = [
 /**
  * @Summary Corner radius of the top of the base.
  */
-BASE_TOP_RADIUS = r_base;
+BASE_TOP_RADIUS = 7.5 / 2;
 
 /**
  * @Summary Size of the top of the base. [Length, Width]
@@ -230,3 +223,12 @@ bp_rcut_depth = 2;
 r_skel = 2;
 // minimum baseplate thickness (when skeletonized)
 h_skel = 1;
+
+
+// ****************************************
+// Deprecated Values
+// Will be removed / re-named in the future.
+// ****************************************
+
+d_wall2 = BASE_TOP_RADIUS-r_c1-d_clear*sqrt(2);
+d_magic = -2*d_clear-2*d_wall+d_div;
