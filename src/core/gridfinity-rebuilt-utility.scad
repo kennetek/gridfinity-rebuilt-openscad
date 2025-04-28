@@ -172,12 +172,25 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
     translate([0, 0, BASE_HEIGHT])
     //todo: Remove these constants
     sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS-0.5-0.001)) {
-        if ($style_lip == 0) {
+        if ($style_lip == 0 || $style_lip == 3) {
             profile_wall(h);
         } else {
             profile_wall2(h);
         }
     }
+    if($style_lip == 3) {
+        color("lemonchiffon")
+
+        for(i=[1:gx-1]) {
+            translate([grid_dimensions.x*gx/2-d_clear-grid_dimensions.x*i,grid_dimensions.y*gy/2-d_clear,h+BASE_HEIGHT])lipNotch();
+            translate([grid_dimensions.x*gx/2-d_clear-grid_dimensions.x*i,-(grid_dimensions.y*gy/2-d_clear),h+BASE_HEIGHT])rotate([0,0,180])lipNotch();
+       }
+       for(j=[1:gy-1]) {
+            translate([grid_dimensions.x*gx/2-d_clear,grid_dimensions.y*gy/2-d_clear-j*grid_dimensions.y,h+BASE_HEIGHT])rotate([0,0,270])lipNotch();
+            translate([-(grid_dimensions.x*gx/2-d_clear),grid_dimensions.y*gy/2-d_clear-j*grid_dimensions.y,h+BASE_HEIGHT])rotate([0,0,90])lipNotch();
+       }
+   }
+
 }
 // Function to include in the custom() module to individually slice bins
 // Will try to clamp values to fit inside the provided base size
@@ -597,10 +610,10 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     v_ang_tab = a_tab;
     v_ang_lip = 45;
 
-    ycutfirst = y == 0 && $style_lip == 0;
-    ycutlast = abs(y+h-$gyy)<0.001 && $style_lip == 0;
-    xcutfirst = x == 0 && $style_lip == 0;
-    xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
+    ycutfirst = y == 0 && ($style_lip == 0 || $style_lip == 3);
+    ycutlast = abs(y+h-$gyy)<0.001 && ($style_lip == 0 || $style_lip == 3);
+    xcutfirst = x == 0 && ($style_lip == 0 || $style_lip == 3);
+    xcutlast = abs(x+w-$gxx)<0.001 && ($style_lip == 0 || $style_lip == 3);
     zsmall = ($dh+BASE_HEIGHT)/7 < 3;
 
     ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div;
@@ -758,4 +771,29 @@ module profile_cutter_tab(h, tab, ang) {
         offset(delta = r_f2)
         polygon([[0,h],[tab,h],[0,h-tab*tan(ang)]]);
 
+}
+
+module lipNotch() {
+// this parameter is a complex calculation of the filleted .6mm radius top of the stacking lip used by gridfinity-rebuilt
+// rather than duplicate the calculation from parameters, I'm just copying the value directly here
+lipHeight=3.55147;
+//these parameters are not 'named' values in standard.scad but are there in STACKING_LIP_LINE
+lipBase = STACKING_LIP_LINE[1].x;             //0.7
+lipMidZ = STACKING_LIP_LINE[2].y - lipBase;  //1.8
+lipTop  = STACKING_LIP_LINE[3].x - lipBase;   //1.9
+
+    difference() {
+        union() {
+            translate([-r_base,-lipBase-1.9,0])cube([2*r_base,lipBase+1.9,lipHeight-STACKING_LIP_FILLET_RADIUS]);
+            translate([-r_base,-lipBase-1.9,0])cube([2*r_base,lipBase-1.9-STACKING_LIP_FILLET_RADIUS,lipHeight]);
+            translate([0,-STACKING_LIP_FILLET_RADIUS,lipHeight-STACKING_LIP_FILLET_RADIUS])rotate([0,90,0])cylinder(r=STACKING_LIP_FILLET_RADIUS,h=2*r_base,center=true);
+        }
+        translate([-r_base,-r_base,lipBase/2])cylinder(r1=0+(r_base-lipBase-lipTop),r2=r_base-lipTop,h=lipBase,center=true);
+        translate([-r_base,-r_base,lipBase+lipMidZ/2])cylinder(r1=r_base-lipTop,r2=r_base-lipTop,h=lipMidZ+0.01,center=true);
+        translate([-r_base,-r_base,lipBase+lipMidZ+lipTop/2])cylinder(r1=r_base-lipTop,r2=r_base,h=lipTop,center=true);
+
+        translate([r_base,-r_base,lipBase/2])cylinder(r1=0+(r_base-lipBase-lipTop),r2=r_base-lipTop,h=lipBase,center=true);
+        translate([r_base,-r_base,lipBase+lipMidZ/2])cylinder(r1=r_base-lipTop,r2=r_base-lipTop,h=lipMidZ+0.01,center=true);
+        translate([r_base,-r_base,lipBase+lipMidZ+lipTop/2])cylinder(r1=r_base-lipTop,r2=r_base,h=lipTop,center=true);
+    }
 }
