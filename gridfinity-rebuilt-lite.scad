@@ -38,12 +38,16 @@ divy = 2;
 enable_zsnap = false;
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
+// scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
+scoop = 0; //[0:0.1:1]
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
 gridz_define = 0; // [0:gridz is the height of bins in units of 7mm increments - Zack's method,1:gridz is the internal height in millimeters, 2:gridz is the overall external height of the bin in millimeters]
 // the type of tabs
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
+// which divisions have tabs
+place_tab = 1; // [0:Everywhere-Normal,1:Top-Left Division]
 
 /* [Base] */
 // thickness of bottom layer
@@ -74,9 +78,8 @@ grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
 color("tomato")
 render()
 gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, grid_dimensions, hole_options, only_corners || half_grid) {
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
+    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 }
-
 // ===== CONSTRUCTION ===== //
 
 module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap, grid_dimensions, style_hole, only_corners) {
