@@ -561,15 +561,20 @@ module stacking_lip_filleted() {
  * @brief External wall profile, with a stacking lip.
  * @details Translated so a 90 degree rotation produces the expected outside radius.
  */
+ // now uses intersection to assure proper profile even down to gridz=1
 module profile_wall(height_mm) {
     assert(is_num(height_mm))
-    translate([r_base - STACKING_LIP_SIZE.x, 0, 0]){
-        translate([0, height_mm, 0])
-        stacking_lip_filleted();
-        translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
-        square([d_wall, height_mm]);
+    intersection() {
+        translate([r_base - STACKING_LIP_SIZE.x, 0, 0]){
+            translate([0, height_mm, 0])
+            stacking_lip_filleted();
+            translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
+            square([d_wall, height_mm]);
+        }
+        square([10,10+height_mm]);
     }
 }
+
 
 // lipless profile
 module profile_wall2(height_mm) {
