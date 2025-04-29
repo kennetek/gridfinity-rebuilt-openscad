@@ -300,6 +300,26 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 }
 
 /**
+    * @brief Creates a solid block that rises up from a gridfinity base.
+    * @param grid_size Number of bases in each dimension. [x, y]
+    * @param grid_dimensions [length, width] of a single Gridfinity base.
+    * @param gridz Height of the solid block
+    * @param gridz_define Enum determining how gridz is interpreted
+    * @param enable_zsnap Automatically snap the bin size to the nearest 7mm increment.
+    * @param lip_style Enum determining how the lip is handled
+    * @param hole_options @see bundle_hole_options
+    * @param only_corners Only put holes on each corner.
+    * @param thumbscrew Enable thumbscrew
+    * @param base_only Only create the base if true, easily create support modifier mesh.
+    */
+module gridfinityBlock(grid_size, grid_dimensions = GRID_DIMENSIONS_MM, gridz, gridz_define = GRIDZ_7MM, enable_zsnap = true, lip_style = LIP_STYLE_SUBTRACTIVE, hole_options, only_corners = true, enable_thumbscrew = false, base_only = false) {
+    if (! base_only) {
+        gridfinityInit(grid_size.x, grid_size.y, height(gridz, gridz_define, lip_style, enable_zsnap), 0, grid_dimensions, lip_style);
+    }
+    gridfinityBase(grid_size, hole_options=hole_options, only_corners=only_corners, thumbscrew=enable_thumbscrew);
+}
+
+/**
  * @brief Create the base of a gridfinity bin, or use it for a custom object.
  * @param grid_size Size in number of bases. [x, y]
  * @param grid_dimensions [length, width] of a single Gridfinity base.
