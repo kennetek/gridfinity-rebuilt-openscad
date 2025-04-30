@@ -110,14 +110,6 @@ function vector_magnitude(vector) =
  */
 function vector_as_unit(vector) = vector / vector_magnitude(vector);
 
-/**
- * @brief Convert a 2d vector into an angle.
- * @details Just a wrapper around atan2.
- * @param A 2d vectorm
- * @returns Angle of the vector.
- */
-function atanv(vector) = atan2(vector.y, vector.x);
-
 function _affine_rotate_x(angle_x) = [
     [1,  0, 0, 0],
     [0, cos(angle_x), -sin(angle_x), 0],
@@ -232,7 +224,7 @@ module sweep_rounded(size) {
     walls = [
         for (i = [0 : len(path_vectors) - 1])
         affine_matrix * affine_translations[i]
-        * affine_rotate([0, atanv(path_vectors[i]), 0])
+        * affine_rotate([0, atan2(path_vectors[i].y, path_vectors[i].x), 0])
     ];
 
     union()
