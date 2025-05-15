@@ -33,6 +33,9 @@ SCREW_HOLE_RADIUS = 3 / 2;
 MAGNET_HOLE_RADIUS = 6.5 / 2;
 MAGNET_HOLE_DEPTH = MAGNET_HEIGHT + (LAYER_HEIGHT * 2);
 
+// minimum padding width that allows a bottom magnet at the edge of the baseplate
+BOTTOM_MAGNET_MIN_PAD = MAGNET_HOLE_RADIUS + 1;
+
 // distance of hole from side of bin
 d_hole_from_side=8;
 
