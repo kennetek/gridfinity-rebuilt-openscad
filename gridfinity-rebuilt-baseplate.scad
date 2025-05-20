@@ -213,6 +213,10 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
             translate([0, 0, additional_height/2])
             cutter_screw_together(grid_size.x, grid_size.y, length);
         }
+
+        translate([0, 0, baseplate_height_mm])
+        // Cut off 2 layers from the top so the slicer can generate 2 perimeters side-by-side.
+        cube([size_mm[0] + 2, size_mm[1] + 2, LAYER_HEIGHT*4], center=true);
     }
 }
 
