@@ -241,12 +241,102 @@ module cut_move(x, y, w, h) {
 // ===== Modules ===== //
 
 /**
+ * @brief Internal module to handle base pattern generation based on location options
+ */
+module _pattern_bases(grid_size, grid_dimensions, individual_base_size_mm, thumbscrew, base_locations, hole_options, off, base_solid=true) {
+    if(base_locations == 0) {
+        // All bases
+        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+            if (solid_base) {
+                base_solid(individual_base_size_mm);
+            } else {
+                block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+            }
+    } else if(base_locations == 1) {
+        // Corners only
+        // Bottom left
+        translate([-grid_dimensions.x * (grid_size.x-1)/2, -grid_dimensions.y * (grid_size.y-1)/2, 0])
+            if (solid_base) {
+                base_solid(individual_base_size_mm);
+            } else {
+                block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+            }
+        
+        // Bottom right
+        translate([grid_dimensions.x * (grid_size.x-1)/2, -grid_dimensions.y * (grid_size.y-1)/2, 0])
+            if (solid_base) {
+                base_solid(individual_base_size_mm);
+            } else {
+                block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+            }
+        
+        // Top left
+        translate([-grid_dimensions.x * (grid_size.x-1)/2, grid_dimensions.y * (grid_size.y-1)/2, 0])
+            if (solid_base) {
+                base_solid(individual_base_size_mm);
+            } else {
+                block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+            }
+        
+        // Top right
+        translate([grid_dimensions.x * (grid_size.x-1)/2, grid_dimensions.y * (grid_size.y-1)/2, 0])
+            if (solid_base) {
+                base_solid(individual_base_size_mm);
+            } else {
+                block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+            }
+    } else if(base_locations == 2) {
+        // Edges only
+        // Bottom edge
+        for(x = [0:grid_size.x-1]) {
+            translate([grid_dimensions.x * (x - (grid_size.x-1)/2), -grid_dimensions.y * (grid_size.y-1)/2, 0])
+                if (solid_base) {
+                    base_solid(individual_base_size_mm);
+                } else {
+                    block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+                }
+        }
+        
+        // Top edge
+        for(x = [0:grid_size.x-1]) {
+            translate([grid_dimensions.x * (x - (grid_size.x-1)/2), grid_dimensions.y * (grid_size.y-1)/2, 0])
+                if (solid_base) {
+                    base_solid(individual_base_size_mm);
+                } else {
+                    block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+                }
+        }
+        
+        // Left edge (excluding corners which are already done)
+        for(y = [1:grid_size.y-2]) {
+            translate([-grid_dimensions.x * (grid_size.x-1)/2, grid_dimensions.y * (y - (grid_size.y-1)/2), 0])
+                if (solid_base) {
+                    base_solid(individual_base_size_mm);
+                } else {
+                    block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+                }
+        }
+        
+        // Right edge (excluding corners which are already done)
+        for(y = [1:grid_size.y-2]) {
+            translate([grid_dimensions.x * (grid_size.x-1)/2, grid_dimensions.y * (y - (grid_size.y-1)/2), 0])
+                if (solid_base) {
+                    base_solid(individual_base_size_mm);
+                } else {
+                    block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+                }
+        }
+    }
+}
+
+/**
  * @brief Create the base of a gridfinity bin, or use it for a custom object.
  * @param grid_size Number of bases in each dimension. [x, y]
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
+ * @param base_locations Where to place the bases. [0: All bases, 1: Corners only, 2: Edges only]
  */
-module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false, base_locations=0) {
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
@@ -256,6 +346,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         is_bool(only_corners) &&
         is_bool(thumbscrew)
     );
+    assert(base_locations >= 0 && base_locations <= 2, "base_locations must be 0 (all), 1 (corners only), or 2 (edges only)");
 
     // Per spec, there's a 0.5mm gap between each base.
     // This must be kept constant or half bins may not work correctly.
@@ -277,10 +368,8 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     }
 
     if(only_corners) {
-        difference(){
-            pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
-                base_solid(individual_base_size_mm);
-            }
+        difference() {
+            _pattern_bases(grid_size, grid_dimensions, individual_base_size_mm, thumbscrew, base_locations, hole_options, off, base_solid=true);
 
             if(thumbscrew) {
                 thumbscrew_position = grid_size_mm - individual_base_size_mm;
@@ -292,10 +381,8 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
             _base_holes(hole_options, off, grid_size_mm);
             _base_preview_fix();
         }
-    }
-    else {
-        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
-        block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+    } else {
+        _pattern_bases(grid_size, grid_dimensions, individual_base_size_mm, thumbscrew, base_locations, hole_options, off);
     }
 }
 

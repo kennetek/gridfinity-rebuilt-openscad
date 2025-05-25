@@ -101,6 +101,8 @@ chamfer_holes = true;
 printable_hole_top = true;
 // Enable "gridfinity-refined" thumbscrew hole in the center of each base: https://www.printables.com/model/413761-gridfinity-refined
 enable_thumbscrew = false;
+// Where to place the bases
+base_locations = 1; // [0: All bases, 1: Corners only, 2: Edges only]
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
@@ -119,7 +121,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
+gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew, base_locations=base_locations);
 //}
 
 
