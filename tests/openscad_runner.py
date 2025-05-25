@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import platform
 from dataclasses import dataclass, is_dataclass, asdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -105,6 +106,7 @@ class OpenScadRunner:
     parameters: Optional[dict]
     '''If set, a temporary parameter file is created, and used with these variables'''
 
+    MACOS_DEFAULT_PATH = '/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD'
     WINDOWS_DEFAULT_PATH = 'C:\\Program Files\\OpenSCAD\\openscad.exe'
     TOP_ANGLE_CAMERA = CameraArguments(Vec3(0,0,0),Vec3(45,0,45),150)
 
@@ -120,7 +122,7 @@ class OpenScadRunner:
         set_variable_argument('$fa', 8) + set_variable_argument('$fs', 0.25)
 
     def __init__(self, file_path: Path):
-        self.openscad_binary_path = self.WINDOWS_DEFAULT_PATH
+        self.openscad_binary_path = self.MACOS_DEFAULT_PATH if platform.system() == 'Darwin' else self.WINDOWS_DEFAULT_PATH
         self.scad_file_path = file_path
         self.image_folder_base = Path('.')
         self.camera_arguments = None
