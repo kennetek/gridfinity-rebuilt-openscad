@@ -157,3 +157,53 @@ class TestBinHoles:
         vars["chamfer_holes"] = True
         vars["printable_hole_top"] = True
         openscad_runner.create_image([], Path('magnet_and_screw_holes_all.png'))
+
+    def test_base_locations_corners_only(self, openscad_runner):
+        """Test base_locations=1 (Corners only)"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 3
+        vars["gridy"] = 3
+        vars["gridz"] = 2
+        vars["base_locations"] = 1
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 350)
+        openscad_runner.create_image([], Path('base_locations_corners_only.png'))
+
+    def test_base_locations_edges_only(self, openscad_runner):
+        """Test base_locations=2 (Edges only)"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 3
+        vars["gridy"] = 3
+        vars["gridz"] = 2
+        vars["base_locations"] = 2
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 350)
+        openscad_runner.create_image([], Path('base_locations_edges_only.png'))
+
+    def test_base_locations_large_grid_all_bases(self, openscad_runner):
+        """Test base_locations=0 with a larger grid"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 5
+        vars["gridy"] = 5
+        vars["gridz"] = 2
+        vars["base_locations"] = 0
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 550)
+        openscad_runner.create_image([], Path('base_locations_large_grid_all_bases.png'))
+
+    def test_base_locations_large_grid_corners_only(self, openscad_runner):
+        """Test base_locations=1 with a larger grid"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 5
+        vars["gridy"] = 5
+        vars["gridz"] = 2
+        vars["base_locations"] = 1
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 550)
+        openscad_runner.create_image([], Path('base_locations_large_grid_corners_only.png'))
+
+    def test_base_locations_large_grid_edges_only(self, openscad_runner):
+        """Test base_locations=2 with a larger grid"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 5
+        vars["gridy"] = 5
+        vars["gridz"] = 2
+        vars["base_locations"] = 2
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 550)
+        openscad_runner.create_image([], Path('base_locations_large_grid_edges_only.png'))
