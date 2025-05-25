@@ -158,6 +158,16 @@ class TestBinHoles:
         vars["printable_hole_top"] = True
         openscad_runner.create_image([], Path('magnet_and_screw_holes_all.png'))
 
+    def test_base_locations_all_bases(self, openscad_runner):
+        """Test base_locations=0 (All locations)"""
+        vars = openscad_runner.parameters
+        vars["gridx"] = 3
+        vars["gridy"] = 3
+        vars["gridz"] = 2
+        vars["base_locations"] = 0  # All locations
+        openscad_runner.camera_arguments = CameraArguments(Vec3(0,0,0), CameraRotations.AngledBottom, 350)
+        openscad_runner.create_image([], Path('base_locations_all_bases.png'))
+
     def test_base_locations_corners_only(self, openscad_runner):
         """Test base_locations=1 (Corners only)"""
         vars = openscad_runner.parameters
