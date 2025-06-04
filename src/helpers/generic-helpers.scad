@@ -3,6 +3,8 @@
  * @brief Generic Helper Functions. Not gridfinity specific.
  */
 
+use <grid.scad>
+
 function clp(x,a,b) = min(max(x,a),b);
 
 function is_even(number) = (number%2)==0;
@@ -14,13 +16,24 @@ module copy_mirror(vec=[0,1,0]) {
     children();
 }
 
+/**
+ * @deprecated Use `pattern_grid(...)`
+ * @brief Create a 2d pattern of child items.
+ * @param x Number of X divisions.
+ * @param y Number of Y divisions. In mm.
+ * @param sx Size of X.  In mm.
+ * @param sy Size of Y.  In mm.
+ */
 module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
     yy = sy <= 0 ? sx : sy;
-    translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
-    for (i = [1:ceil(x)])
-    for (j = [1:ceil(y)])
-    translate([(i-1)*sx,(j-1)*yy,0])
-    children();
+    pattern_grid(
+        num_elements=[ceil(x), ceil(y)],
+        element_dimensions=[sx, yy],
+        center=true,
+        center_elements=true)
+    {
+        children();
+    }
 }
 
 module pattern_circular(n=2) {
