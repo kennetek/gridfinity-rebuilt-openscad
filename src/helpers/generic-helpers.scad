@@ -97,18 +97,10 @@ unity_matrix = [
 ];
 
 /**
- * @brief Get the magnitude of a 2d or 3d vector
- * @param vector A 2d or 3d vectorm
- * @returns Magnitude of the vector.
- */
-function vector_magnitude(vector) =
-    sqrt(vector.x^2 + vector.y^2 + (len(vector) == 3 ? vector.z^2 : 0));
-
-/**
- * @brief Convert a 2d or 3d vector into a unit vector
+ * @brief Convert a vector into a unit vector.
  * @returns The unit vector.  Where total magnitude is 1.
  */
-function vector_as_unit(vector) = vector / vector_magnitude(vector);
+function vector_as_unit(vector) = vector / norm(vector);
 
 function _affine_rotate_x(angle_x) = [
     [1,  0, 0, 0],
@@ -130,7 +122,6 @@ function _affine_rotate_z(angle_z) = [
     [0, 0, 1, 0],
     [0, 0, 0, 1]
 ];
-
 
 /**
  * @brief Affine transformation matrix equivalent of `rotate`
@@ -231,7 +222,7 @@ module sweep_rounded(size) {
     {
         for (i = [0 : len(walls) - 1]){
             multmatrix(walls[i])
-            linear_extrude(vector_magnitude(path_vectors[i]))
+            linear_extrude(norm(path_vectors[i]))
             children();
 
             // Rounded Corners
