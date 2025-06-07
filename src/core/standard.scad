@@ -70,12 +70,47 @@ d_wall = 0.95;
 // tolerance fit factor
 d_clear = 0.25;
 
-// height of tab (yaxis, measured from inner wall)
-d_tabh = 15.85;
-// maximum width of tab
-d_tabw = 42;
-// angle of tab
-a_tab = 36;
+// ****************************************
+// Tab Constants
+// Arbitrarily chosen.
+// ****************************************
+
+/**
+ * @brief Maximum width of a tab.
+ */
+TAB_WIDTH_NOMINAL = 42;
+
+ /**
+ * @brief How deep the tab protrudes into the bin.
+ * @details External code should use `TAB_SIZE.x` instead.
+ */
+_tab_depth = 15.85;
+
+/**
+ * @brief Angle of the support holding up the tab
+ */
+ _tab_support_angle = 36;
+
+ /**
+ * @brief Additional support height, so the end isn't a sharp angle.
+ */
+ _tab_support_height = 1.2;
+
+_tab_height = tan(_tab_support_angle) * _tab_depth + _tab_support_height;
+TAB_POLYGON = [
+    [0, 0], // Start
+    [0, _tab_height], // Up
+    [_tab_depth, _tab_height], //Out
+    [_tab_depth, _tab_height - _tab_support_height] // Prevent a sharp angle
+    //Implicit back to start
+];
+
+/**
+ * @brief Size of the tab.
+ * @Details "x": How deep the tab protrudes into the bin.
+ *          "y": The height of the tab.
+ */
+TAB_SIZE = TAB_POLYGON[2];
 
 // ****************************************
 // Stacking Lip Constants
@@ -240,3 +275,10 @@ h_skel = 1;
 
 d_wall2 = BASE_TOP_RADIUS-r_c1-d_clear*sqrt(2);
 d_magic = -2*d_clear-2*d_wall+d_div;
+
+// height of tab (yaxis, measured from inner wall)
+d_tabh = _tab_depth;
+// maximum width of tab
+d_tabw = TAB_WIDTH_NOMINAL;
+// angle of tab
+a_tab = _tab_support_angle;
