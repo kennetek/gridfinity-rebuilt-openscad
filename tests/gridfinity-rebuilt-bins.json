@@ -30,7 +30,8 @@
             "scoop": "0",
             "screw_holes": "false",
             "style_lip": "0",
-            "style_tab": "1"
+            "style_tab": "1",
+            "base_locations": "0"
         }
     }
 }
