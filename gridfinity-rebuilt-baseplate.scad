@@ -56,6 +56,9 @@ style_plate = 3; // [0: thin, 1:weighted, 2:skeletonized, 3: screw together, 4: 
 // hole styles
 style_hole = 0; // [0:none, 1:countersink, 2:counterbore]
 
+// top style
+style_top = 0; // [0:sharp, 1: flattened]
+
 /* [Magnet Hole] */
 // Baseplate will have holes for 6mm Diameter x 2mm high magnets.
 enable_magnet = true;
@@ -69,7 +72,7 @@ hole_options = bundle_hole_options(refined_hole=false, magnet_hole=enable_magnet
 // ===== IMPLEMENTATION ===== //
 
 color("tomato")
-gridfinityBaseplate([gridx, gridy], l_grid, [distancex, distancey], style_plate, hole_options, style_hole, [fitx, fity]);
+gridfinityBaseplate([gridx, gridy], l_grid, [distancex, distancey], style_plate, hole_options, style_hole, style_top, [fitx, fity]);
 
 // ===== CONSTRUCTION ===== //
 
@@ -87,7 +90,7 @@ gridfinityBaseplate([gridx, gridy], l_grid, [distancex, distancey], style_plate,
  * @param sh Style of screw hole allowing the baseplate to be mounted to something.
  * @param fit_offset Determines where padding is added.
  */
-module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_options, sh, fit_offset = [0, 0]) {
+module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_options, sh, st, fit_offset = [0, 0]) {
 
     assert(is_list(grid_size_bases) && len(grid_size_bases) == 2,
         "grid_size_bases must be a 2d list");
@@ -212,6 +215,11 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
         if (screw_together) {
             translate([0, 0, additional_height/2])
             cutter_screw_together(grid_size.x, grid_size.y, length);
+        }
+        
+        if (st == 1) {
+            translate([0, 0, baseplate_height_mm])
+            cube([10000, 10000, LAYER_HEIGHT*4], center=true);
         }
     }
 }
