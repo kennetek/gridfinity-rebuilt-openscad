@@ -20,10 +20,11 @@ use <../external/threads-scad/threads.scad>
  * @details Also can include lip when working with height values.
  * @param gridfinityUnit Gridfinity is normally on a base 7 system.
  * @param includeLipHeight Include the lip height as well.
- * @returns The final value in mm.
+ * @returns The final value in mm. Including base height.
  */
 function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
-    gridfinityUnit*7 + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
+    let(lip_height = includeLipHeight ? STACKING_LIP_SIZE.y : 0)
+    max(gridfinityUnit*7 + lip_height, BASE_HEIGHT);
 
 /**
  * @Summary Height in mm including fixed heights.
