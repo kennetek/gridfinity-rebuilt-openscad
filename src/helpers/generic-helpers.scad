@@ -30,7 +30,9 @@ module rounded_square(size, radius, center = false) {
     if (is_num(size)) {
         assert((size/2) > radius);
     } else {
-        assert((size.x/2) > radius && (size.y/2 > radius));
+        assert((size.x/2) > radius && (size.y/2 > radius),
+            str("Cannot create a rounded_square smaller than the corner radius (", radius,").")
+        );
         if (len(size) == 3) {
             assert(size.z > 0);
         }
@@ -143,7 +145,9 @@ function _affine_rotate_z(angle_z) = [
  * @returns An affine transformation matrix for use with `multmatrix()`
  */
 function affine_rotate(angle_vector) =
-    _affine_rotate_z(angle_vector.z) * _affine_rotate_y(angle_vector.y) * _affine_rotate_x(angle_vector.x);
+    _affine_rotate_z(angle_vector.z) *
+    _affine_rotate_y(angle_vector.y) *
+    _affine_rotate_x(angle_vector.x);
 
 /**
  * @brief Affine transformation matrix equivalent of `translate`
