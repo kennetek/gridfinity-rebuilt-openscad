@@ -274,7 +274,6 @@ h_skel = 1;
 // ****************************************
 
 d_wall2 = BASE_TOP_RADIUS-r_c1-d_clear*sqrt(2);
-d_magic = -2*d_clear-2*d_wall+d_div;
 
 // height of tab (yaxis, measured from inner wall)
 d_tabh = _tab_depth;
