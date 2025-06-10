@@ -67,7 +67,9 @@ function _affine_rotate_z(angle_z) = [
  * @returns An affine transformation matrix for use with `multmatrix()`
  */
 function affine_rotate(angle_vector) =
-    _affine_rotate_z(angle_vector.z) * _affine_rotate_y(angle_vector.y) * _affine_rotate_x(angle_vector.x);
+    _affine_rotate_z(angle_vector.z) *
+    _affine_rotate_y(angle_vector.y) *
+    _affine_rotate_x(angle_vector.x);
 
 /**
  * @brief Affine transformation matrix equivalent of `translate`

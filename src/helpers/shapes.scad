@@ -46,7 +46,9 @@ module rounded_square(size, radius, center = false) {
     if (is_num(size)) {
         assert((size/2) > radius);
     } else {
-        assert((size.x/2) > radius && (size.y/2 > radius));
+        assert((size.x/2) > radius && (size.y/2 > radius),
+            str("Cannot create a rounded_square smaller than the corner radius (", radius,").")
+        );
     }
     size_l = is_num(size) ? [size, size] : size;
     diameter_2d = 2 * [radius, radius];
