@@ -10,6 +10,7 @@ use <cutouts.scad>
 use <../helpers/generic-helpers.scad>
 use <../helpers/grid.scad>
 use <../helpers/shapes.scad>
+use <../helpers/grid.scad>
 use <../external/threads-scad/threads.scad>
 
 // ===== User Modules ===== //
@@ -78,17 +79,26 @@ function height (z,d=0,l=0,enable_zsnap=true) =
 // scoop_weight:    scoop toggle for all compartments. see cut()
 // place_tab:   tab suppression for all compartments. see "gridfinity-rebuilt-bins.scad"
 module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
-    for (i = [1:n_divx])
-    for (j = [1:n_divy])
-    {
-        if (
-            place_tab == 1 && (i != 1 || j != n_divy) // Top-Left Division
-        ) {
-            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, 5, scoop_weight);
-        }
-        else {
-            cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
-        }
+
+    element_dimensions = [
+        GRID_DIMENSIONS_MM.x * $gxx/n_divx ,
+        GRID_DIMENSIONS_MM.y * $gyy/n_divy
+    ];
+
+    compartment_size = [
+        element_dimensions.x - 2 * d_div,
+        element_dimensions.y - 2 * d_div,
+        $dh
+    ];
+
+    translate([0, 0, $dh + BASE_HEIGHT])
+    pattern_grid([n_divx, n_divy], element_dimensions, true, true) {
+        cut_compartment_auto(
+            compartment_size,
+            style_tab,
+            place_tab != 0,
+            scoop_weight
+        );
     }
 }
 
@@ -204,38 +214,6 @@ module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
 
     cut_move(x,y,w,h)
     cut_compartment_auto(size_mm, t, false, s);
-}
-
-
-// cuts equally sized bins over a given length at a specified position
-// bins_x:  number of bins along x-axis
-// bins_y:  number of bins along y-axis
-// len_x:   length (in gridfinity bases) along x-axis that the bins_x will fill
-// len_y:   length (in gridfinity bases) along y-axis that the bins_y will fill
-// pos_x:   start x position of the bins (left side)
-// pos_y:   start y position of the bins (bottom side)
-// style_tab:   Style of the tab used on the bins
-// scoop:   Weight of the scoop on the bottom of the bins
-// tab_width:   Width of the tab on the bins, in mm.
-// tab_height:  How far the tab will stick out over the bin, in mm. Default tabs fit 12mm labels, but for narrow bins can take up too much space over the opening. This setting allows 'slimmer' tabs for use with thinner labels, so smaller/narrower bins can be labeled and still keep a reasonable opening at the top. NOTE: The measurement is not 1:1 in mm, so a '3.5' value does not guarantee a tab that fits 3.5mm label tape. Use the 'measure' tool after rendering to check the distance between faces to guarantee it fits your needs.
-module cutEqualBins(bins_x=1, bins_y=1, len_x=1, len_y=1, pos_x=0, pos_y=0, style_tab=5, scoop=1, tab_width=d_tabw, tab_height=d_tabh) {
-    // Calculate width and height of each bin based on total length and number of bins
-    bin_width = len_x / bins_x;
-    bin_height = len_y / bins_y;
-
-    // Loop through each bin position in x and y direction
-    for (i = [0:bins_x-1]) {
-        for (j = [0:bins_y-1]) {
-            // Calculate the starting position for each bin
-            // Adjust position by adding pos_x and pos_y to shift the entire grid of bins as needed
-            bin_start_x = pos_x + i * bin_width;
-            bin_start_y = pos_y + j * bin_height;
-
-            // Call the cut module to create each bin with calculated position and dimensions
-            // Pass through the style_tab and scoop parameters
-            cut(bin_start_x, bin_start_y, bin_width, bin_height, style_tab, scoop, tab_width=tab_width, tab_height=tab_height);
-        }
-    }
 }
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
