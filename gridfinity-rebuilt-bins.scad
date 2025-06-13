@@ -63,8 +63,6 @@ c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
 cd = 10; // .1
 // cylinder height
 ch = 1;  //.1
-// spacing to lid
-c_depth = 1;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
@@ -117,13 +115,11 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
     } else if (cdivx > 0 && cdivy > 0) {
-
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
 gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
 //}
-
 
 // ===== EXAMPLES ===== //
 

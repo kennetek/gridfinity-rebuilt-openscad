@@ -110,10 +110,9 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
 //         set n_div values to 0 for a solid bin
 // cylinder_diameter: diameter of cutouts
 // cylinder_height: height of cutouts
-// coutout_depth: offset from top to solid part of container
 // orientation: orientation of cylinder cutouts (0 = x direction, 1 = y direction, 2 = z direction)
 // chamfer: chamfer around the top rim of the holes
-module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, coutout_depth=0, orientation=0, chamfer=0.5) {
+module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, orientation=0, chamfer=0.5) {
     rotation = (orientation == 0)
             ? [0, 90, 0]
             : (orientation == 1)
@@ -130,14 +129,9 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     gridx_mm = $gxx * l_grid;
     gridy_mm = $gyy * l_grid;
     padding = 2;
-    cutout_x = gridx_mm - d_wall * 2;
-    cutout_y = gridy_mm - d_wall * 2;
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
-        translate([0, 0, -coutout_depth]) {
-            linear_extrude(coutout_depth * 2)
-            rounded_square([cutout_x, cutout_y], BASE_TOP_RADIUS, true);
-
+        translate([0, 0, 0]) {
             pattern_grid([n_divx, n_divy], [(gridx_mm - padding) / n_divx, (gridy_mm - padding) / n_divy], true, true)
                 rotate(rotation)
                     union() {
