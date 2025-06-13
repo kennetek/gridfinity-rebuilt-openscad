@@ -31,7 +31,7 @@ use <src/core/gridfinity-rebuilt-holes.scad>
 // ===== PARAMETERS ===== //
 
 /* [Setup Parameters] */
-$fa = 8;
+$fa = 4;
 $fs = 0.25; // .01
 
 /* [General Settings] */
