@@ -113,23 +113,14 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
 // chamfer: chamfer around the top rim of the holes
 module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, chamfer=0.5) {
 
-    // When oriented vertically along the z axis, half of the cutting cylinder is in the air
-    cylinder_height = cylinder_height * 2;
+    element_dimensions = [
+        GRID_DIMENSIONS_MM.x * $gxx/n_divx ,
+        GRID_DIMENSIONS_MM.y * $gyy/n_divy
+    ];
 
-    gridx_mm = $gxx * l_grid;
-    gridy_mm = $gyy * l_grid;
-    padding = 2;
-
-    cut_move(x=0, y=0, w=$gxx, h=$gyy) {
-        translate([0, 0, 0]) {
-            pattern_grid([n_divx, n_divy], [(gridx_mm - padding) / n_divx, (gridy_mm - padding) / n_divy], true, true)
-                    union() {
-                        cylinder(d=cylinder_diameter, h=cylinder_height, center=true);
-                        if (chamfer > 0) {
-                            translate([0, 0, -chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter + 4 * chamfer, h=2 * chamfer);
-                        }
-                    };
-        }
+    translate([0, 0, $dh + BASE_HEIGHT])
+    pattern_grid([n_divx, n_divy], element_dimensions, true, true) {
+        cut_chamfered_cylinder(cylinder_diameter/2, cylinder_height, chamfer);
     }
 }
 
