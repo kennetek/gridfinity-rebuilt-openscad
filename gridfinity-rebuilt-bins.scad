@@ -21,14 +21,14 @@
  This **has no impact on stacking height, and can be ignored.**
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
-
 */
 
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/core/gridfinity-base.scad>
-
+use <src/core/bin.scad>
+use <src/core/cutouts.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -102,14 +102,14 @@ enable_thumbscrew = false;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
+height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
 
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
+gridfinityInit(gridx, gridy, height_mm, height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
 
     if (divx > 0 && divy > 0) {
-
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
     } else if (cdivx > 0 && cdivy > 0) {
@@ -117,6 +117,44 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
     }
 }
 gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
+}
+
+bin1 = new_bin(
+    grid_size = [gridx, gridy],
+    height_mm = height_mm,
+    fill_height = height_internal == 0? -1 : height_internal,
+    include_lip = style_lip == 0,
+    hole_options = hole_options,
+    only_corners = only_corners || half_grid,
+    thumbscrew = enable_thumbscrew,
+    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1)
+);
+
+echo(str(
+    "\n",
+    "Infill Dimensions: ", bin_get_infill_size_mm(bin1), "\n",
+    "Final Size*: ", bin_get_size_mm(bin1), "\n",
+    "  *Excludes Base Height & Stacking Lip Height"
+));
+
+compartment_height = bin_get_infill_size_mm(bin1).z;
+
+translate([gridx*50, 0, 0])
+bin_render(bin1) {
+    if (divx > 0 && divy > 0) {
+        subdivide_bin(bin1, [divx, divy]) {
+            cut_compartment_auto(
+                auto_compartment_size(compartment_height),
+                style_tab,
+                place_tab != 0,
+                scoop
+            );
+        }
+    } else if (cdivx > 0 && cdivy > 0) {
+        subdivide_bin(bin1, [cdivx, cdivy]) {
+            cut_chamfered_cylinder(cd/2, ch+TOLLERANCE, c_chamfer);
+        }
+    }
 }
 
 // ===== EXAMPLES ===== //
