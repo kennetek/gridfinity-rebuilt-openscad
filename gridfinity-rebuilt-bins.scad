@@ -123,7 +123,7 @@ gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hol
 
 // 3x3 even spaced grid
 /*
-gridfinityInit(3, 3, height(6), 0, 42) {
+gridfinityInit(3, 3, height(6), 0) {
 	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 0);
 }
 gridfinityBase([3, 3]);
@@ -131,7 +131,8 @@ gridfinityBase([3, 3]);
 
 // Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop.
 /*
-gridfinityInit(3, 3, height(6), 0, 42) {
+translate([100, 100, 0]){
+gridfinityInit(3, 3, height(6), 0) {
     cut(x=0, y=0, w=1.5, h=0.5, t=5, s=0);
     cut(0, 0.5, 1.5, 0.5, 5, 0);
     cut(0, 1, 1.5, 0.5, 5, 0);
@@ -143,7 +144,8 @@ gridfinityInit(3, 3, height(6), 0, 42) {
     cut(1.5, 0, 1.5, 5/3, 2);
     cut(1.5, 5/3, 1.5, 4/3, 4);
 }
-gridfinityBase([3, 3]);
+gridfinityBase([3, 3], hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
+}
 */
 
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin.
