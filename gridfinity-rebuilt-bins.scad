@@ -57,8 +57,6 @@ divy = 1;
 cdivx = 0;
 // number of cylindrical Y Divisions (mutually exclusive to Linear Compartments)
 cdivy = 0;
-// orientation
-c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
 // diameter of cylindrical cut outs
 cd = 10; // .1
 // cylinder height
@@ -115,7 +113,7 @@ gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
     } else if (cdivx > 0 && cdivy > 0) {
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, orientation=c_orientation, chamfer=c_chamfer);
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, chamfer=c_chamfer);
     }
 }
 gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);

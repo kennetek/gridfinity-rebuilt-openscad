@@ -110,21 +110,11 @@ module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
 //         set n_div values to 0 for a solid bin
 // cylinder_diameter: diameter of cutouts
 // cylinder_height: height of cutouts
-// orientation: orientation of cylinder cutouts (0 = x direction, 1 = y direction, 2 = z direction)
 // chamfer: chamfer around the top rim of the holes
-module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, orientation=0, chamfer=0.5) {
-    rotation = (orientation == 0)
-            ? [0, 90, 0]
-            : (orientation == 1)
-                ? [90, 0, 0]
-                : [0, 0, 0];
+module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, chamfer=0.5) {
 
     // When oriented vertically along the z axis, half of the cutting cylinder is in the air
-    // When oriented along the x or y axes, the entire height of the cylinder is cut out
-    cylinder_height = (orientation == 2) ? cylinder_height * 2 : cylinder_height;
-
-    // Chamfer is only enabled for vertical, since it doesn't make sense in other orientations
-    chamfer = (orientation == 2) ? chamfer : 0;
+    cylinder_height = cylinder_height * 2;
 
     gridx_mm = $gxx * l_grid;
     gridy_mm = $gyy * l_grid;
@@ -133,7 +123,6 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
         translate([0, 0, 0]) {
             pattern_grid([n_divx, n_divy], [(gridx_mm - padding) / n_divx, (gridy_mm - padding) / n_divy], true, true)
-                rotate(rotation)
                     union() {
                         cylinder(d=cylinder_diameter, h=cylinder_height, center=true);
                         if (chamfer > 0) {
