@@ -167,21 +167,17 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
         color("firebrick")
         translate([0, 0, BASE_HEIGHT])
         linear_extrude(fill_height_real)
-        rounded_square(foreach_add(grid_size_mm, -d_wall/2),
-                       BASE_TOP_RADIUS,
-                       center=true);
+        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
         children();
     }
 
     // Outer Wall
-    color("royalblue")
-    translate([0, 0, BASE_HEIGHT])
-    sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS)) {
-        if ($style_lip == 0) {
-            profile_wall(h);
-        } else {
-            profile_wall2(h);
-        }
+    // If no lip is present, the outer wall is handled by the inner fill.
+    if ($style_lip == 0) {
+        color("royalblue")
+        translate([0, 0, BASE_HEIGHT])
+        sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
+        profile_wall(h);
     }
 }
 // Function to include in the custom() module to individually slice bins
@@ -315,14 +311,6 @@ module profile_wall(height_mm) {
         translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
         square([d_wall, height_mm]);
     }
-}
-
-// lipless profile
-module profile_wall2(height_mm) {
-    assert(is_num(height_mm))
-    translate([BASE_TOP_RADIUS,0,0])
-    mirror([1,0,0])
-    square([d_wall, height_mm]);
 }
 
 module cut_move_unsafe(x, y, w, h) {
