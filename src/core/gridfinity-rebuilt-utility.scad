@@ -132,6 +132,7 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
 
 /**
  * @Summary Initialize A Gridfinity Bin
+ * @deprecated Use `new_bin` and `bin_render` instead.
  * @Details Creates the top portion of a bin, and sets some gloal variables.
  * @TODO: Remove dependence on global variables.
  * @param sl Lip style of this bin.
