@@ -53,6 +53,17 @@ function hf (z, gridz_define, style_lip) =
     ;
 
 /**
+ * @brief Ensure height is a multiple of 7.
+ * @param height_mm The Overall bin's height.
+ *                  Including the base!
+ * @returns height_mm, if it is a multiple of 7.
+ *          Otherwise, the next multiple of 7 from height_mm.
+ */
+function z_snap(height_mm) =
+    height_mm % 7 == 0 ? height_mm
+    : height_mm + 7 - height_mm % 7;
+
+/**
  * @brief Calculates the proper height for bins. Three Functions in One.
  * @details This does **not** include the baseplate height.
  * @param z Height value
@@ -62,13 +73,8 @@ function hf (z, gridz_define, style_lip) =
  * @returns Height in mm
  */
 function height (z,d=0,l=0,enable_zsnap=true) =
-    (
-    enable_zsnap ? (
-        (abs(hf(z,d,l))%7==0) ? hf(z,d,l) :
-        hf(z,d,l)+7-abs(hf(z,d,l))%7
-    )
-    :hf(z,d,l)
-    ) - BASE_HEIGHT;
+    let(total_height = enable_zsnap ? z_snap(hf(z,d,l)) : hf(z,d,l))
+    max(total_height - BASE_HEIGHT, 0);
 
 // Creates equally divided cutters for the bin
 //
