@@ -187,6 +187,11 @@ BASE_PROFILE = [
 ];
 
 /**
+ * @brief Maximum [x, y] values/size of the base.
+ */
+_base_profile_max_mm= BASE_PROFILE[3];
+
+/**
  * @Summary Corner radius of the top of the base.
  */
 BASE_TOP_RADIUS = 7.5 / 2;
@@ -207,15 +212,10 @@ BASE_TOP_DIMENSIONS = [41.5, 41.5];
 BASE_GAP_MM = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
 
 /**
- * @Summary Maximum [x,y] values/size of the base.
- */
-BASE_PROFILE_MAX = BASE_PROFILE[3];
-
-/**
  * @brief Height of the base profile.
  * @details Does **not** include the structure tying the bases together.
  */
-BASE_PROFILE_HEIGHT = BASE_PROFILE_MAX.y;
+BASE_PROFILE_HEIGHT = _base_profile_max_mm.y;
 
 /**
  * @Summary Height of the base.
@@ -227,7 +227,7 @@ BASE_HEIGHT = BASE_PROFILE_HEIGHT;
  * @Details This is also how much BASE_PROFILE needs to be translated
  *          to use `sweep_rounded(...)`.
  */
-BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - BASE_PROFILE_MAX.x;
+BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - _base_profile_max_mm.x;
 
 /**
  * @Summary Dimensions of the bottom of the base. [Length, Width]
@@ -237,8 +237,8 @@ BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - BASE_PROFILE_MAX.x;
 function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
     assert(is_list(top_dimensions) && len(top_dimensions) == 2
         && is_num(top_dimensions.x) && is_num(top_dimensions.y))
-    [top_dimensions.x - 2*BASE_PROFILE_MAX.x,
-    top_dimensions.y - 2*BASE_PROFILE_MAX.x];
+    top_dimensions
+    - 2*[_base_profile_max_mm.x, _base_profile_max_mm.x];
 
 // ***************
 // Gridfinity Refined Thumbscrew
