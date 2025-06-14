@@ -85,7 +85,9 @@ d_hole = 26;  // center-to-center distance between holes
 d_bottom = layer*(max(bottom_layer,1));
 x_l = l_grid/2;
 
-dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+BASE_HEIGHT : gridz-(enable_lip?3.8:0);
+dht = (gridz_define == 0) ? 7 * gridz
+    : (gridz_define == 1) ? gridz + BASE_HEIGHT
+    : gridz - (enable_lip ? 3.8 : 0);
 d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-BASE_HEIGHT;
 
 d_fo1 = 2*+BASE_TOP_RADIUS;

@@ -36,7 +36,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + h_bot + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
+    mmHeight + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -54,7 +54,7 @@ function hf (z, gridz_define, style_lip) =
 
 /**
  * @brief Calculates the proper height for bins. Three Functions in One.
- * @Details Critically, this does not include the baseplate height.
+ * @details This does **not** include the baseplate height.
  * @param z Height value
  * @param d gridz_define as explained in gridfinity-rebuilt-bins.scad
  * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
