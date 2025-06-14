@@ -219,8 +219,9 @@ BASE_PROFILE_HEIGHT = _base_profile_max_mm.y;
 
 /**
  * @Summary Height of the base.
+ * @details Includes the structure tying the bases together.
  */
-BASE_HEIGHT = BASE_PROFILE_HEIGHT;
+BASE_HEIGHT = BASE_PROFILE_HEIGHT + h_bot;
 
 /**
  * @Summary Corner radius of the bottom of the base.
