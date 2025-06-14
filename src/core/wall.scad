@@ -7,11 +7,38 @@
 include <standard.scad>
 use <../helpers/generic-helpers.scad>
 
+/*
+ * @brief Render a wall of the given size, with a stacking lip.
+ * @details Centered on x, y origin.  Bottom is at z == 0.
+ *          Adds ~STACKING_LIP_HEIGHT to the height of the bin.
+ *          Top is rounded, which reduces the height a bit.
+ * @param size [x, y, z] Size of the stacking lip. In mm.
+ */
+module render_wall(size) {
+    assert(
+        is_valid_3d(size)
+        && size.x > 0
+        && size.y > 0
+        && size.z >= 0
+    );
+
+    grid_size_mm = [size.x, size.y];
+
+    // Prevent the stacking lip from protruding too far down.
+    intersection() {
+        sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
+        _profile_wall(size.z);
+
+        linear_extrude(size.z + STACKING_LIP_HEIGHT)
+        square(grid_size_mm, center=true);
+    }
+}
+
 /**
  * @brief Stacking lip based on https://gridfinity.xyz/specification/
  * @details Also includes a support base.
  */
-module stacking_lip() {
+module _stacking_lip() {
     polygon(STACKING_LIP);
 }
 
@@ -20,7 +47,7 @@ module stacking_lip() {
  * @details Based on https://gridfinity.xyz/specification/
  *          Also includes a support base.
  */
-module stacking_lip_filleted() {
+module _stacking_lip_filleted() {
     // Replace 2D edge with a radius.
     // Method used: tangent, tangent, radius algorithm
     // See:  https://math.stackexchange.com/questions/797828/calculate-center-of-circle-tangent-to-two-lines-in-space
@@ -58,7 +85,7 @@ module stacking_lip_filleted() {
 
         // Stacking lip with cutout for circle to fit in
         difference(){
-            polygon(STACKING_LIP);
+            _stacking_lip();
             translate(concat(to_fillet, [0]))
             circle(r = intersection_distance);
         }
@@ -68,13 +95,17 @@ module stacking_lip_filleted() {
 /**
  * @brief External wall profile, with a stacking lip.
  * @details Translated so a 90 degree rotation produces the expected outside radius.
+ * @param height_mm Height of the wall.  Excludes STACKING_LIP_HEIGHT, but **includes** STACKING_LIP_SUPPORT_HEIGHT.
  */
-module profile_wall(height_mm) {
-    assert(is_num(height_mm))
+module _profile_wall(height_mm) {
+    assert(is_num(height_mm)  && height_mm >=0 )
     translate([BASE_TOP_RADIUS - STACKING_LIP_SIZE.x, 0, 0]){
         translate([0, height_mm, 0])
-        stacking_lip_filleted();
-        translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
-        square([d_wall, height_mm]);
+        _stacking_lip_filleted();
+
+        if(height_mm > 0) {
+            translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
+            square([d_wall, height_mm]);
+        }
     }
 }
