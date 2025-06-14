@@ -115,6 +115,35 @@ function foreach_add(list, to_add) =
 function vector_scale(vector1, vector2) = assert(len(vector1) == len(vector2))
     [for(i=[0:len(vector1)-1]) vector1[i] * vector2[i] ];
 
+
+/*
+ * @brief If the given vector is a valid 2d vector.
+ * @details Only validates the first two elements.
+ *          The list could have other things after those.
+ */
+function is_valid_2d(vector) =
+    is_list(vector)
+    && len(vector) >= 2
+    && is_num(vector[0])
+    && is_num(vector[1]);
+
+/*
+ * @brief If the given vector is a valid 3d vector.
+ * @details This just validates the first three elements.
+ *          The list could have other things after those.
+ */
+function is_valid_3d(vector) =
+    is_valid_2d(vector)
+    && len(vector) >= 3
+    && is_num(vector[2]);
+
+/*
+ * @brief If all the elements in a vector are greater than zero.
+ */
+function is_positive(vector) =
+    is_list(vector)
+    && min(vector) > 0;
+
 /**
  * @breif Simple helper to print affine matrices in an easier to read manner.
  * @details If a multidimensional matrix is provided, then each item is printed to a separate line.
