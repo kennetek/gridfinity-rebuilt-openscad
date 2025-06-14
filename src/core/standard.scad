@@ -212,9 +212,15 @@ BASE_GAP_MM = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
 BASE_PROFILE_MAX = BASE_PROFILE[3];
 
 /**
+ * @brief Height of the base profile.
+ * @details Does **not** include the structure tying the bases together.
+ */
+BASE_PROFILE_HEIGHT = BASE_PROFILE_MAX.y;
+
+/**
  * @Summary Height of the base.
  */
-BASE_HEIGHT = BASE_PROFILE_MAX.y;
+BASE_HEIGHT = BASE_PROFILE_HEIGHT;
 
 /**
  * @Summary Corner radius of the bottom of the base.

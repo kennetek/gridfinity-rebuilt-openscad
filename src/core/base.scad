@@ -39,7 +39,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     // Top which ties all bases together
     if (final_cut) {
-        translate([0, 0, BASE_HEIGHT])
+        translate([0, 0, BASE_PROFILE_HEIGHT])
         linear_extrude(h_bot)
         rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
     }
@@ -91,10 +91,9 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         grid_dimensions.y * grid_size.y
     ] - BASE_GAP_MM;
 
-
     //Bridging structure to tie the bases together
     difference() {
-        translate([0, 0, BASE_HEIGHT-top_bottom_thickness])
+        translate([0, 0, BASE_PROFILE_HEIGHT-top_bottom_thickness])
         linear_extrude(top_bottom_thickness)
         rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
 
@@ -138,7 +137,7 @@ module base_polygon() {
     translated_line = foreach_add(BASE_PROFILE, [BASE_BOTTOM_RADIUS, 0]);
     solid_profile = concat(translated_line,
         [
-            [0, BASE_PROFILE_MAX.y],  // Go in to form a solid polygon
+            [0, BASE_PROFILE_HEIGHT],  // Go in to form a solid polygon
             [0, 0],  // Needed since start has been translated.
         ]
     );
@@ -147,6 +146,7 @@ module base_polygon() {
 
 /**
  * @brief A single solid Gridfinity base.
+ * @warning Does not include the structure tying the bases together.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  */
 module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
@@ -164,8 +164,9 @@ module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
         sweep_rounded(sweep_inner)
             base_polygon();
 
-        translate([0, 0, BASE_HEIGHT/2])
-        cube([cube_size.x, cube_size.y, BASE_HEIGHT], center=true);
+        //Inner fill
+        translate([0, 0, BASE_PROFILE_HEIGHT/2])
+        cube([cube_size.x, cube_size.y, BASE_PROFILE_HEIGHT], center=true);
     }
 }
 
@@ -176,7 +177,7 @@ module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
 module _base_thumbscrew() {
     ScrewThread(
         1.01 * BASE_THUMBSCREW_OUTER_DIAMETER + 1.25 * 0.4,
-        BASE_HEIGHT,
+        BASE_PROFILE_HEIGHT,
         BASE_THUMBSCREW_PITCH
     );
 }
@@ -260,7 +261,7 @@ module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TO
 module _base_preview_fix() {
     if($preview){
         cube([10000, 10000, 0.01], center=true);
-        translate([0, 0, BASE_HEIGHT])
+        translate([0, 0, BASE_PROFILE_HEIGHT])
         cube([10000, 10000, 0.01], center=true);
     }
 }

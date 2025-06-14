@@ -90,7 +90,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
     // Lower the bin start point by this amount.
     // Made up for in bin height.
     // Ensures divider walls smoothly transition to the bottom
-    lower_by_mm = BASE_HEIGHT + bottom_layer;
+    lower_by_mm = BASE_PROFILE_HEIGHT + bottom_layer;
 
     difference() {
         translate([0, 0, -lower_by_mm])
@@ -100,7 +100,7 @@ module gridfinityLite(gridx, gridy, gridz, gridz_define, style_lip, enable_zsnap
         // Underside of the base. Keep out zone.
         render()
         difference() {
-            cube([gridx*grid_dimensions.x, gridy*grid_dimensions.y, BASE_HEIGHT*2], center=true);
+            cube([gridx*grid_dimensions.x, gridy*grid_dimensions.y, BASE_PROFILE_HEIGHT*2], center=true);
             gridfinityBase([gridx, gridy], grid_dimensions, hole_options=style_hole, only_corners=only_corners);
         }
     }

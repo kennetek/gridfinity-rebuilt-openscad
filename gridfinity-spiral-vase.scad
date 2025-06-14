@@ -183,7 +183,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
                 pattern_circular(4){
                     rotate([0,0,45])
                     translate([-wall_thickness/2, 3, 0])
-                    cube([wall_thickness, l_grid, BASE_PROFILE_MAX.y]);
+                    cube([wall_thickness, l_grid, BASE_PROFILE_HEIGHT]);
 
                     if (enable_holes) {
                         block_magnet_blank(wall_thickness);
@@ -192,7 +192,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
                 base_solid();
             }
             if (style_base != 4) {
-                translate([0, 0, BASE_PROFILE_MAX.y])
+                translate([0, 0, BASE_PROFILE_HEIGHT])
                 linear_extrude(bottom_thickness)
                 profile_x(0.1);
             }
@@ -206,7 +206,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
         // Tricks slicer into not ignoring the center.
         rotate([0, 0, 90])
         translate([0, 0, bottom_thickness])
-        cube([0.005, 2*l_grid, 2*BASE_HEIGHT]);
+        cube([0.005, 2*l_grid, 2*BASE_PROFILE_HEIGHT]);
     }
 }
 
@@ -217,18 +217,18 @@ module block_magnet_blank(o = 0, half = true) {
     difference() {
         hull() {
             cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
-            cylinder(r = magnet_radius-(BASE_HEIGHT+0.1-MAGNET_HOLE_DEPTH), h = (BASE_HEIGHT+0.1)*2, center = true);
+            cylinder(r = magnet_radius-(BASE_PROFILE_HEIGHT+0.1-MAGNET_HOLE_DEPTH), h = (BASE_PROFILE_HEIGHT+0.1)*2, center = true);
         }
         if (half)
         mirror([0,0,1])
-        cylinder(r=magnet_radius*2, h = (BASE_HEIGHT+0.1)*4);
+        cylinder(r=magnet_radius*2, h = (BASE_PROFILE_HEIGHT+0.1)*4);
     }
 }
 
 module block_pinch(height_mm) {
     assert(is_num(height_mm));
 
-    translate([0, 0, -BASE_HEIGHT])
+    translate([0, 0, -BASE_PROFILE_HEIGHT])
     block_wall(gridx, gridy, l_grid) {
         translate([d_wall2-nozzle*2-d_clear*2,0,0])
         profile_wall(height_mm);
@@ -341,7 +341,7 @@ module block_funnel_outside() {
 module block_vase_base() {
     difference() {
         // base
-        translate([0,0,-BASE_HEIGHT]) {
+        translate([0,0,-BASE_PROFILE_HEIGHT]) {
             translate([0,0,-0.1])
             color("firebrick")
             block_bottom(d_bottom, gridx, gridy, l_grid);
