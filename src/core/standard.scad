@@ -150,6 +150,12 @@ STACKING_LIP_LINE = [
  */
 STACKING_LIP_SIZE = STACKING_LIP_LINE[3];
 
+/**
+ * @brief Height of the stacking lip.
+ * @details Height does **not** include STACKING_LIP_SUPPORT_HEIGHT.
+ */
+STACKING_LIP_HEIGHT = STACKING_LIP_SIZE.y;
+
 _stacking_lip_support_angle = 45;
 
 /**

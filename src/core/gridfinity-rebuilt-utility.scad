@@ -24,7 +24,7 @@ use <../external/threads-scad/threads.scad>
  * @returns The final value in mm. Including base height.
  */
 function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
-    let(lip_height = includeLipHeight ? STACKING_LIP_SIZE.y : 0)
+    let(lip_height = includeLipHeight ? STACKING_LIP_HEIGHT : 0)
     max(gridfinityUnit*7 + lip_height, BASE_HEIGHT);
 
 /**
@@ -35,7 +35,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_SIZE.y : 0);
+    mmHeight + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_HEIGHT : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -47,7 +47,7 @@ function includingFixedHeights(mmHeight, includeLipHeight = false) =
 function hf (z, gridz_define, style_lip) =
         gridz_define==0 ? fromGridfinityUnits(z, style_lip==2) :
         gridz_define==1 ? includingFixedHeights(z, style_lip==2) :
-        gridz_define==2 ? z + (style_lip==2 ? STACKING_LIP_SIZE.y : 0)  :
+        gridz_define==2 ? z + (style_lip==2 ? STACKING_LIP_HEIGHT : 0)  :
         assert(false, "gridz_define must be 0, 1, or 2.")
     ;
 
@@ -160,8 +160,7 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
     if ($style_lip == 0) {
         color("royalblue")
         translate([0, 0, BASE_HEIGHT])
-        sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
-        profile_wall(h);
+        render_wall(concat(grid_size_mm, h));
     }
 }
 
