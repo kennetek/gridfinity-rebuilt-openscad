@@ -10,6 +10,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/shapes.scad>
 
 // ===== PARAMETERS ===== //
 

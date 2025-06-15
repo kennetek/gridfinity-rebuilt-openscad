@@ -6,6 +6,7 @@
  */
 
 use <../helpers/generic-helpers.scad>
+use <../helpers/shapes.scad>
 
 // ****************************************
 // Baseplate constants

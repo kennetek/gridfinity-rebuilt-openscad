@@ -10,6 +10,7 @@ include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/shapes.scad>
 
 // ===== PARAMETERS ===== //
 
