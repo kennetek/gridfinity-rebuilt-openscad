@@ -25,6 +25,7 @@ module render_wall(size) {
     grid_size_mm = [size.x, size.y];
 
     // Prevent the stacking lip from protruding too far down.
+    color("royalblue")
     intersection() {
         sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
         _profile_wall(size.z);

@@ -347,7 +347,6 @@ module block_vase_base() {
             translate([0,0,-0.1])
             color("firebrick")
             block_bottom(d_bottom, gridx, gridy, l_grid);
-            color("royalblue")
             block_wall(gridx, gridy, l_grid) {
                 if (enable_lip) profile_wall($dh);
                 else profile_wall2($dh);

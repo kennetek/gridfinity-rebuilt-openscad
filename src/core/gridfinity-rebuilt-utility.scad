@@ -165,7 +165,6 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
     // Outer Wall
     // If no lip is present, the outer wall is handled by the inner fill.
     if ($style_lip == 0) {
-        color("royalblue")
         translate([0, 0, BASE_HEIGHT])
         render_wall(concat(grid_size_mm, h));
     }
