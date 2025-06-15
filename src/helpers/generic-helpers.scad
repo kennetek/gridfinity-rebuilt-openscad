@@ -56,13 +56,6 @@ module _internal_rounded_square_2d(size, radius, center) {
     }
 }
 
-/**
- * @deprecated Use rounded_square(...)
- */
-module rounded_rectangle(length, width, height, rad) {
-    rounded_square([length, width, height], rad, center=true);
-}
-
 module copy_mirror(vec=[0,1,0]) {
     children();
     if (vec != [0,0,0])
