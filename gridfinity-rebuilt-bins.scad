@@ -21,17 +21,19 @@
  This **has no impact on stacking height, and can be ignored.**
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
-
 */
 
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
+use <src/core/gridfinity-base.scad>
+use <src/core/bin.scad>
+use <src/core/cutouts.scad>
 
 // ===== PARAMETERS ===== //
 
 /* [Setup Parameters] */
-$fa = 8;
+$fa = 4;
 $fs = 0.25; // .01
 
 /* [General Settings] */
@@ -55,14 +57,10 @@ divy = 1;
 cdivx = 0;
 // number of cylindrical Y Divisions (mutually exclusive to Linear Compartments)
 cdivy = 0;
-// orientation
-c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
 // diameter of cylindrical cut outs
 cd = 10; // .1
 // cylinder height
 ch = 1;  //.1
-// spacing to lid
-c_depth = 1;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
@@ -104,30 +102,66 @@ enable_thumbscrew = false;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
 grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
+height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
 
 // ===== IMPLEMENTATION ===== //
 
-//color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
+color("tomato") {
+gridfinityInit(gridx, gridy, height_mm, height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
 
     if (divx > 0 && divy > 0) {
-
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
 
     } else if (cdivx > 0 && cdivy > 0) {
-
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, chamfer=c_chamfer);
     }
 }
 gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
-//}
+}
 
+bin1 = new_bin(
+    grid_size = [gridx, gridy],
+    height_mm = height_mm,
+    fill_height = height_internal == 0? -1 : height_internal,
+    include_lip = style_lip == 0,
+    hole_options = hole_options,
+    only_corners = only_corners || half_grid,
+    thumbscrew = enable_thumbscrew,
+    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1)
+);
+
+echo(str(
+    "\n",
+    "Infill Dimensions: ", bin_get_infill_size_mm(bin1), "\n",
+    "Final Size*: ", bin_get_size_mm(bin1), "\n",
+    "  *Excludes Base Height & Stacking Lip Height"
+));
+
+compartment_height = bin_get_infill_size_mm(bin1).z;
+
+translate([gridx*50, 0, 0])
+bin_render(bin1) {
+    if (divx > 0 && divy > 0) {
+        subdivide_bin(bin1, [divx, divy]) {
+            cut_compartment_auto(
+                auto_compartment_size(compartment_height),
+                style_tab,
+                place_tab != 0,
+                scoop
+            );
+        }
+    } else if (cdivx > 0 && cdivy > 0) {
+        subdivide_bin(bin1, [cdivx, cdivy]) {
+            cut_chamfered_cylinder(cd/2, ch+TOLLERANCE, c_chamfer);
+        }
+    }
+}
 
 // ===== EXAMPLES ===== //
 
 // 3x3 even spaced grid
 /*
-gridfinityInit(3, 3, height(6), 0, 42) {
+gridfinityInit(3, 3, height(6), 0) {
 	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 0);
 }
 gridfinityBase([3, 3]);
@@ -135,7 +169,8 @@ gridfinityBase([3, 3]);
 
 // Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop.
 /*
-gridfinityInit(3, 3, height(6), 0, 42) {
+translate([100, 100, 0]){
+gridfinityInit(3, 3, height(6), 0) {
     cut(x=0, y=0, w=1.5, h=0.5, t=5, s=0);
     cut(0, 0.5, 1.5, 0.5, 5, 0);
     cut(0, 1, 1.5, 0.5, 5, 0);
@@ -147,7 +182,8 @@ gridfinityInit(3, 3, height(6), 0, 42) {
     cut(1.5, 0, 1.5, 5/3, 2);
     cut(1.5, 5/3, 1.5, 4/3, 4);
 }
-gridfinityBase([3, 3]);
+gridfinityBase([3, 3], hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
+}
 */
 
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin.
