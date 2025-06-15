@@ -93,13 +93,13 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
 
     //Bridging structure to tie the bases together
     difference() {
-        translate([0, 0, BASE_PROFILE_HEIGHT-top_bottom_thickness])
+        translate([0, 0, BASE_PROFILE_HEIGHT])
         linear_extrude(top_bottom_thickness)
         rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
 
         pattern_grid(grid_size, grid_dimensions, true, true)
-        translate([0, 0, top_bottom_thickness])
-        base_solid(individual_base_size_mm);
+        translate([0, 0, top_bottom_thickness+TOLLERANCE])
+        base_solid(individual_base_size_mm- [d_wall, d_wall]);
     }
 
     render()
