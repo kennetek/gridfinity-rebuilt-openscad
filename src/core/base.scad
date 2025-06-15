@@ -37,6 +37,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     ] - BASE_GAP_MM;
 
     // Top which ties all bases together
+    color("RosyBrown")
     translate([0, 0, BASE_PROFILE_HEIGHT])
     linear_extrude(h_bot)
     rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
@@ -89,6 +90,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
     ] - BASE_GAP_MM;
 
     //Bridging structure to tie the bases together
+    color("RosyBrown")
     difference() {
         translate([0, 0, BASE_PROFILE_HEIGHT])
         linear_extrude(top_bottom_thickness)
