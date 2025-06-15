@@ -17,13 +17,12 @@ use <../external/threads-scad/threads.scad>
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), off=0, final_cut=true, only_corners=false, thumbscrew=false) {
+module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_options=bundle_hole_options(), only_corners=false, thumbscrew=false) {
     assert(is_list(grid_dimensions) && len(grid_dimensions) == 2 &&
         grid_dimensions.x > 0 && grid_dimensions.y > 0);
     assert(is_list(grid_size) && len(grid_size) == 2 &&
         grid_size.x > 0 && grid_size.y > 0);
     assert(
-        is_bool(final_cut) &&
         is_bool(only_corners) &&
         is_bool(thumbscrew)
     );
@@ -38,11 +37,9 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     ] - BASE_GAP_MM;
 
     // Top which ties all bases together
-    if (final_cut) {
-        translate([0, 0, BASE_PROFILE_HEIGHT])
-        linear_extrude(h_bot)
-        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
-    }
+    translate([0, 0, BASE_PROFILE_HEIGHT])
+    linear_extrude(h_bot)
+    rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
 
     if(only_corners) {
         difference(){
@@ -57,13 +54,13 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
                 }
             }
 
-            _base_holes(hole_options, off, grid_size_mm);
+            _base_holes(hole_options, grid_size_mm);
             _base_preview_fix();
         }
     }
     else {
         pattern_grid(grid_size, grid_dimensions, true, true)
-        block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
+        block_base(hole_options, individual_base_size_mm, thumbscrew=thumbscrew);
     }
 }
 
@@ -108,10 +105,10 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
             union() {
                 pattern_grid(grid_size, grid_dimensions, true, true)
                 base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
-                _base_holes(hole_options, -wall_thickness, grid_size_mm);
+                _base_holes(hole_options, grid_size_mm, -wall_thickness);
             }
 
-            _base_holes(hole_options, 0, grid_size_mm);
+            _base_holes(hole_options, grid_size_mm);
             _base_preview_fix();
         }
     }
@@ -120,9 +117,9 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
             difference() {
                 union() {
                     base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
-                    _base_holes(hole_options, -wall_thickness, individual_base_size_mm);
+                    _base_holes(hole_options, individual_base_size_mm, -wall_thickness);
                 }
-                _base_holes(hole_options, 0, individual_base_size_mm);
+                _base_holes(hole_options, individual_base_size_mm);
                 _base_preview_fix();
             }
         }
@@ -185,10 +182,11 @@ module _base_thumbscrew() {
 /**
  * @brief Internal Code. Generates the 4 holes for a single base.
  * @details Need this fancy code to support refined holes and non-square bases.
+ * @param top_dimensions [length, width] of a single Gridfinity base.
  * @param hole_options @see bundle_hole_options
  * @param offset @see block_base_hole.offset
  */
-module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
+module _base_holes(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, offset=0) {
     hole_position = foreach_add(
         base_bottom_dimensions(top_dimensions)/2,
         -HOLE_DISTANCE_FROM_BOTTOM_EDGE
@@ -208,11 +206,10 @@ module _base_holes(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS) {
 /**
  * @brief A single Gridfinity base.  With holes (if set).
  * @param hole_options @see block_base_hole.hole_options
- * @param offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
-module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
+module block_base(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
     assert(is_list(top_dimensions) && len(top_dimensions) == 2);
     assert(is_bool(thumbscrew));
 
@@ -224,7 +221,7 @@ module block_base(hole_options, offset=0, top_dimensions=BASE_TOP_DIMENSIONS, th
         if (thumbscrew) {
             _base_thumbscrew();
         }
-        _base_holes(hole_options, offset, top_dimensions);
+        _base_holes(hole_options, top_dimensions);
         _base_preview_fix();
     }
 }
