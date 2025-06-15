@@ -9,51 +9,30 @@ function is_even(number) = (number%2)==0;
 
 /**
  * @brief Create `square`, with rounded corners.
- * @param size Same as `square`.  See details for differences.
+ * @param size Same as `square`.
  * @param radius Radius of the corners. 0 is the same as just calling `square`
  * @param center Same as `square`.
- * @details "size" accepts both the standard number or a 2d vector the same as `square`.
- *          However, if passed a 3d vector, this will apply a `linear_extrude` to the resulting shape.
  */
 module rounded_square(size, radius, center = false) {
     assert(is_num(size) ||
         (is_list(size) && (
-            (len(size) == 2 && is_num(size.x) && is_num(size.y)) ||
-            (len(size) == 3 && is_num(size.x) && is_num(size.y) && is_num(size.z))
+            (len(size) == 2 && is_num(size.x) && is_num(size.y))
         ))
     );
-    assert(is_num(radius) && radius >= 0 && is_bool(center));
+    assert(is_num(radius) && radius >= 0);
+    assert(is_bool(center));
 
     // Make sure something is produced.
     if (is_num(size)) {
         assert((size/2) > radius);
     } else {
         assert((size.x/2) > radius && (size.y/2 > radius));
-        if (len(size) == 3) {
-            assert(size.z > 0);
-        }
     }
+    size_l = is_num(size) ? [size, size] : size;
+    diameter_2d = 2 * [radius, radius];
 
-    if (is_list(size) && len(size) == 3) {
-        linear_extrude(size.z)
-        _internal_rounded_square_2d(size, radius, center);
-    } else {
-        _internal_rounded_square_2d(size, radius, center);
-    }
-}
-
-/**
- * @brief Internal module. Do not use. May be changed/removed at any time.
- */
-module _internal_rounded_square_2d(size, radius, center) {
-    diameter = 2*radius;
-    if (is_list(size)) {
-        offset(radius)
-        square([size.x-diameter, size.y-diameter], center = center);
-    } else {
-        offset(radius)
-        square(size-diameter, center = center);
-    }
+    offset(radius)
+    square(size_l - diameter_2d, center = center);
 }
 
 module copy_mirror(vec=[0,1,0]) {
