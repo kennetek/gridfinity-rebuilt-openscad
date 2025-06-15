@@ -274,7 +274,8 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     // Top which ties all bases together
     if (final_cut) {
         translate([0, 0, BASE_HEIGHT])
-        rounded_square([grid_size_mm.x, grid_size_mm.y, h_bot], BASE_TOP_RADIUS, center=true);
+        linear_extrude(h_bot)
+        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
     }
 
     if(only_corners) {
@@ -331,7 +332,8 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
     //Bridging structure to tie the bases together
     difference() {
         translate([0, 0, BASE_HEIGHT-top_bottom_thickness])
-        rounded_square([grid_size_mm.x, grid_size_mm.y, top_bottom_thickness], BASE_TOP_RADIUS, center=true);
+        linear_extrude(top_bottom_thickness)
+        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
 
         pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
         translate([0, 0, top_bottom_thickness])

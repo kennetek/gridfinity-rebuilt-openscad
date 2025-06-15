@@ -482,7 +482,8 @@ module transform_scoop() {
 
 module block_vase(h = d_height*2) {
     translate([0,0,-0.1])
-    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h], r_base+0.01-nozzle/2, center=true);
+    linear_extrude(h)
+    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle], r_base+0.01-nozzle/2, center=true);
 }
 
 module profile_x(x_f = 3) {
