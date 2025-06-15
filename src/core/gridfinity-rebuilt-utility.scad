@@ -7,6 +7,7 @@
 include <standard.scad>
 use <gridfinity-rebuilt-holes.scad>
 use <../helpers/generic-helpers.scad>
+use <../helpers/shapes.scad>
 use <../external/threads-scad/threads.scad>
 
 // ===== User Modules ===== //

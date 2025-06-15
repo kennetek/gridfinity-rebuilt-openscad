@@ -7,34 +7,6 @@ function clp(x,a,b) = min(max(x,a),b);
 
 function is_even(number) = (number%2)==0;
 
-/**
- * @brief Create `square`, with rounded corners.
- * @param size Same as `square`.
- * @param radius Radius of the corners. 0 is the same as just calling `square`
- * @param center Same as `square`.
- */
-module rounded_square(size, radius, center = false) {
-    assert(is_num(size) ||
-        (is_list(size) && (
-            (len(size) == 2 && is_num(size.x) && is_num(size.y))
-        ))
-    );
-    assert(is_num(radius) && radius >= 0);
-    assert(is_bool(center));
-
-    // Make sure something is produced.
-    if (is_num(size)) {
-        assert((size/2) > radius);
-    } else {
-        assert((size.x/2) > radius && (size.y/2 > radius));
-    }
-    size_l = is_num(size) ? [size, size] : size;
-    diameter_2d = 2 * [radius, radius];
-
-    offset(radius)
-    square(size_l - diameter_2d, center = center);
-}
-
 module copy_mirror(vec=[0,1,0]) {
     children();
     if (vec != [0,0,0])
