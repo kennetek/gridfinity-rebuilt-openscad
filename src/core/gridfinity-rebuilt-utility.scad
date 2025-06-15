@@ -121,7 +121,8 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
         translate([0, 0, -coutout_depth]) {
-            rounded_rectangle(cutout_x, cutout_y, coutout_depth * 2, r_base);
+            linear_extrude(coutout_depth * 2)
+            rounded_square([cutout_x, cutout_y], r_base, true);
 
             pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding) / n_divx, sy=(gridy_mm - padding) / n_divy)
                 rotate(rotation)
