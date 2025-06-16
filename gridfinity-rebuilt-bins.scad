@@ -47,21 +47,19 @@ gridz = 6; //.1
 // Half grid sized bins.  Implies "only corners".
 half_grid = false;
 
-/* [Linear Compartments] */
+/* [Compartments] */
 // number of X Divisions (set to zero to have solid bin)
 divx = 1;
 // number of Y Divisions (set to zero to have solid bin)
 divy = 1;
+// Leave zero for default. Units: mm
+depth = 0;  //.1
 
 /* [Cylindrical Compartments] */
-// number of cylindrical X Divisions (mutually exclusive to Linear Compartments)
-cdivx = 0;
-// number of cylindrical Y Divisions (mutually exclusive to Linear Compartments)
-cdivy = 0;
+// Use this instead of bins
+cut_cylinders = false;
 // diameter of cylindrical cut outs
 cd = 10; // .1
-// cylinder height
-ch = 1;  //.1
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
@@ -73,7 +71,7 @@ height_internal = 0;
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
 
-/* [Features] */
+/* [Compartment Features] */
 // the type of tabs
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // which divisions have tabs
@@ -124,18 +122,17 @@ echo(str(
 ));
 
 bin_render(bin1) {
-    if (divx > 0 && divy > 0) {
-        bin_subdivide(bin1, [divx, divy]) {
+    bin_subdivide(bin1, [divx, divy]) {
+        depth_real = cgs(height=depth).z;
+        if (cut_cylinders) {
+            cut_chamfered_cylinder(cd/2, depth_real, c_chamfer);
+        } else {
             cut_compartment_auto(
-                cgs(),
+                cgs(height=depth),
                 style_tab,
                 place_tab != 0,
                 scoop
             );
-        }
-    } else if (cdivx > 0 && cdivy > 0) {
-        bin_subdivide(bin1, [cdivx, cdivy]) {
-            cut_chamfered_cylinder(cd/2, ch+TOLLERANCE, c_chamfer);
         }
     }
 }
