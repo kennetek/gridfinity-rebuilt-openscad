@@ -79,7 +79,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
     assert(is_list(grid_size) && len(grid_size) == 2 && grid_size.x > 0 && grid_size.y > 0);
     assert(is_num(wall_thickness) && wall_thickness > 0);
-    assert(is_num(top_bottom_thickness) && top_bottom_thickness > 0);
+    assert(is_num(top_bottom_thickness) && top_bottom_thickness >= 0);
     assert(is_bool(only_corners));
 
     individual_base_size_mm = grid_dimensions - BASE_GAP_MM;
@@ -244,7 +244,7 @@ module block_base(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=f
 module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TOP_DIMENSIONS) {
     assert(is_num(wall_thickness) && wall_thickness > 0);
     assert(is_num(bottom_thickness)
-        && bottom_thickness > 0
+        && bottom_thickness >= 0
         && bottom_thickness <= BASE_PROFILE_HEIGHT);
     assert(is_valid_2d(top_dimensions)
            && min(top_dimensions) > 2 * BASE_TOP_RADIUS,
@@ -281,6 +281,7 @@ module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TO
         }
 
         //Bottom
+        if (bottom_thickness > 0)
         if(optimized_bottom){
             translate([0, 0, bottom_thickness/2])
             cube(concat(cube_size, bottom_thickness), center=true);
