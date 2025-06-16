@@ -1,19 +1,22 @@
 
 
+// minimum wall thickness
+d_wall = 0.95;
+
+// internal fillet radius
+r_f2 = 2.8;
+
+// width of divider between compartments
+d_div = 1.2;
 
 /**
  * @brief Size of a single gridfinity unit. [Length, Width] In millimeters.
  */
 GRID_DIMENSIONS_MM = [42, 42];
 
-/**
- * @deprecated Use GRID_DIMENSIONS_MM instead.
- */
-l_grid = GRID_DIMENSIONS_MM.x;
-
 // Tollerance to make sure cuts don't leave a sliver behind,
 // and that items are properly connected to each other.
-TOLLERANCE = 0.01;
+TOLLERANCE = 0.02;
 
 // ****************************************
 // Magnet / Screw Hole Constants
@@ -54,15 +57,6 @@ BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS = 5/2;
 BASEPLATE_SCREW_COUNTERBORE_RADIUS = 5.5/2;
 BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
 
-// ****************************************
-
-// internal fillet radius
-r_f2 = 2.8;
-
-// width of divider between compartments
-d_div = 1.2;
-// minimum wall thickness
-d_wall = 0.95;
 // ****************************************
 // Tab Constants
 // Arbitrarily chosen.
@@ -289,3 +283,8 @@ d_tabh = _tab_depth;
 
 // angle of tab
 a_tab = _tab_support_angle;
+
+/**
+ * @deprecated Use GRID_DIMENSIONS_MM instead.
+ */
+l_grid = GRID_DIMENSIONS_MM.x;
