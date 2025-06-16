@@ -200,9 +200,9 @@ module bin_render_lite(bin, bottom_thickness) {
 
     // Deliberately overlapping with the bridging structure.
     // Lite bases use a thinner structure.
-    // h_bot makes up for said overlap.
+    // BASE_BRIDGE_HEIGHT makes up for said overlap.
     translate([0, 0, BASE_PROFILE_HEIGHT])
-    render_wall(bin_get_size_mm(bin) + [0, 0, h_bot]);
+    render_wall(bin_get_size_mm(bin) + [0, 0, BASE_BRIDGE_HEIGHT]);
 
     // While not required, the base cutout will not show correctly in preview without this.
     render()
