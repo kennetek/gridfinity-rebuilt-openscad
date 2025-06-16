@@ -232,7 +232,7 @@ module block_pinch(height_mm) {
 
     translate([0, 0, -BASE_PROFILE_HEIGHT])
     block_wall(gridx, gridy, l_grid) {
-        translate([d_wall2-nozzle*2-d_clear*2,0,0])
+        translate([d_wall2-nozzle*2-TOLLERANCE*2,0,0])
         profile_wall(height_mm);
     }
 }

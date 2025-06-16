@@ -256,12 +256,12 @@ module hole_pattern(){
 }
 
 module cutter_countersink(){
-    screw_hole(SCREW_HOLE_RADIUS + d_clear, 2*BASE_PROFILE_HEIGHT,
+    screw_hole(SCREW_HOLE_RADIUS + TOLLERANCE, 2*BASE_PROFILE_HEIGHT,
         false, BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS);
 }
 
 module cutter_counterbore(){
-    screw_radius = SCREW_HOLE_RADIUS + d_clear;
+    screw_radius = SCREW_HOLE_RADIUS + TOLLERANCE;
     counterbore_height = BASEPLATE_SCREW_COUNTERBORE_HEIGHT + 2*LAYER_HEIGHT;
     union(){
         cylinder(h=2*BASE_PROFILE_HEIGHT, r=screw_radius);
