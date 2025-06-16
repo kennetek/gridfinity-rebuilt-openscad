@@ -9,12 +9,8 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
-use <src/core/base.scad>
-use <src/core/wall.scad>
+use <src/core/bin.scad>
 use <src/core/cutouts.scad>
-use <src/helpers/generic-helpers.scad>
-use <src/helpers/shapes.scad>
-use <src/helpers/grid.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -43,8 +39,6 @@ divy = 2;
 enable_zsnap = false;
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
-// scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
-scoop = 0; //[0:0.1:1]
 
 /* [Other] */
 // determine what the variable "gridz" applies to based on your use case
@@ -75,69 +69,24 @@ chamfer_holes = true;
 printable_hole_top = true;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
-grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
-height_mm = height(gridz, gridz_define, style_lip, enable_zsnap);
-
-
-fill_height_real = height_mm + BASE_HEIGHT - STACKING_LIP_SUPPORT_HEIGHT;
 
 // ===== IMPLEMENTATION ===== //
 
-// Input all the cutter types in here
-//color("tomato")
-//render()
-gridfinityLite(gridx, gridy, height_mm, style_lip, grid_dimensions, hole_options, only_corners || half_grid) {
-    $gxx=gridx;
-    $gyy=gridy;
-    $dh=fill_height_real;
-    translate([0, 0, -fill_height_real-BASE_HEIGHT+TOLLERANCE])
-    cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = 0);
-}
-// ===== CONSTRUCTION ===== //
-
-module gridfinityLite(gridx, gridy, height_mm, style_lip, grid_dimensions, style_hole, only_corners) {
-
-    // Lower the bin start point by this amount.
-    // Made up for in bin height.
-    // Ensures divider walls smoothly transition to the bottom
-    lite_base_height = BASE_PROFILE_HEIGHT + bottom_layer;
-
-    grid_size_mm = [
-        gridx * grid_dimensions.x,
-        gridy * grid_dimensions.y
-    ] - BASE_GAP_MM;
-    fill_height_real = height_mm + BASE_HEIGHT - STACKING_LIP_SUPPORT_HEIGHT;
-
-    translate([0, 0, BASE_PROFILE_HEIGHT])
-    render_wall([
-        grid_size_mm.x,
-        grid_size_mm.y,
-        height_mm + h_bot
-        ]);
-
-    //color("tomato")
-    difference() {
-
-        // Infill
-        linear_extrude(fill_height_real)
-        rounded_square(grid_size_mm-[TOLLERANCE, TOLLERANCE], BASE_TOP_RADIUS, center=true);
-
-        // Negative of the base.
-        // Keep infill from going into the gaps.
-        difference() {
-            translate([0, 0, BASE_PROFILE_HEIGHT/2])
-            cube([
-                grid_size_mm.x,
-                grid_size_mm.y,
-                BASE_PROFILE_HEIGHT+2*TOLLERANCE
-                ], center=true);
-            render() // Required!
-            gridfinityBase([gridx, gridy], grid_dimensions, hole_options=style_hole, only_corners=only_corners);
-        }
-
-        translate([0, 0, fill_height_real])
-        children();
+binL = new_bin(
+    grid_size = [gridx, gridy],
+    height_mm = height(gridz, gridz_define, style_lip, enable_zsnap),
+    include_lip = style_lip == 0,
+    hole_options = hole_options,
+    only_corners = only_corners || half_grid,
+    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1)
+);
+compartment_height = bin_get_infill_size_mm(binL, true).z;
+bin_render_lite(binL, bottom_layer){
+    bin_subdivide(binL, [divx, divy]) {
+        cut_compartment_auto(
+            cgs(height=compartment_height+2*TOLLERANCE),
+            style_tab,
+            place_tab != 0
+        );
     }
-
-    gridfinity_base_lite([gridx, gridy], grid_dimensions, d_wall, bottom_layer, hole_options=style_hole, only_corners=only_corners);
 }
