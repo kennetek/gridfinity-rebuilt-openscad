@@ -116,6 +116,13 @@ function affine_scale(vector) = [
 ];
 
 /**
+ * @brief Reverse the order of elements in a list.
+ */
+function reverse(list) =
+    assert(is_list(list))
+    [for(i=[len(list)-1:-1:0]) list[i]];
+
+/**
  * @brief Add something to each element in a list.
  * @param list The list whos elements will be modified.
  * @param to_add
