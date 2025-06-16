@@ -1,7 +1,5 @@
 
 
-// bottom thiccness of bin
-h_bot = 2.2;
 
 /**
  * @brief Size of a single gridfinity unit. [Length, Width] In millimeters.
@@ -222,7 +220,12 @@ BASE_PROFILE_HEIGHT = _base_profile_max_mm.y;
  * @Summary Height of the base.
  * @details Includes the structure tying the bases together.
  */
-BASE_HEIGHT = BASE_PROFILE_HEIGHT + h_bot;
+BASE_HEIGHT = 7;
+
+/**
+ * @Summary Height of the structure tying the bases together.
+ */
+BASE_BRIDGE_HEIGHT = BASE_HEIGHT - BASE_PROFILE_HEIGHT;
 
 /**
  * @Summary Corner radius of the bottom of the base.
