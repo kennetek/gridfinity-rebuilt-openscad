@@ -80,6 +80,8 @@ else gridfinityVase(); // Generate the bin
 
 //Deprecated Variables
 d_hole = 26;  // center-to-center distance between holes
+r_c1 = 0.8;  // lower base chamfer "radius"
+d_wall2 = BASE_TOP_RADIUS-r_c1-0.25*sqrt(2);
 //End Deprecated Variables
 
 d_bottom = layer*(max(bottom_layer,1));
