@@ -287,7 +287,6 @@ d_wall2 = BASE_TOP_RADIUS-r_c1-d_clear*sqrt(2);
 
 // height of tab (yaxis, measured from inner wall)
 d_tabh = _tab_depth;
-// maximum width of tab
-d_tabw = TAB_WIDTH_NOMINAL;
+
 // angle of tab
 a_tab = _tab_support_angle;
