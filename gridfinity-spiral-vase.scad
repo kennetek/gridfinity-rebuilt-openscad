@@ -94,9 +94,9 @@ d_fo1 = 2*+BASE_TOP_RADIUS;
 
 f2c = sqrt(2)*(sqrt(2)-1); // fillet to chamfer ratio
 me = ((gridx*l_grid-0.5)/n_divx)-nozzle*4-d_fo1-12.7-4;
-m = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
+m = min(TAB_WIDTH_NOMINAL/1.8 + max(0,me), TAB_WIDTH_NOMINAL/1.25);
 d_ramp = f2c*(l_grid*((d_height-2)/7+1)/12-r_f2)+d_wall2;
-d_edge = ((gridx*l_grid-0.5)/n_divx-d_tabw-d_fo1)/2;
+d_edge = ((gridx*l_grid-0.5)/n_divx-TAB_WIDTH_NOMINAL-d_fo1)/2;
 n_st = gridz <= 3 ? 6 : d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab;
 
 n_x = (n_st==0?1:n_divx);
@@ -121,7 +121,7 @@ module gridfinityVase() {
 
                 if (n_st != 6)
                 transform_style()
-                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
+                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)-nozzle*4)
                 block_tab_base(-nozzle*sqrt(2));
             }
 
@@ -301,7 +301,7 @@ module block_divider() {
         // divider slices cut to tabs
         if (n_st == 0)
         transform_style()
-        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
+        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)-nozzle*4)
         block_tab_base(-nozzle*sqrt(2));
     }
 }
@@ -378,7 +378,7 @@ module block_vase_base() {
     translate([shiftauto(i,n_x)*d_edge + shift*d_edge,0,0])
     intersection() {
         block_vase();
-        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)
+        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)
         profile_tab();
     }
 }

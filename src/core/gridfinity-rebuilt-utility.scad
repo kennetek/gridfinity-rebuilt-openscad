@@ -81,7 +81,6 @@ function height (z,d=0,l=0,enable_zsnap=true) =
 // w:   width of compartment, in # of bases covered
 // h:   height of compartment, in # of basese covered
 // t:   tab style of this specific compartment.
-//      alignment only matters if the compartment size is larger than d_tabw
 //      0:full, 1:auto, 2:left, 3:center, 4:right, 5:none
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else.
 // s:   toggle the rounded back corner that allows for easy removal
