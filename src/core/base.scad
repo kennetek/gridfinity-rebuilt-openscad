@@ -7,9 +7,11 @@ include <standard.scad>
 use <gridfinity-rebuilt-holes.scad>
 use <../helpers/generic-helpers.scad>
 use <../helpers/grid.scad>
+use <../helpers/list.scad>
 use <../helpers/shapes.scad>
 use <../external/threads-scad/threads.scad>
 
+_debug = false;
 
 /**
  * @brief Create the base of a gridfinity bin, or use it for a custom object.
@@ -131,8 +133,9 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
 /**
  * @brief Solid polygon of a gridfinity base.
  * @details Ready for use with `sweep_rounded(...)`.
+ *          Square internals allow for `cube` to fill the center.
  */
-module base_polygon() {
+module _base_polygon() {
     translated_line = foreach_add(BASE_PROFILE, [BASE_BOTTOM_RADIUS, 0]);
     solid_profile = concat(translated_line,
         [
@@ -145,23 +148,23 @@ module base_polygon() {
 
 /**
  * @brief A single solid Gridfinity base.
+ * @details Height is BASE_PROFILE_HEIGHT.
  * @warning Does not include the structure tying the bases together.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  */
 module base_solid(top_dimensions=BASE_TOP_DIMENSIONS) {
-    assert(is_list(top_dimensions) && len(top_dimensions) == 2);
+    assert(is_valid_2d(top_dimensions)
+           && min(top_dimensions) > 2 * BASE_TOP_RADIUS,
+        str("Minimum size of a single base must be greater than ", 2 * BASE_TOP_RADIUS)
+    );
 
     base_bottom = base_bottom_dimensions(top_dimensions);
     sweep_inner = foreach_add(base_bottom, -2*BASE_BOTTOM_RADIUS);
     cube_size = foreach_add(base_bottom, -BASE_BOTTOM_RADIUS);
 
-    assert(sweep_inner.x > 0 && sweep_inner.y > 0,
-        str("Minimum size of a single base must be greater than ", 2*BASE_TOP_RADIUS)
-    );
-
     union(){
         sweep_rounded(sweep_inner)
-            base_polygon();
+        _base_polygon();
 
         //Inner fill
         translate([0, 0, BASE_PROFILE_HEIGHT/2])
@@ -207,12 +210,13 @@ module _base_holes(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, offset=0) {
 
 /**
  * @brief A single Gridfinity base.  With holes (if set).
+ * @details Height is BASE_PROFILE_HEIGHT.
  * @param hole_options @see block_base_hole.hole_options
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
  * @param thumbscrew Enable "gridfinity-refined" thumbscrew hole in the center of each base unit. This is a ISO Metric Profile, 15.0mm size, M15x1.5 designation.
  */
 module block_base(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=false) {
-    assert(is_list(top_dimensions) && len(top_dimensions) == 2);
+    assert(is_valid_2d(top_dimensions) && is_positive(top_dimensions));
     assert(is_bool(thumbscrew));
 
     base_bottom = base_bottom_dimensions(top_dimensions);
@@ -230,27 +234,105 @@ module block_base(hole_options, top_dimensions=BASE_TOP_DIMENSIONS, thumbscrew=f
 
 /**
  * @brief Outer shell of a Gridfinity base.
+ * @details Height is BASE_PROFILE_HEIGHT.
  * @param wall_thickness How thick the walls are.
+ *                       Capped at BASE_TOP_RADIUS.
  * @param bottom_thickness How thick the bottom is.
  * @param top_dimensions [x, y] size of a single base.  Only set if deviating from the standard!
+ * @IMPORTANT: This is highly optimized to reduce the amount of geometry generated.
  */
 module base_outer_shell(wall_thickness, bottom_thickness, top_dimensions=BASE_TOP_DIMENSIONS) {
     assert(is_num(wall_thickness) && wall_thickness > 0);
-    assert((is_num(bottom_thickness) && bottom_thickness > 0));
+    assert(is_num(bottom_thickness)
+        && bottom_thickness > 0
+        && bottom_thickness <= BASE_PROFILE_HEIGHT);
+    assert(is_valid_2d(top_dimensions)
+           && min(top_dimensions) > 2 * BASE_TOP_RADIUS,
+        str("Minimum size of a single base must be greater than ", 2 * BASE_TOP_RADIUS)
+    );
+
+    base_bottom = base_bottom_dimensions(top_dimensions);
+    sweep_inner = foreach_add(base_bottom, -2*BASE_BOTTOM_RADIUS);
+    cube_size = foreach_add(base_bottom, -BASE_BOTTOM_RADIUS);
+
+    optimized_wall = wall_thickness <= BASE_BOTTOM_RADIUS;
+    optimized_bottom = optimized_wall
+        || bottom_thickness < (wall_thickness - BASE_BOTTOM_RADIUS);
+
+    if(_debug)
+        echo(
+            optimized_wall=optimized_wall,
+            optimized_bottom=optimized_bottom
+        );
 
     union(){
-        difference(){
-            base_solid(top_dimensions=top_dimensions);
-            base_solid(top_dimensions=foreach_add(top_dimensions, -2*wall_thickness));
-            _base_preview_fix();
+        //Sides
+        if(optimized_wall) {
+            sweep_rounded(sweep_inner)
+            _base_polygon_lite(wall_thickness, bottom_thickness);
+        } else {
+            sweep_rounded(sweep_inner)
+            difference() {
+                _base_polygon();
+
+                translate([-wall_thickness, 0, 0])
+                _base_polygon();
+            }
         }
+
         //Bottom
-        intersection() {
+        if(optimized_bottom){
             translate([0, 0, bottom_thickness/2])
-            cube([top_dimensions.x, top_dimensions.y, bottom_thickness], center=true);
-            base_solid(top_dimensions=top_dimensions);
+            cube(concat(cube_size, bottom_thickness), center=true);
+        } else {
+            intersection() {
+                translate([0, 0, bottom_thickness/2])
+                cube(concat(top_dimensions, bottom_thickness), center=true);
+                base_solid(top_dimensions=top_dimensions);
+            }
         }
     }
+}
+
+/**
+ * @brief Optimized lite version of `_base_polygon`.
+ * @details Ready for use with `sweep_rounded(...)`.
+ *          Produces a shape with a specific thickness.
+ *          Bottom internals are squared for use with `cube`.
+ * @param wall_thickness How thick the resulting walls are.
+ *        Max allowed is BASE_BOTTOM_RADIUS.
+ * @param bottom_thickness How thick the bottom is.
+ *        Max allowed is BASE_PROFILE_HEIGHT.
+ * @warning: Walls may be slightly thicker than expected as they slope to the appropriate bottom_thickness.
+ */
+module _base_polygon_lite(wall_thickness, bottom_thickness) {
+    assert(is_num(wall_thickness)
+        && wall_thickness > 0
+        && wall_thickness <= BASE_BOTTOM_RADIUS);
+    assert(is_num(bottom_thickness)
+        && bottom_thickness >= 0
+        && bottom_thickness <= BASE_PROFILE_HEIGHT);
+
+    translated_line = foreach_add(BASE_PROFILE, [BASE_BOTTOM_RADIUS, 0]);
+    inner_line = reverse(
+        foreach_add(translated_line, [-wall_thickness, 0])
+    );
+
+    first_point = inner_line[0];
+    last_point = inner_line[len(inner_line) -1];
+
+    // Ensures the end is squared off.
+    capped_inner_line = [
+        for(p = inner_line)
+            [p.x, max(p.y, bottom_thickness)]
+    ];
+
+    solid_profile = concat(
+        translated_line,
+        capped_inner_line,
+        [last_point] // Go back to start.
+    );
+    polygon(solid_profile);
 }
 
 /**
