@@ -67,9 +67,6 @@ r_f2 = 2.8;
 d_div = 1.2;
 // minimum wall thickness
 d_wall = 0.95;
-// tolerance fit factor
-d_clear = 0.25;
-
 // ****************************************
 // Tab Constants
 // Arbitrarily chosen.
