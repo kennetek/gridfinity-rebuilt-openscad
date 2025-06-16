@@ -100,6 +100,9 @@ module bin_render(bin) {
     fill_height_real = bin[3];
     include_lip = bin[4];
 
+    // Hack to support `cut` and `cut_move`.
+    $_current_bin = bin;
+
     // If no lip is present, the outer wall is handled by the infill.
     if (include_lip) {
         bin_render_wall(bin);

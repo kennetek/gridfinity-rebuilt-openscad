@@ -5,13 +5,12 @@
  */
 
 include <standard.scad>
-use <wall.scad>
+use <bin.scad>
 use <cutouts.scad>
 use <../helpers/generic-helpers.scad>
 use <../helpers/grid.scad>
-use <../helpers/shapes.scad>
-use <../helpers/grid.scad>
-use <../external/threads-scad/threads.scad>
+use <../helpers/grid_element.scad>
+use <../helpers/list.scad>
 
 // ===== User Modules ===== //
 
@@ -76,104 +75,7 @@ function height (z,d=0,l=0,enable_zsnap=true) =
     let(total_height = enable_zsnap ? z_snap(hf(z,d,l)) : hf(z,d,l))
     max(total_height - BASE_HEIGHT, 0);
 
-// Creates equally divided cutters for the bin
-//
-// n_divx:  number of x compartments (ideally, coprime w/ gridx)
-// n_divy:  number of y compartments (ideally, coprime w/ gridy)
-//          set n_div values to 0 for a solid bin
-// style_tab:   tab style for all compartments. see cut()
-// scoop_weight:    scoop toggle for all compartments. see cut()
-// place_tab:   tab suppression for all compartments. see "gridfinity-rebuilt-bins.scad"
-module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, place_tab=1) {
-
-    element_dimensions = [
-        GRID_DIMENSIONS_MM.x * $gxx/n_divx ,
-        GRID_DIMENSIONS_MM.y * $gyy/n_divy
-    ];
-
-    compartment_size = [
-        element_dimensions.x - 2 * d_div,
-        element_dimensions.y - 2 * d_div,
-        $dh
-    ];
-
-    translate([0, 0, $dh + BASE_HEIGHT])
-    pattern_grid([n_divx, n_divy], element_dimensions, true, true) {
-        cut_compartment_auto(
-            compartment_size,
-            style_tab,
-            place_tab != 0,
-            scoop_weight
-        );
-    }
-}
-
-
-// Creates equally divided cylindrical cutouts
-//
-// n_divx: number of x cutouts
-// n_divy: number of y cutouts
-//         set n_div values to 0 for a solid bin
-// cylinder_diameter: diameter of cutouts
-// cylinder_height: height of cutouts
-// chamfer: chamfer around the top rim of the holes
-module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, chamfer=0.5) {
-
-    element_dimensions = [
-        GRID_DIMENSIONS_MM.x * $gxx/n_divx ,
-        GRID_DIMENSIONS_MM.y * $gyy/n_divy
-    ];
-
-    translate([0, 0, $dh + BASE_HEIGHT])
-    pattern_grid([n_divx, n_divy], element_dimensions, true, true) {
-        cut_chamfered_cylinder(cylinder_diameter/2, cylinder_height, chamfer);
-    }
-}
-
-/**
- * @Summary Initialize A Gridfinity Bin
- * @deprecated Use `new_bin` and `bin_render` instead.
- * @Details Creates the top portion of a bin, and sets some gloal variables.
- * @TODO: Remove dependence on global variables.
- * @param sl Lip style of this bin.
- *        0:Regular lip,
- *        1:Remove lip subtractively,
- *        2:Remove lip and retain height
- * @param fill_height Height of the solid which fills a bin.  Set to 0 for automatic.
- * @param grid_dimensions [length, width] of a single Gridfinity base.
- */
-module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSIONS_MM, sl = 0) {
-    $gxx = gx;
-    $gyy = gy;
-    $dh = h;
-    $dh0 = fill_height;
-    $style_lip = sl;
-
-    fill_height_real = fill_height != 0 ? fill_height : h - STACKING_LIP_SUPPORT_HEIGHT;
-
-    // Subtracting BASE_GAP_MM to remove the perimeter overhang.
-    grid_size_mm = [gx * grid_dimensions.x, gy * grid_dimensions.y] - BASE_GAP_MM;
-
-    // Inner Fill
-    difference() {
-        color("firebrick")
-        translate([0, 0, BASE_HEIGHT])
-        linear_extrude(fill_height_real)
-        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
-        children();
-    }
-
-    // Outer Wall
-    // If no lip is present, the outer wall is handled by the inner fill.
-    if ($style_lip == 0) {
-        translate([0, 0, BASE_HEIGHT])
-        render_wall(concat(grid_size_mm, h));
-    }
-}
-
 // Function to include in the custom() module to individually slice bins
-// Will try to clamp values to fit inside the provided base size
-//
 // x:   start coord. x=1 is the left side of the bin.
 // y:   start coord. y=1 is the bottom side of the bin.
 // w:   width of compartment, in # of bases covered
@@ -184,15 +86,25 @@ module gridfinityInit(gx, gy, h, fill_height = 0, grid_dimensions = GRID_DIMENSI
 //      Automatic alignment will use left tabs for bins on the left edge, right tabs for bins on the right edge, and center tabs everywhere else.
 // s:   toggle the rounded back corner that allows for easy removal
 
-module cut(x=0, y=0, w=1, h=1, t=1, s=1) {
-    size_mm = [
-        GRID_DIMENSIONS_MM.x * clp(w,0,$gxx-x) - d_div,
-        GRID_DIMENSIONS_MM.y * clp(h,0,$gyy-y) - d_div,
-        $dh
-        ];
+module cut(x=0, y=0, w=1, h=1, t=5, s=1) {
+    assert(w > 0 && h > 0);
+    bin = $_current_bin;
+    assert(is_bin(bin),
+        "No active Gridfinity bin."
+    );
 
-    cut_move(x,y,w,h)
-    cut_compartment_auto(size_mm, t, false, s);
+    infill_size_mm = bin_get_infill_size_mm(bin);
+
+    cut_move(x,y,w,h) {
+        element = grid_element_current();
+        element_dimensions = grid_element_get_dimensions(element);
+        size_mm = [
+            element_dimensions.x * w - d_div/2,
+            element_dimensions.x * h - d_div/2,
+            infill_size_mm.z + TOLLERANCE
+        ];
+        cut_compartment_auto(size_mm, t, false, s);
+    }
 }
 
 // Translates an object from the origin point to the center of the requested compartment block, can be used to add custom cuts in the bin
@@ -203,20 +115,25 @@ module cut_move(x, y, w, h) {
     assert(is_num(w));
     assert(is_num(h));
 
-    corner_mm = [
-        GRID_DIMENSIONS_MM.x * x,
-        GRID_DIMENSIONS_MM.y * y
-    ];
-    grid_size_mm = [
-        $gxx * GRID_DIMENSIONS_MM.x,
-        $gyy * GRID_DIMENSIONS_MM.y
-    ];
-    size_mm = [
-        GRID_DIMENSIONS_MM.x * w,
-        GRID_DIMENSIONS_MM.y * h
-    ];
-    translate_mm = corner_mm - grid_size_mm/2 + size_mm/2;
+    bin = $_current_bin;
+    assert(is_bin(bin),
+        "No active Gridfinity bin."
+    );
 
-    translate(concat(translate_mm, $dh + BASE_HEIGHT))
+    infill_grid = grid_from_total(
+        bin_get_bases(bin),
+        as_2d(bin_get_infill_size_mm(bin)),
+        true
+    );
+
+    element_dimensions = grid_get_element_dimensions(infill_grid);
+    size_mm = [
+        element_dimensions.x * w - d_div/2,
+        element_dimensions.x * h - d_div/2,
+        0
+    ];
+
+    translate(size_mm/2)
+    grid_translate(infill_grid, [x, y], false)
     children();
 }
