@@ -94,6 +94,9 @@ module bin_render(bin) {
     only_corners = bin[9];
     thumbscrew = bin[10];
 
+    // Hack to support `cut` and `cut_move`.
+    $_current_bin = bin;
+
     // If no lip is present, the outer wall is handled by the infill.
     if (include_lip) {
         bin_render_wall(bin);
