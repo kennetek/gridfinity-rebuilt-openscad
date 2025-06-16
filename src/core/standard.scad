@@ -1,7 +1,5 @@
 
 
-// lower base chamfer "radius"
-r_c1 = 0.8;
 // bottom thiccness of bin
 h_bot = 2.2;
 
@@ -282,8 +280,6 @@ h_skel = 1;
 // Deprecated Values
 // Will be removed / re-named in the future.
 // ****************************************
-
-d_wall2 = BASE_TOP_RADIUS-r_c1-d_clear*sqrt(2);
 
 // height of tab (yaxis, measured from inner wall)
 d_tabh = _tab_depth;
