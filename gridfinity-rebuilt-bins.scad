@@ -139,9 +139,43 @@ bin_render(bin1) {
 
 // ===== EXAMPLES ===== //
 /*
-// 3x3 even spaced grid
+// 1x1 bin
+bin_11 = new_bin([1, 1], height(2));
+// 3x3 bin
 bin_33 = new_bin([3, 3], height(6));
 
+//Vary radius per child
+translate([150, 200, 0])
+bin_render(bin_11) {
+    depth = bin_get_infill_size_mm(bin_11).z;
+    bin_subdivide(bin_11, [3, 1]) {
+        element = grid_element_current();
+        r = 3 + grid_element_get_sequence_number(element);
+
+        cut_chamfered_cylinder(r, depth);
+    }
+}
+
+// One child per subdivision.
+translate([150, 150, 0])
+bin_render(bin_11) {
+    depth = bin_get_infill_size_mm(bin_11).z;
+    bin_subdivide(bin_11, [3, 1]) {
+        translate([0, 0, -depth])
+        child_per_element() {
+            cylinder(r=3, h=depth);
+
+            linear_extrude(depth)
+            square(4, center=true);
+
+            rotate([0, 0, 90])
+            linear_extrude(depth)
+            text("text", halign="center");
+        }
+    }
+}
+
+// 3x3 even spaced grid
 translate([150, 0, 0])
 bin_render(bin_33) {
     bin_subdivide(bin_33, [3, 3]) {
