@@ -55,25 +55,40 @@ module pattern_grid(num_elements, element_dimensions, center=false, center_eleme
     // Local coordinates
     position_start = center ? -total_dimensions/2 : [0, 0, 0];
 
-    for (i = [0:num_elements.x -1]) {
-        for (j = [0:num_elements.y -1]) {
-            position_offset = [
-                i * element_dimensions.x,
-                j * element_dimensions.y,
-                0
-            ] + (center_elements ? element_center : [0, 0, 0]);
-            position = position_start + position_offset;
-            $_grid_element = [
-                "grid_element_struct",
-                [i, j],  // index
-                position, // position
-                num_elements,
-                element_dimensions
-            ];
-            translate(position)
-            children();
-        }
+    for(sequence_number = [0 : num_elements.x * num_elements.y - 1]) {
+        i = floor(sequence_number / num_elements.y);
+        j = sequence_number % num_elements.y;
+        position_offset = [
+            i * element_dimensions.x,
+            j * element_dimensions.y,
+            0
+        ] + (center_elements ? element_center : [0, 0, 0]);
+        position = position_start + position_offset;
+        $_grid_element = [
+            "grid_element_struct",
+            [i, j],  // index
+            position, // position
+            num_elements,
+            element_dimensions,
+            sequence_number
+        ];
+        translate(position)
+        children();
     }
+}
+
+/**
+ * @brief Create one child per grid element.
+ * @details For use inside `pattern_grid` or `subdivide_grid`
+ * @WARNING: BETA FEATURE direction and ordering is not guaranteed.
+ * @see https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/User-Defined_Functions_and_Modules#Children
+ * > Note that children(), echo() and empty block statements (including ifs) count as $children objects, even if no geometry is present (as of v2017.12.23).
+ */
+module child_per_element() {
+    element = grid_element_current();
+    sequence_number = grid_element_get_sequence_number(element);
+    //echo(sequence_number=sequence_number);
+    children(sequence_number);
 }
 
 /**
@@ -104,6 +119,9 @@ function grid_element_is_default(element) =
     let(num_elements=element[3])
     index == [0, 0] == num_elements;
 
+/**
+ * @brief Multidimensional index of the current element.
+ */
 function grid_element_get_index(element) =
     assert(_is_grid_element(element), "Not a grid element.")
     element[1];
@@ -120,6 +138,14 @@ function grid_element_get_num_elements(element) =
 function grid_element_get_dimensions(element) =
     assert(_is_grid_element(element), "Not a grid element.")
     element[4];
+
+/**
+ * @brief numeric index of the current element.
+ * @warning: Ordering in which elements are rendered is **not** finalized and may change.
+ */
+function grid_element_get_sequence_number(element) =
+    assert(_is_grid_element(element), "Not a grid element.")
+    element[5];
 
 function grid_element_is_first_col(element) =
     assert(_is_grid_element(element), "Not a grid element.")
@@ -194,6 +220,7 @@ if(!is_undef($test_grid) && $test_grid){
     pattern_grid([3, 5], [10, 20], true, true){
         element = grid_element_current();
         echo("\n",
+            sequence_number=grid_element_get_sequence_number(element), "\n",
             index=grid_element_get_index(element), "\n",
             position=grid_element_get_position(element), "\n",
             num_elements=grid_element_get_num_elements(element), "\n",
