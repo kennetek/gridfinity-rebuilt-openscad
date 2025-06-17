@@ -123,20 +123,18 @@ echo(str(
 
 compartment_height = bin_get_infill_size_mm(bin1).z;
 bin_render(bin1) {
-    if (divx > 0 && divy > 0) {
-        subdivide_bin(bin1, [divx, divy]) {
-            if (cut_cylinders) {
-                depth = cylinder_depth > 0 ? cylinder_depth
-                    : compartment_height;
-                cut_chamfered_cylinder(cd/2, depth+TOLLERANCE, c_chamfer);
-            } else {
-                cut_compartment_auto(
-                    auto_compartment_size(compartment_height),
-                    style_tab,
-                    place_tab != 0,
-                    scoop
-                );
-            }
+    subdivide_bin(bin1, [divx, divy]) {
+        if (cut_cylinders) {
+            depth = cylinder_depth > 0 ? cylinder_depth
+                : compartment_height;
+            cut_chamfered_cylinder(cd/2, depth+TOLLERANCE, c_chamfer);
+        } else {
+            cut_compartment_auto(
+                auto_compartment_size(compartment_height),
+                style_tab,
+                place_tab != 0,
+                scoop
+            );
         }
     }
 }
