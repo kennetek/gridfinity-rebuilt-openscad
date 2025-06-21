@@ -172,6 +172,13 @@ function is_positive(vector) =
     && min(vector) > 0;
 
 /**
+ * @brief Limit a multidimensional vector to 2d.
+ */
+function limit_2d(vector) =
+    assert(is_valid_2d(vector))
+    [vector[0], vector[1]];
+
+/**
  * @breif Simple helper to print affine matrices in an easier to read manner.
  * @details If a multidimensional matrix is provided, then each item is printed to a separate line.
  * @param object Object to print.
