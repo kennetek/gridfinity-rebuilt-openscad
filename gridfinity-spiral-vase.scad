@@ -9,7 +9,9 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
+use <src/core/base.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/shapes.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -77,21 +79,25 @@ else gridfinityVase(); // Generate the bin
 
 //Deprecated Variables
 d_hole = 26;  // center-to-center distance between holes
+r_c1 = 0.8;  // lower base chamfer "radius"
+d_wall2 = BASE_TOP_RADIUS-r_c1-0.25*sqrt(2);
 //End Deprecated Variables
 
 d_bottom = layer*(max(bottom_layer,1));
 x_l = l_grid/2;
 
-dht = (gridz_define==0)?gridz*7 : (gridz_define==1)?h_bot+gridz+BASE_HEIGHT : gridz-(enable_lip?3.8:0);
+dht = (gridz_define == 0) ? 7 * gridz
+    : (gridz_define == 1) ? gridz + BASE_HEIGHT
+    : gridz - (enable_lip ? 3.8 : 0);
 d_height = (enable_zsnap?((abs(dht)%7==0)?dht:dht+7-abs(dht)%7):dht)-BASE_HEIGHT;
 
 d_fo1 = 2*+BASE_TOP_RADIUS;
 
 f2c = sqrt(2)*(sqrt(2)-1); // fillet to chamfer ratio
 me = ((gridx*l_grid-0.5)/n_divx)-nozzle*4-d_fo1-12.7-4;
-m = min(d_tabw/1.8 + max(0,me), d_tabw/1.25);
+m = min(TAB_WIDTH_NOMINAL/1.8 + max(0,me), TAB_WIDTH_NOMINAL/1.25);
 d_ramp = f2c*(l_grid*((d_height-2)/7+1)/12-r_f2)+d_wall2;
-d_edge = ((gridx*l_grid-0.5)/n_divx-d_tabw-d_fo1)/2;
+d_edge = ((gridx*l_grid-0.5)/n_divx-TAB_WIDTH_NOMINAL-d_fo1)/2;
 n_st = gridz <= 3 ? 6 : d_edge < 2 && style_tab != 0 && style_tab != 6 ? 1 : style_tab == 1 && n_divx <= 1? 0 : style_tab;
 
 n_x = (n_st==0?1:n_divx);
@@ -116,7 +122,7 @@ module gridfinityVase() {
 
                 if (n_st != 6)
                 transform_style()
-                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
+                transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)-nozzle*4)
                 block_tab_base(-nozzle*sqrt(2));
             }
 
@@ -169,7 +175,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
                 pattern_circular(4){
                     rotate([0,0,45])
                     translate([-wall_thickness/2, 3, 0])
-                    cube([wall_thickness, l_grid, BASE_PROFILE_MAX.y]);
+                    cube([wall_thickness, l_grid, BASE_PROFILE_HEIGHT]);
 
                     if (enable_holes) {
                         block_magnet_blank(wall_thickness);
@@ -178,7 +184,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
                 base_solid();
             }
             if (style_base != 4) {
-                translate([0, 0, BASE_PROFILE_MAX.y])
+                translate([0, 0, BASE_PROFILE_HEIGHT])
                 linear_extrude(bottom_thickness)
                 profile_x(0.1);
             }
@@ -192,7 +198,7 @@ module gridfinityBaseVase(wall_thickness, bottom_thickness) {
         // Tricks slicer into not ignoring the center.
         rotate([0, 0, 90])
         translate([0, 0, bottom_thickness])
-        cube([0.005, 2*l_grid, 2*BASE_HEIGHT]);
+        cube([0.005, 2*l_grid, 2*BASE_PROFILE_HEIGHT]);
     }
 }
 
@@ -203,20 +209,20 @@ module block_magnet_blank(o = 0, half = true) {
     difference() {
         hull() {
             cylinder(r = magnet_radius, h = MAGNET_HOLE_DEPTH*2, center = true);
-            cylinder(r = magnet_radius-(BASE_HEIGHT+0.1-MAGNET_HOLE_DEPTH), h = (BASE_HEIGHT+0.1)*2, center = true);
+            cylinder(r = magnet_radius-(BASE_PROFILE_HEIGHT+0.1-MAGNET_HOLE_DEPTH), h = (BASE_PROFILE_HEIGHT+0.1)*2, center = true);
         }
         if (half)
         mirror([0,0,1])
-        cylinder(r=magnet_radius*2, h = (BASE_HEIGHT+0.1)*4);
+        cylinder(r=magnet_radius*2, h = (BASE_PROFILE_HEIGHT+0.1)*4);
     }
 }
 
 module block_pinch(height_mm) {
     assert(is_num(height_mm));
 
-    translate([0, 0, -BASE_HEIGHT])
+    translate([0, 0, -BASE_PROFILE_HEIGHT])
     block_wall(gridx, gridy, l_grid) {
-        translate([d_wall2-nozzle*2-d_clear*2,0,0])
+        translate([d_wall2-nozzle*2-TOLLERANCE*2,0,0])
         profile_wall(height_mm);
     }
 }
@@ -285,7 +291,7 @@ module block_divider() {
         // divider slices cut to tabs
         if (n_st == 0)
         transform_style()
-        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)-nozzle*4)
+        transform_vtab_base((n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)-nozzle*4)
         block_tab_base(-nozzle*sqrt(2));
     }
 }
@@ -296,7 +302,7 @@ module block_divider_edgecut() {
     linear_extrude(100)
     offset(delta = 0.1)
     mirror([1,0,0])
-    translate([-r_base,0,0])
+    translate([-BASE_TOP_RADIUS,0,0])
     profile_wall($dh);
 }
 
@@ -327,11 +333,10 @@ module block_funnel_outside() {
 module block_vase_base() {
     difference() {
         // base
-        translate([0,0,-BASE_HEIGHT]) {
+        translate([0,0,-BASE_PROFILE_HEIGHT]) {
             translate([0,0,-0.1])
             color("firebrick")
             block_bottom(d_bottom, gridx, gridy, l_grid);
-            color("royalblue")
             block_wall(gridx, gridy, l_grid) {
                 if (enable_lip) profile_wall($dh);
                 else profile_wall2($dh);
@@ -363,7 +368,7 @@ module block_vase_base() {
     translate([shiftauto(i,n_x)*d_edge + shift*d_edge,0,0])
     intersection() {
         block_vase();
-        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-d_fo1:d_tabw)
+        transform_vtab_base(n_st<2?gridx*l_grid/n_x-0.5-d_fo1:TAB_WIDTH_NOMINAL)
         profile_tab();
     }
 }
@@ -482,7 +487,8 @@ module transform_scoop() {
 
 module block_vase(h = d_height*2) {
     translate([0,0,-0.1])
-    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle, h], r_base+0.01-nozzle/2, center=true);
+    linear_extrude(h)
+    rounded_square([gridx*l_grid-0.5-nozzle, gridy*l_grid-0.5-nozzle], BASE_TOP_RADIUS+0.01-nozzle/2, center=true);
 }
 
 module profile_x(x_f = 3) {

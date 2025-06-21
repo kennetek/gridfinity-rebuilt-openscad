@@ -21,17 +21,20 @@
  This **has no impact on stacking height, and can be ignored.**
 
 https://github.com/kennetek/gridfinity-rebuilt-openscad
-
 */
 
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
+use <src/core/bin.scad>
+use <src/core/cutouts.scad>
+use <src/helpers/grid.scad>
+use <src/helpers/grid_element.scad>
 
 // ===== PARAMETERS ===== //
 
 /* [Setup Parameters] */
-$fa = 8;
+$fa = 4;
 $fs = 0.25; // .01
 
 /* [General Settings] */
@@ -44,25 +47,19 @@ gridz = 6; //.1
 // Half grid sized bins.  Implies "only corners".
 half_grid = false;
 
-/* [Linear Compartments] */
+/* [Compartments] */
 // number of X Divisions (set to zero to have solid bin)
 divx = 1;
 // number of Y Divisions (set to zero to have solid bin)
 divy = 1;
 
 /* [Cylindrical Compartments] */
-// number of cylindrical X Divisions (mutually exclusive to Linear Compartments)
-cdivx = 0;
-// number of cylindrical Y Divisions (mutually exclusive to Linear Compartments)
-cdivy = 0;
-// orientation
-c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
+// Use this instead of bins
+cut_cylinders = false;
 // diameter of cylindrical cut outs
 cd = 10; // .1
-// cylinder height
-ch = 1;  //.1
-// spacing to lid
-c_depth = 1;
+// Leave zero for default. Units: mm
+cylinder_depth = 0;  //.1
 // chamfer around the top rim of the holes
 c_chamfer = 0.5; // .1
 
@@ -74,7 +71,7 @@ height_internal = 0;
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
 
-/* [Features] */
+/* [Compartment Features] */
 // the type of tabs
 style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // which divisions have tabs
@@ -103,39 +100,97 @@ printable_hole_top = true;
 enable_thumbscrew = false;
 
 hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, crush_ribs, chamfer_holes, printable_hole_top);
-grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1);
 
 // ===== IMPLEMENTATION ===== //
 
-//color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, grid_dimensions=grid_dimensions, sl=style_lip) {
+bin1 = new_bin(
+    grid_size = [gridx, gridy],
+    height_mm = height(gridz, gridz_define, style_lip, enable_zsnap),
+    fill_height = height_internal == 0? -1 : height_internal,
+    include_lip = style_lip == 0,
+    hole_options = hole_options,
+    only_corners = only_corners || half_grid,
+    thumbscrew = enable_thumbscrew,
+    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1)
+);
 
-    if (divx > 0 && divy > 0) {
+echo(str(
+    "\n",
+    "Infill Dimensions: ", bin_get_infill_size_mm(bin1), "\n",
+    "Final Size*: ", bin_get_size_mm(bin1), "\n",
+    "  *Excludes Base Height & Stacking Lip Height"
+));
 
-        cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, place_tab = place_tab);
-
-    } else if (cdivx > 0 && cdivy > 0) {
-
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+compartment_height = bin_get_infill_size_mm(bin1).z;
+bin_render(bin1) {
+    subdivide_bin(bin1, [divx, divy]) {
+        if (cut_cylinders) {
+            depth = cylinder_depth > 0 ? cylinder_depth
+                : compartment_height;
+            cut_chamfered_cylinder(cd/2, depth+TOLLERANCE, c_chamfer);
+        } else {
+            cut_compartment_auto(
+                auto_compartment_size(compartment_height),
+                style_tab,
+                place_tab != 0,
+                scoop
+            );
+        }
     }
 }
-gridfinityBase([gridx, gridy], grid_dimensions=grid_dimensions, hole_options=hole_options, only_corners=only_corners || half_grid, thumbscrew=enable_thumbscrew);
-//}
-
 
 // ===== EXAMPLES ===== //
+/*
+// 1x1 bin
+bin_11 = new_bin([1, 1], height(2));
+// 3x3 bin
+bin_33 = new_bin([3, 3], height(6));
+
+//Vary radius per child
+translate([150, 200, 0])
+bin_render(bin_11) {
+    depth = bin_get_infill_size_mm(bin_11).z;
+    subdivide_bin(bin_11, [3, 1]) {
+        element = grid_element_current();
+        r = 3 + grid_element_get_sequence_number(element);
+
+        cut_chamfered_cylinder(r, depth);
+    }
+}
+
+// One child per subdivision.
+translate([150, 150, 0])
+bin_render(bin_11) {
+    depth = bin_get_infill_size_mm(bin_11).z;
+    subdivide_bin(bin_11, [3, 1]) {
+        translate([0, 0, -depth])
+        child_per_element() {
+            cylinder(r=3, h=depth);
+
+            linear_extrude(depth)
+            square(4, center=true);
+
+            rotate([0, 0, 90])
+            linear_extrude(depth)
+            text("text", halign="center");
+        }
+    }
+}
 
 // 3x3 even spaced grid
-/*
-gridfinityInit(3, 3, height(6), 0, 42) {
-	cutEqual(n_divx = 3, n_divy = 3, style_tab = 0, scoop_weight = 0);
+translate([150, 0, 0])
+bin_render(bin_33) {
+    subdivide_bin(bin_33, [3, 3]) {
+        cut_compartment_auto(
+            auto_compartment_size(bin_get_infill_size_mm(bin_33).z)
+        );
+    }
 }
-gridfinityBase([3, 3]);
-*/
 
 // Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop.
-/*
-gridfinityInit(3, 3, height(6), 0, 42) {
+
+translate([-150, 0, 0])
+bin_render(bin_33) {
     cut(x=0, y=0, w=1.5, h=0.5, t=5, s=0);
     cut(0, 0.5, 1.5, 0.5, 5, 0);
     cut(0, 1, 1.5, 0.5, 5, 0);
@@ -147,54 +202,51 @@ gridfinityInit(3, 3, height(6), 0, 42) {
     cut(1.5, 0, 1.5, 5/3, 2);
     cut(1.5, 5/3, 1.5, 4/3, 4);
 }
-gridfinityBase([3, 3]);
-*/
 
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin.
-/*
-gridfinityInit(3, 3, height(6), 0, 42)  {
+translate([0, 150, 0])
+bin_render(bin_33) {
     cut(0,2,2,1,5,0);
     cut(1,0,1,3,5);
     cut(1,0,2,1,5);
     cut(0,0,1,2);
     cut(2,1,1,2);
 }
-gridfinityBase(3, 3, 42, 0, 0, 1);
-*/
 
 // Areas without a compartment are solid material, where you can put your own cutout shapes. using the cut_move() function, you can select an area, and any child shapes will be moved from the origin to the center of that area, and subtracted from the block. For example, a pattern of three cylinderical holes.
-/*
-gridfinityInit(3, 3, height(6), 0, 42) {
+translate([0, -150, 0])
+bin_render(bin_33) {
+    depth = bin_get_infill_size_mm(bin_33).z;
     cut(x=0, y=0, w=2, h=3);
     cut(x=0, y=0, w=3, h=1, t=5);
+
     cut_move(x=2, y=1, w=1, h=2)
-        pattern_linear(x=1, y=3, sx=42/2)
-            cylinder(r=5, h=1000, center=true);
+    translate([0, 0, -depth]) {
+        pattern_grid([1, 3], [42/2, 42/2], true, true) {
+            cylinder(r=5, h=depth+TOLLERANCE);
+        }
+    }
 }
-gridfinityBase([3, 3]);
-*/
 
 // You can use loops as well as the bin dimensions to make different parametric functions, such as this one, which divides the box into columns, with a small 1x1 top compartment and a long vertical compartment below
-/*
-gx = 3;
-gy = 3;
-gridfinityInit(gx, gy, height(6), 0, 42) {
+translate([150, -150, 0])
+bin_render(bin_33) {
+    gx = bin_get_bases(bin_33).x;
     for(i=[0:gx-1]) {
         cut(i,0,1,gx-1);
         cut(i,gx-1,1,1);
     }
 }
-gridfinityBase([gx, gy]);
-*/
 
 // Pyramid scheme bin
-/*
-gx = 4;
-gy = 4;
-gridfinityInit(gx, gy, height(6), 0, 42) {
+bin_44 = new_bin([4, 4], height(6));
+
+translate([-200, -200, 0])
+bin_render(bin_44) {
+    gx = bin_get_bases(bin_44).x;
+    gy = bin_get_bases(bin_44).y;
     for (i = [0:gx-1])
     for (j = [0:i])
     cut(j*gx/(i+1),gy-i-1,gx/(i+1),1,0);
 }
-gridfinityBase([gx, gy]);
 */
