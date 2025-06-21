@@ -27,7 +27,7 @@ _grid_element_default = function()
     [
         "grid_element_struct",
         [], //grid object
-        [0, 0],  // index
+        [],  // index
         false // centered
     ];
 
@@ -112,20 +112,35 @@ function grid_element_get_position(element) =
     let(raw_element_offset = [
         index.x * raw_element_dimensions.x,
         index.y * raw_element_dimensions.y,
-        0
+        len(index) >= 3 ? index.z * raw_element_dimensions.z : 0
     ])
     let(perimeter_offset = [
-        grid_element_is_first_col(element) ? perimeter[0] : 0,
-        grid_element_is_first_row(element) ? perimeter[1] : 0,
-        0
+        grid_element_is_first(element, 0) ? perimeter[0] : 0,
+        grid_element_is_first(element, 1) ? perimeter[1] : 0,
+        len(index) >= 3 && grid_element_is_first(element, 2) ?
+            perimeter[2] : 0
+    ])
+    let(element_offset =[
+        element_dimensions.x/2,
+        element_dimensions.y/2,
+        len(index) >= 3 ? element_dimensions.z/2 : 0
     ])
     grid_get_position_bottom_left(grid)
         + raw_element_offset + perimeter_offset
-        + (centered ? element_dimensions/2 : [0, 0, 0]);
+        + (centered ? element_offset : [0, 0, 0]);
 
 /**
  * @brief Numeric index of the current element.
  * @warning: Ordering in which elements are rendered is **not** finalized and may change.
+ * @details Equivalent to:
+ *    ```
+ *    sum([
+ *        index[0],
+ *        index[1]*num_elements[0],
+ *        index[2]*num_elements[0]*num_elements[1],
+ *        ...
+ *    ])
+ *    ```
  * @param element An opaque "grid_element" data object.
  * @returns A positive integer.
  */
@@ -135,50 +150,87 @@ function grid_element_get_sequence_number(element) =
     let(grid=element[1])
     let(index=element[2])
     let(centered=element[3])
-    index.x * grid_get_num_elements(grid).y + index.y;
+    let(num_elements=grid_get_num_elements(grid))
+    let(rank=len(num_elements))
+
+    [for(d=0,a=0,m=1;
+            d<rank;
+            a=a+index[d]*m,m=m*num_elements[d],d=d+1
+        )
+        a+index[d] * m
+    ][rank-1];
 
 /**
  * @brief Dimensions of the current grid_element.
  * @details Takes the grid perimeter into account.
  * @param element An opaque "grid_element" data object.
- * @returns [length, width]
+ * @returns A vector with the same rank as `grid_get_element_dimensions`.
  */
 function grid_element_get_dimensions(element) =
     assert(is_grid_element(element), "Not a grid element.")
     assert(!grid_element_is_default(element))
     let(grid=element[1])
-    let(perimeter = grid_get_perimeter(grid))
-    let(perimeter_adjustment = [
-        (grid_element_is_first_col(element) ? perimeter[0] : 0)
-        + (grid_element_is_last_col(element) ? perimeter[2] : 0),
-        (grid_element_is_first_row(element) ? perimeter[1] : 0)
-        + (grid_element_is_last_row(element) ? perimeter[3] : 0)
+    let(raw_element_dimensions=grid_get_element_dimensions(grid))
+    let(perimeter=grid_get_perimeter(grid))
+    let(rank=len(raw_element_dimensions))
+    let(perimeter_adjustment = [ for(i=[0:rank-1])
+        (grid_element_is_first(element, i) ? perimeter[i] : 0)
+        + (grid_element_is_last(element, i) ? perimeter[i+rank] : 0)
     ])
-    grid_get_element_dimensions(grid) - perimeter_adjustment;
+    raw_element_dimensions - perimeter_adjustment;
+
+/**
+ * @brief If the element's position in the given dimension matches.
+ * @param element An opaque "grid_element" data object.
+ * @param dimension Dimension to check.
+ *                  0: column (x)
+ *                  1: row (y)
+ *                  2: layer (z)
+ *                  So on for higher dimensional grids.
+ * @param position Where in the dimension to check.
+ *                 0: first
+ *                 `num_elements[dimension] - 1`: last.
+ */
+function grid_element_is_in_position(element, dimension, position) =
+    assert(is_grid_element(element), "Not a grid element.")
+    assert(is_num(dimension) && dimension >= 0)
+    assert(is_num(position) && position >= 0)
+    grid_element_is_default(element) ? false
+    : grid_element_get_index(element)[dimension] == position;
+
+/**
+ * @brief If this is one of the first elements in a given dimension.
+ * @see grid_element_is_in_position
+ */
+function grid_element_is_first(element, dimension) =
+    grid_element_is_in_position(element, dimension, 0);
+
+/**
+ * @brief If this is one of the last elements in a given dimension.
+ * @see grid_element_is_in_position
+ */
+function grid_element_is_last(element, dimension) =
+    assert(is_grid_element(element), "Not a grid element.")
+    let(is_default = grid_element_is_default(element))
+    let(grid = element[1])
+    let(num_elements = is_default ? [] : grid_get_num_elements(grid))
+    assert(is_default || dimension < len(num_elements),
+        str("Maximum dimension is ", len(num_elements) - 1))
+    let(last = is_default ? 0 : num_elements[dimension] - 1)
+    is_default ? false
+        : grid_element_is_in_position(element, dimension, last);
 
 function grid_element_is_first_col(element) =
-    assert(is_grid_element(element), "Not a grid element.")
-    grid_element_is_default(element) ? false
-    : grid_element_get_index(element).x == 0;
+    grid_element_is_first(element, 0);
 
 function grid_element_is_first_row(element) =
-    assert(is_grid_element(element), "Not a grid element.")
-    grid_element_is_default(element) ? false
-    : grid_element_get_index(element).y == 0;
+    grid_element_is_first(element, 1);
 
 function grid_element_is_last_col(element) =
-    assert(is_grid_element(element), "Not a grid element.")
-    let(grid=element[1])
-    grid_element_is_default(element) ? false
-    : grid_element_get_index(element).x
-        == grid_get_num_elements(grid).x - 1;
+    grid_element_is_last(element, 0);
 
 function grid_element_is_last_row(element) =
-    assert(is_grid_element(element), "Not a grid element.")
-    let(grid=element[1])
-    grid_element_is_default(element) ? false
-    : grid_element_get_index(element).y
-        == grid_get_num_elements(grid).y - 1;
+    grid_element_is_last(element, 1);
 
 /**
  * @brief Label the element with it's index.
@@ -195,20 +247,34 @@ module grid_element_label(element,
 
     dimensions = grid_element_get_dimensions(element);
     centered = grid_element_is_centered(element);
-
     output = str(is_function(label) ? label(element) : label);
+
     rotate_text = dimensions.x < dimensions.y;
-    max_width = (rotate_text ? dimensions.y : dimensions.x)/4;
-    max_height = (rotate_text ? dimensions.x : dimensions.y)/2;
-//    echo(max_width=max_width,max_height=max_height);
+    available_2d = rotate_text ? [dimensions.y, dimensions.x]
+        : [dimensions.x, dimensions.y];
+    final_available = available_2d - [2.5, 2.5];
+
+    text_size = textmetrics(output,
+        halign="center",
+        valign="center"
+    ).size;
+    scaling_factor = [
+        final_available.x / text_size.x,
+        final_available.y / text_size.y
+    ];
+    square_scaling_factor =
+        [min(scaling_factor), min(scaling_factor), 1];
+//    echo(is_rotated=rotate_text,
+//        text_size=text_size,
+//        scaling_factor=scaling_factor);
 
     color("black")
-    translate(concat(centered ? [0, 0] : dimensions/2, 0))
+    translate(centered ? [0, 0, 0] : dimensions/2)
     rotate([0, 0, rotate_text ? 90 : 0])
+    scale(square_scaling_factor)
     text(output,
         halign="center",
-        valign="center",
-        size=min(max_width, max_height)
+        valign="center"
     );
 }
 
@@ -224,37 +290,102 @@ module debug_grid_element(element, gap=1.0, alpha=1.0, layer_spacing=0.01) {
     assert(is_grid_element(element), "Not a grid element.");
     assert(!grid_element_is_default(element));
     assert(is_num(gap) && gap >= 0);
-    assert(is_num(alpha));
+    assert(is_num(alpha) && alpha >= 0);
+    assert(is_num(layer_spacing));
+
+    rank = len(grid_element_get_dimensions(element));
+
+    if(alpha > 0) {
+        if (rank >= 3) {
+            _debug_grid_element_3d(element, gap, alpha);
+        } else {
+            _debug_grid_element_2d(element, gap, alpha, layer_spacing);
+        }
+    }
+}
+
+/**
+ * @brief Internal function.  Do not use directly.
+ */
+module _debug_grid_element_2d(element, gap, alpha, layer_spacing) {
+    assert(is_grid_element(element), "Not a grid element.");
+    assert(!grid_element_is_default(element));
+    assert(is_num(gap) && gap >= 0);
+    assert(is_num(alpha) && alpha > 0);
     assert(is_num(layer_spacing));
 
     dimensions = grid_element_get_dimensions(element);
+    rank = len(dimensions);
     centered = grid_element_is_centered(element);
+    assert(rank == 2);
 
-    gap_2d = [gap, gap]/2;
+    dimensions_2d = [dimensions.x, dimensions.y];
+    gap_2d = [gap, gap] / 2;
     border_2d = [0.1, 0.1] / 2;
 
-    if(alpha > 0) {
-        color(_element_color(element), alpha)
-        square(dimensions-gap_2d, center=centered);
-
-        // Border
-        color("black", alpha)
-        translate([0, 0, layer_spacing])
-        difference() {
-            square(dimensions+border_2d, center=centered);
-            translate(concat(border_2d, 0))
-            square(dimensions-border_2d, center=centered);
-        }
-
-        // Center dot
-        color("grey", alpha)
-        translate([0, 0, 2*layer_spacing])
-        circle(0.5);
-    }
+    // Zero point dot
+    color("grey", alpha)
+    translate([0, 0, 2*layer_spacing])
+    circle(0.5);
 
     translate([0, 0, layer_spacing])
     grid_element_label(element);
 //    grid_element_label(element, function(e) grid_element_get_sequence_number(e));
+
+    color(_element_color(element), alpha)
+    square(dimensions_2d-gap_2d, center=centered);
+
+    // Border
+    color("black", alpha)
+    translate([0, 0, layer_spacing])
+    difference() {
+        square(dimensions+border_2d, center=centered);
+        translate(concat(border_2d, 0))
+        square(dimensions-border_2d, center=centered);
+    }
+}
+
+/**
+ * @brief Internal function.  Do not use directly.
+ */
+module _debug_grid_element_3d(element, gap, alpha) {
+    assert(is_grid_element(element), "Not a grid element.");
+    assert(!grid_element_is_default(element));
+    assert(is_num(gap) && gap >= 0);
+    assert(is_num(alpha) && alpha >= 0);
+
+    dimensions = grid_element_get_dimensions(element);
+    rank = len(dimensions);
+    centered = grid_element_is_centered(element);
+    assert(rank >= 3);
+
+    border = 0.1;
+    dimensions_2d = [dimensions.x, dimensions.y];
+    gap_2d = [gap, gap] / 2;
+    border_2d = [border, border] / 2;
+
+    // Zero point sphere
+    color("grey", alpha)
+    sphere(r=0.5);
+
+    color("black")
+    linear_extrude(0.01, center=centered)
+    grid_element_label(element);
+//    grid_element_label(element, function(e) grid_element_get_sequence_number(e));
+
+    // Lightly colored cubes
+    color(_element_color(element), min(alpha, 0.1))
+    linear_extrude(dimensions.z-gap, center=centered)
+    square(dimensions_2d-gap_2d, center=centered);
+
+    // Border
+    color("black", alpha)
+    linear_extrude(border, center=centered)
+    difference() {
+        square(dimensions+border_2d, center=centered);
+        translate(concat(border_2d, 0))
+        square(dimensions-border_2d, center=centered);
+    }
 }
 
 /**

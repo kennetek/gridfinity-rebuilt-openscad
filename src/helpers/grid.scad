@@ -5,98 +5,84 @@
 
 use <grid_element.scad>
 
-_assert_grid_parameters = function(
-    num_elements,
-    element_dimensions,
-    center,
-    perimeter
-    )
-    assert(is_list(num_elements)
-        && len(num_elements) == 2
-        && num_elements.x >= 0
-        && num_elements.y >= 0)
-    assert(is_list(element_dimensions)
-        && len(element_dimensions) == 2
-        && element_dimensions.x > 0
-        && element_dimensions.y > 0)
-    assert(is_bool(center))
-    assert(is_list(perimeter)
-        && len(perimeter) == 4
-        && perimeter[0] >= 0
-        && perimeter[1] >= 0
-        && perimeter[2] >= 0
-        && perimeter[3] >= 0,
-        "perimeter must be in the form [0, 0, 0, 0], and no item may be negative.")
-    true;
+_is_valid_perimeter = function(element_dimensions, perimeter)
+    assert(is_list(element_dimensions))
+    let(rank=len(element_dimensions))
+    is_undef(perimeter) || (
+    is_list(perimeter)
+    && len(perimeter) == 2 * rank
+    // None match the condition.
+    && min([for(i=[0:rank-1])
+        perimeter[i] + perimeter[i+rank] < element_dimensions[i]
+        || (element_dimensions[i] ==0
+            && perimeter[i] + perimeter[i+rank] == 0
+        ) ? 1 : 0]) != 0
+    );
 
- /**
-  * @brief Create a pattern of 2d elements.
-  * @description Each element is the given size.
-  *     The total size is the sum of all elements minus the perimiter.
-  *     Perimeter exists to allow a specific spacing between elements, while reducing the overall size.
-  *     When perimeter is set, the outer elements dimensions are reduced.
-  * @param num_elements [x, y] Number of elements to create.
-  * @param @param element_dimensions [length, width] of a single element.
-  * @param center Center the entire grid.
-  *               Otherwise grid starts at bottom left corner.
-  *               Determines the [0, 0] position grid_elements use.
-  * @param perimeter [-x, -y, +x, +y] **Subtracted** from the outer element edges.
-  *        Each item represents a side.
-  *        Bottom left position is always **outside** the perimeter.
-  * @returns An opaque "grid" object.
+/**
+ * @brief Create a pattern of 2d elements.
+ * @description Each element is the given size.
+ *     The total size is the sum of all elements minus the perimiter.
+ *     Perimeter exists to allow a specific spacing between elements, while reducing the overall size.
+ *     When perimeter is set, the outer elements dimensions are reduced.
+ * @param num_elements [x, y] Number of elements to create.
+ * @param @param element_dimensions [length, width] of a single element.
+ * @param center Center the entire grid.
+ *               Otherwise grid starts at bottom left corner.
+ *               Determines the [0, 0] position grid_elements use.
+ * @param perimeter [-x, -y, +x, +y, ...]
+ *     **Subtracted** from the outer element edges.
+ *     Each item represents a side.
+ *     Always 2 * len(element_dimensions) items..
+ *     Bottom left position is always **outside** the perimeter.
+ * @returns An opaque "grid" object.
  */
 function new_grid(
     num_elements,
     element_dimensions,
     center=false,
-    perimeter=[0,0,0,0]
+    perimeter=undef
     ) =
-    assert(_assert_grid_parameters(
-        num_elements,
-        element_dimensions,
-        center,
-        perimeter
-    ))
+    assert(is_list(num_elements)
+        && len(num_elements) >= 2
+        && min(num_elements) >= 0)
+    assert(is_list(element_dimensions)
+        && len(element_dimensions) == len(num_elements)
+        && min(element_dimensions) >= 0)
+    assert(is_bool(center))
+    assert(_is_valid_perimeter(element_dimensions, perimeter),
+    str("perimeter must have ", len(element_dimensions) * 2," items, and must be smaller than an element."))
     [
         "grid_struct",
         num_elements,
         element_dimensions,
         center,
-        perimeter
+        !is_undef(perimeter) ? perimeter
+            : [for(i=[0:2*len(element_dimensions)-1]) 0]
     ];
 
- /**
-  * @brief Subdivide a 2d square into grid of child elements.
-  * @param num_elements Number of elements to create. [x, y]
-  * @param total_dimensions [length, width] of the entire grid.
-  * @param center Center the entire grid.
-  *               Otherwise grid starts at bottom left corner.
-  *               Also determines the [0, 0] position.
-  * @param perimeter [-x, -y, +x, +y] **Subtracted** from the outer element edges.
-  *        Each item represents a side.
-  * @returns An opaque "grid" object.
- */
+/**
+ * @brief Subdivide a 2d square into grid of child elements.
+ * @param total_dimensions [length, width] of the entire grid.
+ * @see new_grid for all other parameters.
+ * @returns An opaque "grid" object.
+*/
 function grid_from_total(
     num_elements,
     total_dimensions,
     center=false,
-    perimeter=[0,0,0,0]
+    perimeter=undef
     ) =
-    assert(_assert_grid_parameters(
-        num_elements,
-        [1, 1],
-        center,
-        perimeter
-    ))
+    assert(is_list(num_elements)
+        && len(num_elements) >= 2
+        && min(num_elements) >= 0)
     assert(is_list(total_dimensions)
-        && len(total_dimensions) >= 2
-        && total_dimensions.x > 0
-        && total_dimensions.y > 0)
+        && len(total_dimensions) == len(num_elements)
+        && min(total_dimensions) >= 0)
     let(element_dimensions = [
-        num_elements.x == 0 ? 1
-        : total_dimensions.x / num_elements.x,
-        num_elements.y == 0 ? 1
-        : total_dimensions.y / num_elements.y
+        for(d=[0:len(num_elements)-1])
+        num_elements[d] == 0 ? 1
+        : total_dimensions[d] / num_elements[d]
     ])
     new_grid(num_elements, element_dimensions, center, perimeter);
 
@@ -141,7 +127,6 @@ function grid_get_element_count(grid) =
  * @brief Theoretical element dimensions.
  * @details Does **NOT** take perimeter into account.
  * @param grid An opaque "grid" data object.
- * @returns [length, width]
  */
 function grid_get_element_dimensions(grid) =
     assert(is_grid(grid), "Not a grid.")
@@ -169,30 +154,30 @@ function grid_get_perimeter(grid) =
  * @details Does **NOT** take perimeter into account.
  * @see grid_get_total_dimensions for the correct function.
  * @param grid An opaque "grid" data object.
- * @returns The [length, width] of the entire grid.
+ * @returns The raw [length, width, height, ...] of the entire grid.
  */
 function grid_get_raw_dimensions(grid) =
     assert(is_grid(grid), "Not a grid.")
     let(num_elements = grid[1])
     let(element_dimensions = grid[2])
-    [
-        num_elements.x * element_dimensions.x,
-        num_elements.y * element_dimensions.y
+    let(rank=len(num_elements))
+    [ for(i=[0:rank-1])
+        num_elements[i] * element_dimensions[i]
     ];
 
 /**
  * @brief Get the [length, width] of the entire grid.
  * @details Takes perimeter into account.
  * @param grid An opaque "grid" data object.
- * @returns A 2d vector.
+ * @returns A vector with the same rank as element_dimensions.
  */
 function grid_get_total_dimensions(grid) =
     assert(is_grid(grid), "Not a grid.")
     let(perimeter=grid[4])
-    grid_get_raw_dimensions(grid) - [
-        perimeter[0] + perimeter[2],
-        perimeter[1] + perimeter[3]
-    ];
+    let(raw_dimensions=grid_get_raw_dimensions(grid))
+    let(rank=len(raw_dimensions))
+    raw_dimensions
+    - [ for(i=[0:rank-1]) perimeter[i] + perimeter[i+rank] ];
 
 /**
  * @brief The amount to translate by in order to be at the bottom left position of the grid.
@@ -204,22 +189,33 @@ function grid_get_total_dimensions(grid) =
 function grid_get_position_bottom_left(grid) =
     assert(is_grid(grid), "Not a grid.")
     let(centered = grid[3])
-    let(perimeter=grid[4])
+    let(half_raw_dimensions=grid_get_raw_dimensions(grid)/2)
+    let(rank=len(half_raw_dimensions))
     !centered ? [0, 0, 0]
-        : concat(-grid_get_raw_dimensions(grid)/2, 0);
+        : -[
+            half_raw_dimensions.x,
+            half_raw_dimensions.y,
+            rank>=3 ? half_raw_dimensions.z : 0
+        ];
 
 /*
  * @brief The amount to translate by in order to be at the center position of the grid.
- * @details [0, 0] if `is_centered(grid)==true`.
- *     Otherwise assumes [0, 0] is **outside** the perimeter.
+ * @details Zero point if `is_centered(grid)==true`.
+ *     Otherwise assumes zero point is **outside** the perimeter.
  * @param grid An opaque "grid" data object.
  * @returns A 3d vector. Ready for use with `translate`.
  */
 function grid_get_position_center(grid) =
     assert(is_grid(grid), "Not a grid.")
     let(centered = grid[3])
+    let(half_raw_dimensions=grid_get_raw_dimensions(grid)/2)
+    let(rank=len(half_raw_dimensions))
     centered ? [0, 0, 0]
-        : concat(grid_get_raw_dimensions(grid)/2, 0);
+        : [
+            half_raw_dimensions.x,
+            half_raw_dimensions.y,
+            rank>=3 ? half_raw_dimensions.z : 0
+        ];
 
 /**
  * @brief If the object is a grid.
@@ -239,13 +235,14 @@ function is_grid(grid) =
 function grid_get_element(grid, index, center=false) =
     assert(is_grid(grid), "Not a grid.")
     let(num_elements = grid[1])
-    let(element_dimensions = grid[2])
 
-    assert(is_list(index)
-        && len(index) == 2
-        && index.x >= 0
-        && index.y >= 0)
-    assert(index.x < num_elements.x && index.y < num_elements.y,
+    assert(is_list(index) && len(index) == len(num_elements),
+        str("index must be a list with ", len(num_elements), " items."))
+    assert(min(index) >= 0, "index may not contain negative values.")
+    assert(min([
+            for(d=[0:len(index)-1])
+            index[d] < num_elements[d] ? 1 : 0
+        ]) == 1,
         str("index must be below ", num_elements))
     assert(is_bool(center))
     [
@@ -280,13 +277,21 @@ module grid_translate(grid, index, center=false) {
 module grid_foreach(grid, center_elements=false) {
     assert(is_grid(grid), "Not a grid.");
     num_elements = grid[1];
-    element_dimensions = grid[2];
 
-    for(sequence_number = [0 : num_elements.x * num_elements.y - 1]) {
+    count = grid_get_element_count(grid);
+    rank = len(num_elements);
+
+    for(sequence_number = [0:count-1]) {
+        //Goes x -> y -> z
         index = [
-            floor(sequence_number / num_elements.y),
-            sequence_number % num_elements.y
+            for(d=0,i=sequence_number;
+                d<rank;
+                i=floor(i/num_elements[d]), d=d+1
+            )
+            i % num_elements[d]
         ];
+
+//        echo(sequence_number=sequence_number, index=index);
         grid_translate(grid, index, center_elements)
         children();
     }
@@ -359,6 +364,7 @@ module print_grid(grid) {
     position_center = grid_get_position_center(grid);
 
     echo("Grid:");
+    echo(str("  element_count:\t     ", grid_get_element_count(grid)));
     echo(str("  num_elements:\t     ", grid_get_num_elements(grid)));
     echo(str("  element_dimensions:  ", grid_get_element_dimensions(grid)));
     echo(str("  raw_dimensions:\t     ", raw_mm));
@@ -379,10 +385,37 @@ module print_grid(grid) {
  */
 module grid_visualize_perimeter(grid, min_per_side=0.1) {
     assert(is_grid(grid));
-    assert(min_per_side >= 0);
+    assert(is_num(min_per_side) && min_per_side >= 0);
+
+    raw_mm = grid_get_raw_dimensions(grid);
+    rank = len(raw_mm);
+    perimeter = grid_get_perimeter(grid);
+    position_bottom_left = grid_get_position_bottom_left(grid);
+
+    if(len(raw_mm) < 3) {
+        _grid_visualize_perimeter_2d(grid, min_per_side);
+    } else {
+        translate([0, 0, position_bottom_left.z])
+        linear_extrude(max(perimeter[2], min_per_side))
+        _grid_visualize_perimeter_2d(grid, min_per_side);
+
+        translate([0, 0, position_bottom_left.z + raw_mm.z])
+        mirror([0, 0, 1])
+        linear_extrude(max(perimeter[2+rank], min_per_side))
+        _grid_visualize_perimeter_2d(grid, min_per_side);
+    }
+}
+
+/**
+ * @brief Internal function.  Do not use directly
+ */
+module _grid_visualize_perimeter_2d(grid, min_per_side) {
+    assert(is_grid(grid));
+    assert(is_num(min_per_side) && min_per_side >= 0);
 
     position_bottom_left = grid_get_position_bottom_left(grid);
     raw_mm = grid_get_raw_dimensions(grid);
+    raw_mm_2d = [raw_mm.x, raw_mm.y];
     total_mm = grid_get_total_dimensions(grid);
     perimeter = grid_get_perimeter(grid);
 
@@ -390,21 +423,21 @@ module grid_visualize_perimeter(grid, min_per_side=0.1) {
         max(perimeter[0], min_per_side),
         max(perimeter[1], min_per_side)
     ];
-    inner_size = raw_mm - perimiter_offset - [
-        max(perimeter[2], min_per_side),
-        max(perimeter[3], min_per_side)
+    inner_size = raw_mm_2d - [
+        max(raw_mm.x - total_mm.x, 2 * min_per_side),
+        max(raw_mm.y - total_mm.y, 2 * min_per_side)
     ];
     // Ensure logic is correct.
     assert(inner_size.x <= total_mm.x
         && inner_size.y <= total_mm.y);
 
     // Perimeter
-    if (raw_mm != total_mm || min_per_side > 0) {
+    if(raw_mm != total_mm || min_per_side > 0) {
+        translate(position_bottom_left)
         difference() {
-            translate(position_bottom_left)
-            square(raw_mm);
+            square(raw_mm_2d);
 
-            translate(position_bottom_left + concat(perimiter_offset, 0))
+            translate(concat(perimiter_offset, 0))
             square(inner_size);
         }
     }
@@ -449,8 +482,13 @@ module debug_grid(
     grid_visualize_perimeter(grid);
 
     //Grid Center
-    translate(grid_get_position_center(grid) + [0, 0, 3 * layer_spacing])
-    circle(r=0.75);
+    position_center = grid_get_position_center(grid);
+    translate(position_center + [0, 0, 3 * layer_spacing])
+    if (len(position_center) == 2) {
+        circle(r=0.75);
+    } else {
+        sphere(r=0.75);
+    }
 }
 
 $test_grid = true;
@@ -476,6 +514,7 @@ if(!is_undef($test_grid) && $test_grid){
     }
 
     //****************************************//
+    // Testing Perimeter
 
     grid_34 = new_grid([3, 4], [20, 10], false, [1, 2, 3, 4]);
     grid_34_copy = grid_from_other(grid_34);
@@ -488,8 +527,30 @@ if(!is_undef($test_grid) && $test_grid){
     debug_grid(grid_34_centered);
 
     grid_11 = new_grid([1, 1], [20, 10], false, [4, 3, 2, 1]);
-    translate([0, -100, 0])
+    translate([400, 0, 0])
     debug_grid(grid_11, print=2, _center_elements=false);
+
+    //****************************************//
+    grid_341 = new_grid([3, 4, 1], [20, 10, 5], true);
+    translate([0, -50, 0])
+    debug_grid(grid_341, print=1);
+
+    grid_342 = new_grid([3, 4, 2], [20, 10, 5], true);
+    translate([0, -100, 0])
+    debug_grid(grid_342, print=1);
+
+    grid_3d2 = grid_from_other(grid_342, center=false);
+    translate([0, -175, 0])
+    debug_grid(grid_3d2, print=1);
+
+    translate([0, -225, 0])
+    debug_grid(grid_3d2, print=0, _center_elements=false);
+
+    grid_3dp = grid_from_other(grid_3d2,
+        perimeter=[0, 0, 3, 0, 0, 1]);
+    translate([0, -275, 0])
+    debug_grid(grid_3dp, print=1);
+    //****************************************//
 
     grid_13 = new_grid([1, 3], [10, 20], true);
     translate([-50, 0, 0]) {
@@ -499,6 +560,7 @@ if(!is_undef($test_grid) && $test_grid){
             square(4, center=true);
             text("text", halign="center");
         }
+        //Perimeter should not show
         grid_visualize_perimeter(grid_13, 0);
     }
 
