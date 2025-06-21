@@ -56,15 +56,20 @@ function new_bin(
         : max(height_mm, 0)
     )
     // Subtracting BASE_GAP_MM to remove the perimeter overhang.
-    let(grid_size_mm = vector_scale(grid_size, grid_dimensions) - BASE_GAP_MM)
+    let(base_grid=new_grid(
+        grid_size,
+        limit_2d(grid_dimensions),
+        true,
+        _BIN_BASE_GAP_MM_PERIMETER)
+    )
     [
         "gridfinity_bin_struct",
-        grid_size,
+        base_grid,
         height_mm,
         fill_height_real,
         include_lip,
-        grid_dimensions,
-        grid_size_mm,
+        undef,
+        grid_get_total_dimensions(base_grid),
         undef,
         hole_options,
         only_corners,
@@ -84,12 +89,9 @@ module bin_render(bin) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
-    grid_size = bin[1];
     height_mm = bin[2];
     fill_height_real = bin[3];
     include_lip = bin[4];
-    grid_dimensions = bin[5];
-    grid_size_mm = bin[6];
     hole_options = bin[8];
     only_corners = bin[9];
     thumbscrew = bin[10];
@@ -122,8 +124,10 @@ module bin_render_infill(bin) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
+    base_grid = bin[1];
     fill_height_real = bin[3];
-    grid_size_mm = bin[6];
+
+    grid_size_mm = grid_get_total_dimensions(base_grid);
 
     color("firebrick")
     translate([0, 0, BASE_HEIGHT])
@@ -140,12 +144,10 @@ module bin_render_wall(bin) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
-    height_mm = bin[2];
-    grid_size_mm = bin[6];
 
     color("royalblue")
     translate([0, 0, BASE_HEIGHT])
-    render_wall(concat(grid_size_mm, height_mm));
+    render_wall(bin_get_size_mm(bin));
 }
 
 /**
@@ -156,15 +158,16 @@ module bin_render_base(bin) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
-    grid_size = bin[1];
+    base_grid = bin[1];
     height_mm = bin[2];
     fill_height_real = bin[3];
     include_lip = bin[4];
-    grid_dimensions = bin[5];
-    grid_size_mm = bin[6];
     hole_options = bin[8];
     only_corners = bin[9];
     thumbscrew = bin[10];
+
+    grid_size = grid_get_num_elements(base_grid);
+    grid_dimensions = grid_get_element_dimensions(base_grid);
 
     gridfinityBase(grid_size, grid_dimensions=grid_dimensions, hole_options=hole_options,only_corners=only_corners, thumbscrew=thumbscrew);
 }
@@ -185,21 +188,21 @@ module bin_render_lite(bin, bottom_thickness) {
         "Not a Gridfinity bin."
     );
     assert(is_num(bottom_thickness) && bottom_thickness >= 0);
-    grid_size = bin[1];
-    height_mm = bin[2];
+    base_grid = bin[1];
     fill_height_real = bin[3];
     include_lip = bin[4];
-    grid_dimensions = bin[5];
-    grid_size_mm = bin[6];
     hole_options = bin[8];
     only_corners = bin[9];
     thumbscrew = bin[10];
+
+    grid_size = grid_get_num_elements(base_grid);
+    grid_dimensions = grid_get_element_dimensions(base_grid);
 
     // Deliberately overlapping with the bridging structure.
     // Lite bases use a thinner structure.
     // BASE_BRIDGE_HEIGHT makes up for said overlap.
     translate([0, 0, BASE_PROFILE_HEIGHT])
-    render_wall(concat(grid_size_mm, height_mm + BASE_BRIDGE_HEIGHT));
+    render_wall(bin_get_size_mm(bin) + [0, 0, BASE_BRIDGE_HEIGHT]);
 
     // While not required, the base cutout will not show correctly in preview without this.
     render()
@@ -235,12 +238,9 @@ module subdivide_bin(bin, subdivisions) {
     );
     assert(is_valid_2d(subdivisions)
         && subdivisions.x >=0 && subdivisions.y >=0);
-    grid_size = bin[1];
     height_mm = bin[2];
     fill_height_real = bin[3];
     include_lip = bin[4];
-    grid_dimensions = bin[5];
-    grid_size_mm = bin[6];
     hole_options = bin[8];
     only_corners = bin[9];
     thumbscrew = bin[10];
@@ -261,8 +261,8 @@ function bin_get_bases(bin) =
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     )
-    let(grid_size = bin[1])
-    grid_size;
+    let(base_grid = bin[1])
+    grid_get_num_elements(base_grid);
 
 /**
  * @brief Get the outer size of the bin.
@@ -273,9 +273,21 @@ function bin_get_size_mm(bin) =
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     )
+    let(base_grid = bin[1])
     let(height_mm = bin[2])
-    let(grid_size_mm = bin[6])
-    concat(grid_size_mm, height_mm);
+    concat(grid_get_total_dimensions(base_grid), height_mm);
+
+/**
+ * @brief Internal function. Do not use directly.
+ */
+function _bin_get_infill_grid(bin) =
+    assert(is_bin(bin),
+        "Not a Gridfinity bin."
+    )
+    let(base_grid = bin[1])
+    let(wall_perimeter = [for(i=[0:3]) d_wall])
+    grid_from_other(base_grid, perimeter =
+        _BIN_BASE_GAP_MM_PERIMETER + wall_perimeter);
 
 /**
  * @brief Get the infill dimensions.
@@ -288,9 +300,9 @@ function bin_get_infill_size_mm(bin, is_lite = false) =
         "Not a Gridfinity bin."
     )
     let(fill_height_real = bin[3])
-    let(grid_size_mm = bin[6])
     let(extra_height = is_lite ? BASE_HEIGHT : 0)
-    let(total_inner_mm = foreach_add(grid_size_mm, - 2*d_wall))
+    let(infill_grid = _bin_get_infill_grid(bin))
+    let(total_inner_mm = grid_get_total_dimensions(infill_grid))
     concat(total_inner_mm, fill_height_real + extra_height);
 
 /**
@@ -299,3 +311,13 @@ function bin_get_infill_size_mm(bin, is_lite = false) =
  */
 function is_bin(bin) =
     is_list(bin) && bin[0] == "gridfinity_bin_struct";
+
+/**
+ * @brief Internal variable. Do not use directly.
+ */
+_BIN_BASE_GAP_MM_PERIMETER = [
+    BASE_GAP_MM.x/2,
+    BASE_GAP_MM.y/2,
+    BASE_GAP_MM.x/2,
+    BASE_GAP_MM.y/2
+];
