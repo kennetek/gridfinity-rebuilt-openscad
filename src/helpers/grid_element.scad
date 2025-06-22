@@ -21,39 +21,15 @@ function is_grid_element(element) =
     && len(element) == 4;
 
 /**
- * @brief Internal function. Do not use directly.
- */
-_grid_element_default = function()
-    [
-        "grid_element_struct",
-        [], //grid object
-        [],  // index
-        false // centered
-    ];
-
-/**
  * @brief Information about the given element from `grid_translate` or `grid_foreach`.
- * @details To be used by a child element.
- * @param allow_default If true, returns an empty element.
- *                      False triggers an assert.
+ * @details To be used by a child of `grid_translate`.
+ * @assert If called anywhere else.
  * @returns An opaque data type to be passed to accessor functions.
  */
 function grid_element_current(allow_default = false) =
-    is_grid_element($_grid_element) ? $_grid_element
-    : allow_default ? _grid_element_default()
-    : assert(false, "No grid element available.");
-
-/**
- * @brief If the passed variable is the default element.
- * @details Default element is created when calling ` grid_element_current(allow_default=true)` outside of `grid_translate` or `grid_foreach`.
- * @param element The variable returned by a call to `grid_element_current`
- */
-function grid_element_is_default(element) =
-    assert(is_grid_element(element), "Not a grid element.")
-    let(grid=element[1])
-    let(index=element[2])
-    let(centered=element[3])
-    !is_grid(grid);
+    assert(is_grid_element($_grid_element),
+        "No grid element available.")
+    $_grid_element;
 
 /**
  * @brief Parent grid of the current element.
@@ -62,7 +38,6 @@ function grid_element_is_default(element) =
  */
 function grid_element_get_grid(element) =
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
     let(grid=element[1])
     let(index=element[2])
     let(centered=element[3])
@@ -86,7 +61,6 @@ function grid_element_get_index(element) =
  */
 function grid_element_is_centered(element) =
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
     let(grid=element[1])
     let(index=element[2])
     let(centered=element[3])
@@ -100,7 +74,6 @@ function grid_element_is_centered(element) =
  */
 function grid_element_get_position(element) =
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
     let(grid=element[1])
     let(index=element[2])
     let(centered=element[3])
@@ -146,7 +119,6 @@ function grid_element_get_position(element) =
  */
 function grid_element_get_sequence_number(element) =
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
     let(grid=element[1])
     let(index=element[2])
     let(centered=element[3])
@@ -168,7 +140,6 @@ function grid_element_get_sequence_number(element) =
  */
 function grid_element_get_dimensions(element) =
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
     let(grid=element[1])
     let(raw_element_dimensions=grid_get_element_dimensions(grid))
     let(perimeter=grid_get_perimeter(grid))
@@ -195,8 +166,7 @@ function grid_element_is_in_position(element, dimension, position) =
     assert(is_grid_element(element), "Not a grid element.")
     assert(is_num(dimension) && dimension >= 0)
     assert(is_num(position) && position >= 0)
-    grid_element_is_default(element) ? false
-    : grid_element_get_index(element)[dimension] == position;
+    grid_element_get_index(element)[dimension] == position;
 
 /**
  * @brief If this is one of the first elements in a given dimension.
@@ -211,14 +181,12 @@ function grid_element_is_first(element, dimension) =
  */
 function grid_element_is_last(element, dimension) =
     assert(is_grid_element(element), "Not a grid element.")
-    let(is_default = grid_element_is_default(element))
     let(grid = element[1])
-    let(num_elements = is_default ? [] : grid_get_num_elements(grid))
-    assert(is_default || dimension < len(num_elements),
+    let(num_elements = grid_get_num_elements(grid))
+    assert(dimension < len(num_elements),
         str("Maximum dimension is ", len(num_elements) - 1))
-    let(last = is_default ? 0 : num_elements[dimension] - 1)
-    is_default ? false
-        : grid_element_is_in_position(element, dimension, last);
+    let(last = num_elements[dimension] - 1)
+    grid_element_is_in_position(element, dimension, last);
 
 function grid_element_is_first_col(element) =
     grid_element_is_first(element, 0);
@@ -242,7 +210,6 @@ function grid_element_is_last_row(element) =
 module grid_element_label(element,
     label=function(e) grid_element_get_index(e)) {
     assert(is_grid_element(element), "Not a grid element.");
-    assert(!grid_element_is_default(element));
     assert(!is_undef(label));
 
     dimensions = grid_element_get_dimensions(element);
@@ -288,7 +255,6 @@ module grid_element_label(element,
  */
 module debug_grid_element(element, gap=1.0, alpha=1.0, layer_spacing=0.01) {
     assert(is_grid_element(element), "Not a grid element.");
-    assert(!grid_element_is_default(element));
     assert(is_num(gap) && gap >= 0);
     assert(is_num(alpha) && alpha >= 0);
     assert(is_num(layer_spacing));
@@ -309,7 +275,6 @@ module debug_grid_element(element, gap=1.0, alpha=1.0, layer_spacing=0.01) {
  */
 module _debug_grid_element_2d(element, gap, alpha, layer_spacing) {
     assert(is_grid_element(element), "Not a grid element.");
-    assert(!grid_element_is_default(element));
     assert(is_num(gap) && gap >= 0);
     assert(is_num(alpha) && alpha > 0);
     assert(is_num(layer_spacing));
@@ -350,7 +315,6 @@ module _debug_grid_element_2d(element, gap, alpha, layer_spacing) {
  */
 module _debug_grid_element_3d(element, gap, alpha) {
     assert(is_grid_element(element), "Not a grid element.");
-    assert(!grid_element_is_default(element));
     assert(is_num(gap) && gap >= 0);
     assert(is_num(alpha) && alpha >= 0);
 
@@ -407,7 +371,6 @@ function _element_color(element) =
  */
 module print_grid_element(element) {
     assert(is_grid_element(element), "Not a grid element.")
-    assert(!grid_element_is_default(element))
 
     echo("grid_element:");
     echo(str("  index:\t    ", grid_element_get_index(element)));
