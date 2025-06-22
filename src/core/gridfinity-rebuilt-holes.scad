@@ -214,29 +214,33 @@ module screw_hole(radius, height, supportless=false, chamfer_radius=0, chamfer_a
  * @param supportless If the magnet/screw hole should be printed in such a way that the screw hole does not require supports.
  */
 function bundle_hole_options(refined_hole=false, magnet_hole=false, screw_hole=false, crush_ribs=false, chamfer=false, supportless=false) =
-    assert(
-        is_bool(refined_hole) &&
-        is_bool(magnet_hole) &&
-        is_bool(screw_hole) &&
-        is_bool(crush_ribs) &&
-        is_bool(chamfer) &&
-        is_bool(supportless))
-    [refined_hole, magnet_hole, screw_hole, crush_ribs, chamfer, supportless];
+    assert(is_bool(refined_hole))
+    assert(is_bool(magnet_hole))
+    assert(is_bool(screw_hole))
+    assert(is_bool(crush_ribs))
+    assert(is_bool(chamfer))
+    assert(is_bool(supportless))
+    assert(!refined_hole
+        || (refined_hole && !magnet_hole),
+    "magnet_hole is not compatible with refined_hole")
+    [
+        "hole_options_struct",
+        refined_hole,
+        magnet_hole,
+        screw_hole,
+        crush_ribs,
+        chamfer,
+        supportless
+    ];
 
 /**
- * @summary Ensures that hole options are valid, and can be used.
+ * @brief If the object is a "hole_options".
+ * @param hole_options The object to check.
  */
-module assert_hole_options_valid(hole_options) {
-    assert(is_list(hole_options) && len(hole_options) == 6);
-    for(option=hole_options){
-        assert(is_bool(option), "One or more hole options is not a boolean value!");
-    }
-    refined_hole = hole_options[0];
-    magnet_hole = hole_options[1];
-    if(refined_hole) {
-        assert(!magnet_hole, "magnet_hole is not compatible with refined_hole");
-    }
-}
+function is_hole_options(hole_options) =
+    is_list(hole_options)
+    && len(hole_options) == 7
+    && hole_options[0] == "hole_options_struct";
 
 /**
  * @brief A single magnet/screw hole.  To be cut out of the base.
@@ -245,16 +249,16 @@ module assert_hole_options_valid(hole_options) {
  * @param o offset Grows or shrinks the final shapes.  Similar to `scale`, but in mm.
  */
 module block_base_hole(hole_options, o=0) {
-    assert_hole_options_valid(hole_options);
+    assert(is_hole_options(hole_options));
     assert(is_num(o));
 
     // Destructure the options
-    refined_hole = hole_options[0];
-    magnet_hole = hole_options[1];
-    screw_hole = hole_options[2];
-    crush_ribs = hole_options[3];
-    chamfer = hole_options[4];
-    supportless = hole_options[5];
+    refined_hole = hole_options[1];
+    magnet_hole = hole_options[2];
+    screw_hole = hole_options[3];
+    crush_ribs = hole_options[4];
+    chamfer = hole_options[5];
+    supportless = hole_options[6];
 
     screw_radius = SCREW_HOLE_RADIUS - (o/2);
     magnet_radius = MAGNET_HOLE_RADIUS - (o/2);
