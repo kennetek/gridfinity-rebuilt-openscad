@@ -78,13 +78,14 @@ binL = new_bin(
     include_lip = style_lip == 0,
     hole_options = hole_options,
     only_corners = only_corners || half_grid,
-    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1)
+    grid_dimensions = GRID_DIMENSIONS_MM / (half_grid ? 2 : 1),
+    base_thickness = bottom_layer
 );
-compartment_height = bin_get_infill_size_mm(binL, true).z;
-bin_render_lite(binL, bottom_layer){
+
+bin_render(binL){
     bin_subdivide(binL, [divx, divy]) {
         cut_compartment_auto(
-            cgs(height=compartment_height+2*TOLLERANCE),
+            cgs(),
             style_tab,
             place_tab != 0
         );
