@@ -227,6 +227,7 @@ function is_grid(grid) =
 
 /**
  * @brief Get the element at a particular index.
+ * @details Uses `floor` to insure all indexes are integers.
  * @param grid An opaque "grid" data object.
  * @param index The multidimensional index of the element.
  * @param center If the element's position should be at the center of the element.  Otherwise, bottom left.
@@ -245,25 +246,36 @@ function grid_get_element(grid, index, center=false) =
         ]) == 1,
         str("index must be below ", num_elements))
     assert(is_bool(center))
+    let(index_real = [for(i=index) floor(i)])
     [
         "grid_element_struct",
         grid,
-        index,
+        index_real,
         center // Return position as center of the element or not.
     ];
 
 /**
  * @brief Move to a particular element's position within the grid.
- * @details Children may use `grid_element_current` to obtain the element at the index passed in.
+ * @details Supports floating point index values.
+ *     Children may use `grid_element_current` to obtain the element at the index passed in.
  * @param grid An opaque "grid" data object.
  * @param index The multidimensional index of the element to move to.
+ *              If passed a float, final position is translated by the formula `(index-floor(index))*element_dimensions`.
  * @param center Move to the center point of the element.
  *                       Otherwise moves to the bottom left corner.
  */
 module grid_translate(grid, index, center=false) {
     element = grid_get_element(grid, index, center);
     $_grid_element = element;
-    translate(grid_element_get_position(element))
+
+    index_real = grid_element_get_index(element);
+    partial_index = index - index_real;
+    element_dimensions = grid_get_element_dimensions(grid);
+    offset = [for(i=[0:len(index)-1])
+        partial_index[i] * element_dimensions[i]
+    ];
+
+    translate(grid_element_get_position(element) + offset)
     children();
 }
 
@@ -562,6 +574,14 @@ if(!is_undef($test_grid) && $test_grid){
         }
         //Perimeter should not show
         grid_visualize_perimeter(grid_13, 0);
+
+        //Should create a red circle between text and the square.
+        grid_translate(grid_13, [0, 1.5], true){
+            element = grid_element_current();
+            print_grid_element(element);
+            color("red")
+            circle(r=1);
+        }
     }
 
     // These should produce nothing.
