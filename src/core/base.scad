@@ -12,6 +12,8 @@ use <../helpers/shapes.scad>
 use <../external/threads-scad/threads.scad>
 
 _debug = false;
+//$fa = 8;
+//$fs = 0.25;
 
 /**
  * @brief Create the base of a gridfinity bin, or use it for a custom object.
@@ -39,10 +41,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
     ] - BASE_GAP_MM;
 
     // Top which ties all bases together
-    color("RosyBrown")
-    translate([0, 0, BASE_PROFILE_HEIGHT])
-    linear_extrude(BASE_BRIDGE_HEIGHT)
-    rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
+    _base_bridge_solid(grid_size_mm);
 
     if(only_corners) {
         difference(){
@@ -72,18 +71,24 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
  * @param grid_size Size in number of bases. [x, y]
  * @param grid_dimensions [length, width] of a single Gridfinity base.
  * @param wall_thickness How thick the walls, and holes (if enabled) are.
- * @param top_bottom_thickness How thick the top and bottom is.
+ * @param bottom_thickness Height of the solid bottom.
  * @param hole_options @see block_base_hole.hole_options
  * @param only_corners Only put holes on each corner.
  */
-module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_thickness, top_bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
+module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_thickness, bottom_thickness, hole_options=bundle_hole_options(), only_corners = false) {
     assert(is_list(grid_size) && len(grid_size) == 2 && grid_size.x > 0 && grid_size.y > 0);
     assert(is_num(wall_thickness) && wall_thickness > 0);
-    assert(is_num(top_bottom_thickness) && top_bottom_thickness >= 0);
+    assert(is_num(bottom_thickness)
+        && bottom_thickness >= 0
+        && bottom_thickness <= BASE_HEIGHT);
     assert(is_bool(only_corners));
 
-    individual_base_size_mm = grid_dimensions - BASE_GAP_MM;
+    wall_thickness_2d = [wall_thickness, wall_thickness];
 
+    solid_bridge_height = bottom_thickness - BASE_PROFILE_HEIGHT;
+    profile_height = min(bottom_thickness, BASE_PROFILE_HEIGHT);
+
+    individual_base_size_mm = grid_dimensions - BASE_GAP_MM;
     // Final size of the base top. In mm.
     // Subtracting BASE_GAP_MM to remove the perimeter overhang.
     grid_size_mm = [
@@ -91,16 +96,40 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         grid_dimensions.y * grid_size.y
     ] - BASE_GAP_MM;
 
-    //Bridging structure to tie the bases together
+    //Hollow bridging structure to tie the bases together
     color("RosyBrown")
     difference() {
-        translate([0, 0, BASE_PROFILE_HEIGHT])
-        linear_extrude(top_bottom_thickness)
-        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
+        _base_bridge_solid(grid_size_mm);
 
+        //Creates a square bridging structure.
+        translate([0, 0, BASE_PROFILE_HEIGHT-TOLLERANCE])
         pattern_grid(grid_size, grid_dimensions, true, true)
-        translate([0, 0, top_bottom_thickness+TOLLERANCE])
-        base_solid(individual_base_size_mm- [d_wall, d_wall]);
+        linear_extrude(BASE_BRIDGE_HEIGHT+2*TOLLERANCE)
+        rounded_square(
+            individual_base_size_mm - 2 * wall_thickness_2d,
+            BASE_TOP_RADIUS-wall_thickness,
+            center=true);
+
+        // Chamfer the inner edges
+        translate([0, 0, BASE_PROFILE_HEIGHT-TOLLERANCE])
+        intersection() {
+            pattern_grid(grid_size, grid_dimensions, true, true)
+            _lite_bridge_chamfer(
+                individual_base_size_mm,
+                wall_thickness);
+
+            // Don't touch the exterior.
+            linear_extrude(BASE_BRIDGE_HEIGHT+2*TOLLERANCE)
+            rounded_square(
+                grid_size_mm- 2 * wall_thickness_2d,
+                BASE_TOP_RADIUS-wall_thickness,
+                center=true);
+        }
+    }
+
+    //Solid bridging structure
+    if (solid_bridge_height > 0) {
+        _base_bridge_solid(grid_size_mm, solid_bridge_height);
     }
 
     render()
@@ -108,7 +137,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         difference() {
             union() {
                 pattern_grid(grid_size, grid_dimensions, true, true)
-                base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
+                base_outer_shell(wall_thickness, profile_height, individual_base_size_mm);
                 _base_holes(hole_options, grid_size_mm, -wall_thickness);
             }
 
@@ -120,7 +149,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         pattern_grid(grid_size, grid_dimensions, true, true) {
             difference() {
                 union() {
-                    base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
+                    base_outer_shell(wall_thickness, profile_height, individual_base_size_mm);
                     _base_holes(hole_options, individual_base_size_mm, -wall_thickness);
                 }
                 _base_holes(hole_options, individual_base_size_mm);
@@ -128,6 +157,55 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
             }
         }
     }
+}
+
+/**
+ * @brief The solid bridging structure for bases.
+ * @details Already translated to the correct height. Per the standard.
+ * @param grid_size_mm Total grid size.
+ *        Taking BASE_GAP_MM into account.
+ * @param height
+ */
+module _base_bridge_solid(grid_size_mm, height=BASE_BRIDGE_HEIGHT) {
+    assert(is_valid_2d(grid_size_mm)
+        && is_positive(grid_size_mm));
+    assert(is_num(height)
+        && height >= 0
+        && height <= BASE_BRIDGE_HEIGHT);
+
+    color("RosyBrown")
+    translate([0, 0, BASE_PROFILE_HEIGHT])
+    linear_extrude(height)
+    rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
+}
+
+/**
+ * @brief Negative to chamfer the bridge structure for lite bases.
+ * @param individual_base_size_mm Size of a single base.
+ *        Taking BASE_GAP_MM into account.
+ * @param wall_thickness
+ */
+module _lite_bridge_chamfer(individual_base_size_mm, wall_thickness) {
+    assert(is_valid_2d(individual_base_size_mm)
+        && is_positive(individual_base_size_mm));
+    assert(is_num(wall_thickness)
+        && wall_thickness > 0);
+
+    chamfer_polygon = [
+        [0, 0], // Inside of bin
+        [wall_thickness, BASE_BRIDGE_HEIGHT],
+        [0, BASE_BRIDGE_HEIGHT],
+    ];
+    translated_polygon = foreach_add(
+        chamfer_polygon, [
+            BASE_TOP_RADIUS-wall_thickness-TOLLERANCE,
+            2*TOLLERANCE
+        ]);
+    sweep_inner = individual_base_size_mm
+        - 2 * [BASE_TOP_RADIUS, BASE_TOP_RADIUS];
+
+    sweep_rounded(sweep_inner)
+    polygon(translated_polygon);
 }
 
 /**
