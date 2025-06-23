@@ -80,7 +80,7 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // which divisions have tabs
 place_tab = 0; // [0:Everywhere-Normal,1:Top-Left Division]
 // how should the top lip act
-style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
+style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height, 3: regular Lip with Notches]
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
 scoop = 1; //[0:0.1:1]
 
