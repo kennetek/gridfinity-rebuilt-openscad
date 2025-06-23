@@ -138,7 +138,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
             union() {
                 pattern_grid(grid_size, grid_dimensions, true, true)
                 base_outer_shell(wall_thickness, profile_height, individual_base_size_mm);
-                _base_holes(hole_options, grid_size_mm, -wall_thickness);
+                _base_holes(hole_options, grid_size_mm, -2*wall_thickness);
             }
 
             _base_holes(hole_options, grid_size_mm);
@@ -150,7 +150,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
             difference() {
                 union() {
                     base_outer_shell(wall_thickness, profile_height, individual_base_size_mm);
-                    _base_holes(hole_options, individual_base_size_mm, -wall_thickness);
+                    _base_holes(hole_options, individual_base_size_mm, -2*wall_thickness);
                 }
                 _base_holes(hole_options, individual_base_size_mm);
                 _base_preview_fix();
