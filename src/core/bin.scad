@@ -260,6 +260,25 @@ module bin_subdivide(bin, subdivisions) {
 }
 
 /**
+ * @brief Translate to the lower left of a particular grid element.
+ * @details [0, 0] is the lower left corner.
+ * @param bin A bin created by the `new_bin` function.
+ * @param index [x, y]
+ */
+module bin_translate(bin, index) {
+    assert(is_bin(bin),
+        "Not a Gridfinity bin."
+    );
+    assert(is_valid_2d(index));
+
+    index_3d = concat(as_2d(index), 0.5);
+    infill_grid = _bin_get_infill_grid(bin);
+
+    grid_translate(infill_grid, index_3d, false)
+    children();
+}
+
+/**
  * @brief Get the number of bases the bin is composed of.
  * @warning Total size **is not merely multiplying this by `bin_get_bases`.
  * @param bin A bin created by the `new_bin` function.
