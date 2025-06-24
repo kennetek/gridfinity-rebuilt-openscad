@@ -3,6 +3,8 @@
  * @brief Generic shape modules. Not gridfinity specific.
  */
 
+$debug_shapes=false;
+
 /**
  * @brief Create a cone given a radius and an angle.
  * @param bottom_radius Radius of the bottom of the cone.
@@ -51,4 +53,72 @@ module rounded_square(size, radius, center = false) {
 
     offset(radius)
     square(size_l - diameter_2d, center = center);
+}
+
+/**
+ * @brief Create `cube`, with rounded corners.
+ * @param size A positive 3d vector.
+ * @param radius Radius of the corners. 0 is the same as just calling `cube`
+ * @param center Same as `cube`.
+ */
+module rounded_cube(size, radius, center=false) {
+    assert(is_list(size)
+        && len(size) == 3
+        && min(size) > 0);
+    assert(is_num(radius) && radius >= 0);
+
+    adjusted = size/2 - [radius, radius, radius];
+    assert(min(adjusted) >= 0,
+        "All dimensions must be at least 2*radius.");
+
+    translate(center ? [0, 0, 0] : size/2)
+    if(radius == 0) {
+        cube(size, center=true);
+    } else {
+        // 8 corners
+        for(i=[0:1], j=[0:1], k=[0:1])
+        mirror([i, 0, 0])
+        mirror([0, j, 0])
+        mirror([0, 0, k])
+        translate(adjusted)
+        {
+            sphere(r=radius);
+
+            if(adjusted.x > 0)
+            color("orange")
+            rotate([0, -90, 0])
+            cylinder(r=radius, h=adjusted.x);
+
+            if(adjusted.y > 0)
+            color("blue")
+            rotate([90, 0, 0])
+            cylinder(r=radius, h=adjusted.y);
+
+            if(adjusted.z > 0)
+            color("green")
+            rotate([0, 180, 0])
+            cylinder(r=radius, h=adjusted.z);
+        }
+        //Center Fill
+        if(adjusted.y > 0 && adjusted.z > 0)
+        cube(size - 2*[0, radius, radius], center=true);
+        if(adjusted.x > 0 && adjusted.z > 0)
+        cube(size - 2*[radius, 0, radius], center=true);
+        if(adjusted.x > 0 && adjusted.y > 0)
+        cube(size - 2*[radius, radius, 0], center=true);
+
+//        if($preview && $debug_shapes)
+//        color("grey", 0.1)
+//        cube(size, center=true);
+    }
+}
+
+$test_shapes = true;
+if(!is_undef($test_shapes) && $test_shapes){
+    $fa = 4;
+    $fs = 0.25;
+
+    rounded_cube([3, 4, 5], 1, true);
+    translate([5, 0, 0])
+    rounded_cube([3, 4, 5], 1, false);
 }
