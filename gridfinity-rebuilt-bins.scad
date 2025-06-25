@@ -183,44 +183,61 @@ bin_render(bin_33) {
     }
 }
 
-// Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as (0,0) being the bottom left corner of the bin, with each unit being 1 base long. Each cut() module is a compartment, with the first four values defining the area that should be made into a compartment (X coord, Y coord, width, and height). These values should all be positive. t is the tab style of the compartment (0:full, 1:auto, 2:left, 3:center, 4:right, 5:none). s is a toggle for the bottom scoop.
+// Compartments can be placed anywhere (this includes non-integer positions like 1/2 or 1/3). The grid is defined as [0, 0] being the bottom left corner of the bin, with each unit being 1 base long.
+//  Use `bin_translate` to go to the correct coordinates within the bin.
+//  Use `compartment_cutter(cgs([x, y]), center_top=false);` to cut a compartment of approximately size [x, y] bases.
 
 translate([-150, 0, 0])
 bin_render(bin_33) {
-    cut(x=0, y=0, w=1.5, h=0.5, t=5, s=0);
-    cut(0, 0.5, 1.5, 0.5, 5, 0);
-    cut(0, 1, 1.5, 0.5, 5, 0);
+    bin_translate(bin_33, [0, 0])
+    compartment_cutter(cgs([1.5, 0.5]), center_top=false);
+    bin_translate(bin_33, [0, 0.5])
+    compartment_cutter(cgs([1.5, 0.5]), center_top=false);
+    bin_translate(bin_33, [0, 1])
+    compartment_cutter(cgs([1.5, 0.5]), center_top=false);
 
-    cut(0,1.5,0.5,1.5,5,0);
-    cut(0.5,1.5,0.5,1.5,5,0);
-    cut(1,1.5,0.5,1.5,5,0);
+    bin_translate(bin_33, [0, 1.5])
+    compartment_cutter(cgs([0.5, 1.5]), center_top=false);
+    bin_translate(bin_33, [0.5, 1.5])
+    echo(cgs([0.5, 1.5]))
+    compartment_cutter(cgs([0.5, 1.5]), center_top=false);
+    bin_translate(bin_33, [1, 1.5])
+    compartment_cutter(cgs([0.5, 1.5]), center_top=false);
 
-    cut(1.5, 0, 1.5, 5/3, 2);
-    cut(1.5, 5/3, 1.5, 4/3, 4);
+    bin_translate(bin_33, [1.5, 0])
+    compartment_cutter(cgs([1.5, 5/3]), center_top=false);
+    bin_translate(bin_33, [1.5, 5/3])
+    compartment_cutter(cgs([1.5, 4/3]), center_top=false);
 }
 
 // Compartments can overlap! This allows for weirdly shaped compartments, such as this "2" bin.
 translate([0, 150, 0])
 bin_render(bin_33) {
-    cut(0,2,2,1,5,0);
-    cut(1,0,1,3,5);
-    cut(1,0,2,1,5);
-    cut(0,0,1,2);
-    cut(2,1,1,2);
+    bin_translate(bin_33, [0, 2])
+    compartment_cutter(cgs([2, 1]), center_top=false);
+    bin_translate(bin_33, [1, 0])
+    compartment_cutter(cgs([1, 3]), center_top=false);
+    bin_translate(bin_33, [1, 0])
+    compartment_cutter(cgs([2, 1]), center_top=false);
+    bin_translate(bin_33, [0, 0])
+    compartment_cutter(cgs([1, 2]), center_top=false);
+    bin_translate(bin_33, [2, 1])
+    compartment_cutter(cgs([1, 2]), center_top=false);
 }
 
-// Areas without a compartment are solid material, where you can put your own cutout shapes. using the cut_move() function, you can select an area, and any child shapes will be moved from the origin to the center of that area, and subtracted from the block. For example, a pattern of three cylinderical holes.
+// A pattern of three cylinderical holes.
 translate([0, -150, 0])
 bin_render(bin_33) {
     depth = bin_get_infill_size_mm(bin_33).z;
-    cut(x=0, y=0, w=2, h=3);
-    cut(x=0, y=0, w=3, h=1, t=5);
+    bin_translate(bin_33, [0, 0])
+    compartment_cutter(cgs([2, 3]), center_top=false);
+    bin_translate(bin_33, [0, 0])
+    compartment_cutter(cgs([3, 1]), center_top=false);
 
-    cut_move(x=2, y=1, w=1, h=2)
-    translate([0, 0, -depth]) {
-        pattern_grid([1, 3], [42/2, 42/2], true, true) {
-            cylinder(r=5, h=depth+TOLLERANCE);
-        }
+    bin_translate(bin_33, [2.5, 2])
+    pattern_grid([1, 3], [42/2, 42/2], true, true) {
+        // Cannot use `cgs` here!
+        cut_chamfered_cylinder(5, depth);
     }
 }
 
@@ -229,8 +246,10 @@ translate([150, -150, 0])
 bin_render(bin_33) {
     gx = bin_get_bases(bin_33).x;
     for(i=[0:gx-1]) {
-        cut(i,0,1,gx-1);
-        cut(i,gx-1,1,1);
+        bin_translate(bin_33, [i, 0])
+        compartment_cutter(cgs([1, gx-1]), center_top=false);
+        bin_translate(bin_33, [i, gx-1])
+        compartment_cutter(cgs([1, 1]), center_top=false);
     }
 }
 
@@ -243,6 +262,7 @@ bin_render(bin_44) {
     gy = bin_get_bases(bin_44).y;
     for (i = [0:gx-1])
     for (j = [0:i])
-    cut(j*gx/(i+1),gy-i-1,gx/(i+1),1,0);
+    bin_translate(bin_44, [j*gx/(i+1), gy-i-1])
+    compartment_cutter(cgs([gx/(i+1), 1]), center_top=false);
 }
 */
