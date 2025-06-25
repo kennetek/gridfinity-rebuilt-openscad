@@ -10,6 +10,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/grid.scad>
 use <src/helpers/shapes.scad>
 
 // ===== PARAMETERS ===== //
@@ -128,24 +129,35 @@ module gridfinityVase() {
                 cube([gridx*l_grid,d_wall2,d_height-0.2],center=true);
             }
 
-            if (enable_funnel && gridz > 3)
-            pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-d_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
-            transform_funnel()
-            block_funnel_outside();
+            if (enable_funnel && gridz > 3) {
+                x_elements = n_st==0?n_divx>1?n_divx:gridx:1;
+                element_dimension = (gridx*l_grid-d_fo1)/x_elements;
+                pattern_grid([x_elements, 1], [element_dimension, element_dimension], true, true)
+                transform_funnel()
+                block_funnel_outside();
+            }
 
-            if (n_divx > 1)
-            pattern_linear(n_divx-1,1,(gridx*l_grid-0.5)/(n_divx))
-            block_divider();
+            if (n_divx > 1) {
+                element_dimension = (gridx*l_grid-0.5)/n_divx;
+                pattern_grid([n_divx-1, 1], [element_dimension, element_dimension], true, true)
+                block_divider();
+            }
 
-            if (n_divx < 1)
-            pattern_linear(n_st == 0 ? n_divx>1 ? n_divx-1 : gridx-1 : 1, 1, (gridx*l_grid-d_fo1)/((n_divx>1 ? n_divx : gridx)))
-            block_tabsupport();
+            if (n_divx < 1) {
+                x_elements = n_st == 0 ? n_divx>1 ? n_divx-1 : gridx-1 : 1;
+                element_dimension = (gridx*l_grid-d_fo1)/(n_divx>1 ? n_divx : gridx);
+                pattern_grid([x_elements, 1], [element_dimension, element_dimension], true, true)
+                block_tabsupport();
+            }
         }
 
-        if (enable_funnel && gridz > 3)
-        pattern_linear((n_st==0?n_divx>1?n_divx:gridx:1), 1, (gridx*l_grid-d_fo1)/(n_st==0?n_divx>1?n_divx:gridx:1))
-        transform_funnel()
-        block_funnel_inside();
+        if (enable_funnel && gridz > 3) {
+            x_element = n_st==0?n_divx>1?n_divx:gridx:1;
+            element_dimension = (gridx*l_grid-d_fo1)/x_element;
+            pattern_grid([x_element, 1], [element_dimension, element_dimension], true, true)
+            transform_funnel()
+            block_funnel_inside();
+        }
 
         if (!enable_lip)
         translate([0,0,1.5*d_height])

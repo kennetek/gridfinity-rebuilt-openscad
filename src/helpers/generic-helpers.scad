@@ -16,26 +16,6 @@ module copy_mirror(vec=[0,1,0]) {
     children();
 }
 
-/**
- * @deprecated Use `pattern_grid(...)`
- * @brief Create a 2d pattern of child items.
- * @param x Number of X divisions.
- * @param y Number of Y divisions. In mm.
- * @param sx Size of X.  In mm.
- * @param sy Size of Y.  In mm.
- */
-module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
-    yy = sy <= 0 ? sx : sy;
-    pattern_grid(
-        num_elements=[ceil(x), ceil(y)],
-        element_dimensions=[sx, yy],
-        center=true,
-        center_elements=true)
-    {
-        children();
-    }
-}
-
 module pattern_circular(n=2) {
     for (i = [1:n])
     rotate(i*360/n)

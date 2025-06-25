@@ -27,6 +27,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
+use <src/helpers/grid.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -168,7 +169,7 @@ gridfinityInit(3, 3, height(6), 0, 42) {
     cut(x=0, y=0, w=2, h=3);
     cut(x=0, y=0, w=3, h=1, t=5);
     cut_move(x=2, y=1, w=1, h=2)
-        pattern_linear(x=1, y=3, sx=42/2)
+        pattern_grid([1, 3], [42/2, 42/2], true, true)
             cylinder(r=5, h=1000, center=true);
 }
 gridfinityBase([3, 3]);

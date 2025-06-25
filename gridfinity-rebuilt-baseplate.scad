@@ -11,6 +11,7 @@ include <src/core/gridfinity-baseplate.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/grid.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -161,7 +162,7 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
                 translate(padding_start_point)
                 cube(size_mm);
                 // Replicated Single Baseplate piece
-                pattern_linear(grid_size.x, grid_size.y, length) {
+                pattern_grid(grid_size, [length, length], true, true) {
                     if (minimal) {
                         translate([0, 0, -TOLLERANCE/2])
                         baseplate_cutter([length, length], baseplate_height_mm+TOLLERANCE);
@@ -322,8 +323,8 @@ module cutter_screw_together(gx, gy, size = l_grid) {
     module screw(a, b) {
         copy_mirror([1,0,0])
         translate([a*size/2, 0, 0])
-        pattern_linear(1, b, 1, size)
-        pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
+        pattern_grid([1, b], [1, size], true, true)
+        pattern_grid([1, n_screws], [1, d_screw_head + screw_spacing], true, true)
         rotate([0,90,0])
         cylinder(h=size/2, d=d_screw, center = true);
     }

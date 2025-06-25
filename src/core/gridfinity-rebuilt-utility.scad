@@ -7,6 +7,7 @@
 include <standard.scad>
 use <gridfinity-rebuilt-holes.scad>
 use <../helpers/generic-helpers.scad>
+use <../helpers/grid.scad>
 use <../helpers/shapes.scad>
 use <../external/threads-scad/threads.scad>
 
@@ -125,7 +126,7 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
             linear_extrude(coutout_depth * 2)
             rounded_square([cutout_x, cutout_y], r_base, true);
 
-            pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding) / n_divx, sy=(gridy_mm - padding) / n_divy)
+            pattern_grid([n_divx, n_divy], [(gridx_mm - padding) / n_divx, (gridy_mm - padding) / n_divy], true, true)
                 rotate(rotation)
                     union() {
                         cylinder(d=cylinder_diameter, h=cylinder_height, center=true);
@@ -281,13 +282,13 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
 
     if(only_corners) {
         difference(){
-            pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
+            pattern_grid(grid_size, grid_dimensions, true, true) {
                 base_solid(individual_base_size_mm);
             }
 
             if(thumbscrew) {
                 thumbscrew_position = grid_size_mm - individual_base_size_mm;
-                pattern_linear(2, 2, thumbscrew_position.x, thumbscrew_position.y) {
+                pattern_grid([2, 2], thumbscrew_position, true, true) {
                     _base_thumbscrew();
                 }
             }
@@ -297,7 +298,7 @@ module gridfinityBase(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, hole_option
         }
     }
     else {
-        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+        pattern_grid(grid_size, grid_dimensions, true, true)
         block_base(hole_options, off, individual_base_size_mm, thumbscrew=thumbscrew);
     }
 }
@@ -336,7 +337,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         linear_extrude(top_bottom_thickness)
         rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
 
-        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+        pattern_grid(grid_size, grid_dimensions, true, true)
         translate([0, 0, top_bottom_thickness])
         base_solid(individual_base_size_mm);
     }
@@ -345,7 +346,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
     if(only_corners) {
         difference() {
             union() {
-                pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y)
+                pattern_grid(grid_size, grid_dimensions, true, true)
                 base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
                 _base_holes(hole_options, -wall_thickness, grid_size_mm);
             }
@@ -355,7 +356,7 @@ module gridfinity_base_lite(grid_size, grid_dimensions=GRID_DIMENSIONS_MM, wall_
         }
     }
     else {
-        pattern_linear(grid_size.x, grid_size.y, grid_dimensions.x, grid_dimensions.y) {
+        pattern_grid(grid_size, grid_dimensions, true, true) {
             difference() {
                 union() {
                     base_outer_shell(wall_thickness, top_bottom_thickness, individual_base_size_mm);
