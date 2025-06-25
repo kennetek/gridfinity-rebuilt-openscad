@@ -262,17 +262,20 @@ module bin_subdivide(bin, subdivisions) {
 /**
  * @brief Translate to the lower left of a particular grid element.
  * @details [0, 0] is the lower left corner.
+ *          Since some functions expect all grid elements to be identical...
  * @param bin A bin created by the `new_bin` function.
- * @param index [x, y]
+ * @param index [x, y] Suppports fractional values.
+ * @param exact If [0.5, 0.5] corresponds exactly to the center of a base.
+ *        Do not enable this unless you are familiar with how grid_elements interact with perimiters.
  */
-module bin_translate(bin, index) {
+module bin_translate(bin, index, exact=false) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
     assert(is_valid_2d(index));
 
     index_3d = concat(as_2d(index), 0.5);
-    infill_grid = _bin_get_infill_grid(bin);
+    infill_grid = _bin_get_infill_grid(bin, exact);
 
     grid_translate(infill_grid, index_3d, false)
     children();
@@ -344,23 +347,30 @@ function is_bin(bin) =
 /**
  * @brief Internal function. Do not use directly.
  * @param bin A bin created by the `new_bin` function.
+ * @param exact If the element center of each element should exactly match the center of the corresponding Gridfinity base.
+ * @details Setting exact to true. allows for perfect alignment, but at the cost of the outer elements being slightly smaller.
  */
-function _bin_get_infill_grid(bin) =
+function _bin_get_infill_grid(bin, exact) =
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     )
-    let(base_grid=bin[1])
+    assert(is_bool(exact))
+    let(base_grid = bin[1])
 
     let(infill_size_mm = bin_get_infill_size_mm(bin))
-    let(base_perimeter=grid_get_perimeter(base_grid))
-    let(infill_element_dimensions= concat(
+    let(base_perimeter = grid_get_perimeter(base_grid))
+    let(infill_element_dimensions=concat(
         bin_get_grid_dimensions(bin),
         infill_size_mm.z))
-    let(infill_grid = grid_from_other(base_grid,
+    let(equal_grid = grid_from_total(
+        concat(bin_get_bases(bin), 1), infill_size_mm, true))
+    let(exact_grid = grid_from_other(base_grid,
         element_dimensions = infill_element_dimensions,
         perimeter = base_perimeter + _BIN_WALL_PERIMITER))
     // Ensure the calculations are correct.
-    assert(grid_get_total_dimensions(infill_grid) == infill_size_mm)
+    assert(grid_get_total_dimensions(equal_grid) == infill_size_mm)
+    assert(grid_get_total_dimensions(exact_grid) == infill_size_mm)
+    let(infill_grid = exact ? exact_grid : equal_grid)
     infill_grid;
 
 /**
