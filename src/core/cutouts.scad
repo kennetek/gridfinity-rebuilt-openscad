@@ -8,7 +8,39 @@ use <tab.scad>
 use <../helpers/shapes.scad>
 use <../helpers/list.scad>
 use <../helpers/generic-helpers.scad>
+use <../helpers/grid.scad>
 use <../helpers/grid_element.scad>
+
+/**
+ * @brief "Cutout Grid Scale". Scale [x, y] by the current grid.
+ * @details Height is set by the current grid element by default.
+ *          Applies `-d_div/2` to X and Y.
+ *          **Average element size is not the same as the current element size!**
+ * @param size [x, y] in current grid units. z is optional.
+ * @param height Override the default height.
+ *               If negative, subtract from z-grid height.
+ * @return A 3d vector. With z (by default) equal to z-grid (infill) height.
+ * @warning Will throw if `grid_element_current()` is not valid.
+ */
+ function cgs(size=[1, 1], height=0) =
+    assert(is_valid_2d(size) && is_positive(size))
+    assert(is_num(height))
+    let(element=grid_element_current())
+    let(grid=grid_element_get_grid(element))
+    let(scaled = grid_scale(grid, size))
+    assert(is_valid_3d(scaled),
+        "grid_element_current() must have at least 3 dimensions.")
+    let(divider_mm = [d_div/2, d_div/2, 0])
+    let(calculated = as_3d(scaled) - divider_mm)
+    assert(calculated.x > 0
+        && calculated.y > 0
+        && (calculated.z > 0 || height > 0),
+        str("Grid Elements too small.  Must be greater than [d_div/2, d_div/2, 0] (", divider_mm, "mm)."))
+    [
+        calculated.x,
+        calculated.y,
+        height > 0 ? height : calculated.z + height
+    ];
 
 /**
  * @brief A negative of a square compartment with rounded edges,
