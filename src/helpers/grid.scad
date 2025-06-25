@@ -126,6 +126,7 @@ function grid_get_element_count(grid) =
 /**
  * @brief Theoretical element dimensions.
  * @details Does **NOT** take perimeter into account.
+ *          Inner elements are always this size.
  * @param grid An opaque "grid" data object.
  */
 function grid_get_element_dimensions(grid) =
@@ -148,6 +149,23 @@ function grid_get_perimeter(grid) =
     assert(is_grid(grid), "Not a grid.")
     let(perimeter=grid[4])
     perimeter;
+
+/**
+ * @brief Average element dimensions.
+ * @details **DOES** take perimeter into account.
+ *          When a perimiter exists, none of the elements are this exact size.
+ * @param grid An opaque "grid" data object.
+ * @returns A vector with the same rank as element_dimensions.
+ */
+function grid_get_average_element_dimensions(grid) =
+    assert(is_grid(grid), "Not a grid.")
+    let(num_elements = grid[1])
+    let(rank = len(num_elements))
+    let(total_dimensions = grid_get_total_dimensions(grid))
+    [ for(i=[0:rank-1])
+        total_dimensions[i] / (
+            num_elements[i] != 0 ? num_elements[i] : 1)
+    ];
 
  /**
  * @brief **Not reccomended for most use cases.** Get raw grid size.
@@ -253,6 +271,26 @@ function grid_get_element(grid, index, center=false) =
         index_real,
         center // Return position as center of the element or not.
     ];
+
+/**
+ * @brief Scale the given vector by the **average** grid element dimensions.
+ * @details If an dimension is not provided, then it is assumed to be 1.
+ *          Calling this without arguments, or with an empty list is equivalent to `grid_get_average_element_dimensions`.
+ * @param grid An opaque "grid" data object.
+ * @param grid_units vector to scale by.
+ * @returns A sacled vector with rank items.
+ */
+function grid_scale(grid, grid_units=[]) =
+    assert(is_grid(grid), "Not a grid.")
+    assert(is_list(grid_units))
+
+    let(size_mm=grid_get_average_element_dimensions(grid))
+    let(rank = len(size_mm))
+
+    // Ensure grid_units always has at least the same number of dimensions as grid_dimensions_mm.
+    let(size = concat(grid_units,
+        [for(i=len(grid_units);i<rank;i=i+1) 1]))
+    [ for(i=[0:rank-1]) size_mm[i] * size[i] ];
 
 /**
  * @brief Move to a particular element's position within the grid.
@@ -379,6 +417,7 @@ module print_grid(grid) {
     echo(str("  element_count:\t     ", grid_get_element_count(grid)));
     echo(str("  num_elements:\t     ", grid_get_num_elements(grid)));
     echo(str("  element_dimensions:  ", grid_get_element_dimensions(grid)));
+    echo(str("  average_element_dimensions:  ", grid_get_average_element_dimensions(grid)));
     echo(str("  raw_dimensions:\t     ", raw_mm));
     echo(str("  total_dimensions:\t     ", total_mm));
     echo(str("  is_centered:\t     ", centered));
@@ -593,4 +632,17 @@ if(!is_undef($test_grid) && $test_grid){
             circle(100);
         }
     }
+
+    //****************************************//
+
+    grid_23 = new_grid([2, 3], [10, 20], true);
+    assert(grid_scale(grid_23) == [10, 20]);
+    assert(grid_scale(grid_23, []) == [10, 20]);
+    assert(grid_scale(grid_23, [1]) == [10, 20]);
+    assert(grid_scale(grid_23, [1, 1]) == [10, 20]);
+    assert(grid_scale(grid_23, [0, 1]) == [0, 20]);
+    assert(grid_scale(grid_23, [1, 0]) == [10, 0]);
+    assert(grid_scale(grid_23, [0, 0]) == [0, 0]);
+    assert(grid_scale(grid_23, [1.5, 1.5]) == [15, 30]);
+    assert(grid_scale(grid_23, [2, 2]) == [20, 40]);
 }
