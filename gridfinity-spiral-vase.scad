@@ -10,6 +10,7 @@ https://github.com/kennetek/gridfinity-rebuilt-openscad
 include <src/core/standard.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/base.scad>
+use <src/core/wall.scad>
 use <src/helpers/generic-helpers.scad>
 use <src/helpers/grid.scad>
 use <src/helpers/shapes.scad>
@@ -82,6 +83,7 @@ else gridfinityVase(); // Generate the bin
 d_hole = 26;  // center-to-center distance between holes
 r_c1 = 0.8;  // lower base chamfer "radius"
 d_wall2 = BASE_TOP_RADIUS-r_c1-0.25*sqrt(2);
+module profile_wall(h){ _profile_wall(h); }
 //End Deprecated Variables
 
 d_bottom = layer*(max(bottom_layer,1));
@@ -409,7 +411,7 @@ module block_inset() {
 }
 
 module block_inset_sub(x, y, ang) {
-    translate([0,(gridy*l_grid-0.5)/2+r_fo1,0])
+    translate([0,(gridy*l_grid-0.5)/2+BASE_TOP_RADIUS,0])
     mirror([0,1,0])
     linear_extrude(y,center=true)
     polygon([[-x,0],[x,0],[0,x*tan(ang)]]);
@@ -428,7 +430,7 @@ module block_flushscoop() {
     linear_extrude(d_height)
     union() {
         copy_mirror([1,0,0])
-        polygon([[0,0],[gridx*l_grid/2-r_fo1,0],[gridx*l_grid/2-r_fo1,1],[gridx*l_grid/2-r_fo1-r_c1*5,d_wall2-nozzle*2+1],[0,d_wall2-nozzle*2+1]]);
+        polygon([[0,0],[gridx*l_grid/2-BASE_TOP_RADIUS,0],[gridx*l_grid/2-BASE_TOP_RADIUS,1],[gridx*l_grid/2-BASE_TOP_RADIUS-r_c1*5,d_wall2-nozzle*2+1],[0,d_wall2-nozzle*2+1]]);
     }
 
     transform_scoop()
@@ -531,4 +533,16 @@ module block_x_sub() {
     linear_extrude(d_bottom*2+0.01,center=true)
     offset(0.05)
     profile_x();
+}
+
+module block_wall(gx, gy, l) {
+    translate([0, 0, BASE_PROFILE_HEIGHT])
+    sweep_rounded([gx*l-2*BASE_TOP_RADIUS-0.5-0.001, gy*l-2*BASE_TOP_RADIUS-0.5-0.001])
+    children();
+}
+
+module block_bottom( h = 2.2, gx, gy, l ) {
+    translate([0, 0, BASE_PROFILE_HEIGHT + 0.1])
+    linear_extrude(h)
+    rounded_square([gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4], BASE_TOP_RADIUS+0.01, center=true);
 }
