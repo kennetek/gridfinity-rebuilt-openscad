@@ -11,6 +11,7 @@ include <src/core/gridfinity-baseplate.scad>
 use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/helpers/generic-helpers.scad>
+use <src/helpers/grid.scad>
 
 // ===== PARAMETERS ===== //
 
@@ -161,7 +162,7 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
                 translate(padding_start_point)
                 cube(size_mm);
                 // Replicated Single Baseplate piece
-                pattern_linear(grid_size.x, grid_size.y, length) {
+                pattern_grid(grid_size, [length, length], true, true) {
                     if (minimal) {
                         translate([0, 0, -TOLLERANCE/2])
                         baseplate_cutter([length, length], baseplate_height_mm+TOLLERANCE);
@@ -255,15 +256,15 @@ module hole_pattern(){
 }
 
 module cutter_countersink(){
-    screw_hole(SCREW_HOLE_RADIUS + d_clear, 2*BASE_HEIGHT,
+    screw_hole(SCREW_HOLE_RADIUS + TOLLERANCE, 2*BASE_PROFILE_HEIGHT,
         false, BASEPLATE_SCREW_COUNTERSINK_ADDITIONAL_RADIUS);
 }
 
 module cutter_counterbore(){
-    screw_radius = SCREW_HOLE_RADIUS + d_clear;
+    screw_radius = SCREW_HOLE_RADIUS + TOLLERANCE;
     counterbore_height = BASEPLATE_SCREW_COUNTERBORE_HEIGHT + 2*LAYER_HEIGHT;
     union(){
-        cylinder(h=2*BASE_HEIGHT, r=screw_radius);
+        cylinder(h=2*BASE_PROFILE_HEIGHT, r=screw_radius);
         difference() {
             cylinder(h = counterbore_height, r=BASEPLATE_SCREW_COUNTERBORE_RADIUS);
             make_hole_printable(screw_radius, BASEPLATE_SCREW_COUNTERBORE_RADIUS, counterbore_height);
@@ -322,8 +323,8 @@ module cutter_screw_together(gx, gy, size = l_grid) {
     module screw(a, b) {
         copy_mirror([1,0,0])
         translate([a*size/2, 0, 0])
-        pattern_linear(1, b, 1, size)
-        pattern_linear(1, n_screws, 1, d_screw_head + screw_spacing)
+        pattern_grid([1, b], [1, size], true, true)
+        pattern_grid([1, n_screws], [1, d_screw_head + screw_spacing], true, true)
         rotate([0,90,0])
         cylinder(h=size/2, d=d_screw, center = true);
     }
