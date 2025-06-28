@@ -115,12 +115,91 @@ module rounded_cube(size, radius, center=false) {
     }
 }
 
+/**
+ * @brief Simple donut shape.
+ * @details When inner_r=0, called a "horn torus".
+ * @param inner_r Inner radius.
+ * @param outer_r Outer radius.
+ * @param inner_fill Make the inside solid.
+ *                   Equivalent to `rounded_cylinder` with height equal to diameter.
+ */
+module torus(inner_r, outer_r, inner_fill=false) {
+    assert(is_num(inner_r) && inner_r >= 0);
+    assert(is_num(outer_r) && outer_r > 0);
+    assert(outer_r > inner_r);
+    radius = (outer_r - inner_r)/2;
+
+    rotate_extrude(360)
+    translate([outer_r-radius, 0, 0])
+    circle(r=radius);
+
+    if(inner_fill) {
+        cylinder(h=2*radius, r=outer_r-radius, center=true);
+    }
+//    color("blue", 0.5)
+//    circle(r=inner_r);
+//    color("red", 0.1)
+//    circle(r=outer_r);
+}
+
+/**
+ * @brief
+ * @details This is what (wolframcloud)[https://resources.wolframcloud.com/FunctionRepository/resources/RoundedCylinder] calls it.
+ * @param height
+ * @param radius
+ * @param edge_r Radius of the top/bottom edges.
+ *               0 is the same as calling `cylinder`.
+ * @param center Same as `cylinder(center)`.
+ */
+module rounded_cylinder(height, radius, edge_r, center=false) {
+    assert(is_num(height) && height>0);
+    assert(is_num(radius) && radius>0);
+    assert(is_num(edge_r) && edge_r>=0);
+    assert(is_bool(center));
+    assert(height >= 2*edge_r);
+    assert(radius >= 2*edge_r);
+
+    inner_radius = radius-2*edge_r;
+    inner_height = height-2*edge_r;
+
+    translate([0, 0, edge_r + (center?-height/2:0)]) {
+        if(inner_height > 0) {
+            cylinder(h=inner_height, r=radius);
+        }
+        if(edge_r > 0) {
+            torus(inner_radius, radius, true);
+            translate([0, 0, inner_height])
+            torus(inner_radius, radius, true);
+        }
+    }
+//    color("blue", 0.1)
+//    cylinder(h=5, r=5);
+}
+
 $test_shapes = true;
 if(!is_undef($test_shapes) && $test_shapes){
     $fa = 4;
-    $fs = 0.25;
+    $fs = 0.1;
 
     rounded_cube([3, 4, 5], 1, true);
     translate([5, 0, 0])
     rounded_cube([3, 4, 5], 1, false);
+
+    translate([0, 10, 0])
+    torus(4, 5);
+    translate([0, 10, 0])
+    torus(0, 2);
+    translate([0, 20, 0])
+    torus(4, 5, true);
+    translate([0, 30, 0])
+    rounded_cylinder(5, 5, 0.25);
+    translate([0, 40, 0])
+    rounded_cylinder(5, 5, 2.5);
+    translate([0, 50, 0])
+    rounded_cylinder(5, 5, 0);
+    translate([0, 60, 0])
+    rounded_cylinder(5, 5, 0.25, center=true);
+    translate([0, 70, 0])
+    color("blue")
+    cylinder(h=5, r=5, center=true);
 }
