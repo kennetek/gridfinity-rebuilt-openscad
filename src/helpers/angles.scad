@@ -30,3 +30,14 @@ function positive_angle(angle) =
     assert(is_num(angle))
     let(a = angle%360)
     a < 0 ? (a + 360) % 360 : a;
+
+/**
+ * @brief Determines the number of fragments in a circle. Aka, Circle resolution.
+ * @param r Radius of the circle.
+ * @details Recommended function from the manual as a translation of the OpenSCAD function.
+ *          Used to improve performance by not rendering every single degree of circles/spheres.
+ * @see https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Other_Language_Features#Circle_resolution:_$fa,_$fs,_and_$fn
+ */
+function get_fragments_from_r(r) =
+    assert(r > 0)
+    ($fn>0?($fn>=3?$fn:3):ceil(max(min(360/$fa,r*2*PI/$fs),5)));
