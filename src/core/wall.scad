@@ -8,8 +8,12 @@ include <standard.scad>
 use <../helpers/generic-helpers.scad>
 use <../helpers/angles.scad>
 use <../helpers/list.scad>
+use <../helpers/shapes.scad>
 
 $debug = false;
+$test_wall = true;
+$fa = 1;
+$fs = 0.1; // .01
 
 /*
  * @brief Render a wall of the given size, with a stacking lip.
@@ -26,16 +30,18 @@ module render_wall(size) {
         && size.z >= 0
     );
 
-    grid_size_mm = [size.x, size.y];
+    grid_size_mm = as_2d(size);
 
-    // Prevent the stacking lip from protruding too far down.
     color("royalblue")
-    intersection() {
-        sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
-        _profile_wall(size.z);
+    sweep_rounded(foreach_add(grid_size_mm, -2*BASE_TOP_RADIUS))
+    _profile_wall(size.z);
 
-        linear_extrude(size.z + STACKING_LIP_HEIGHT)
-        square(grid_size_mm, center=true);
+    // Wall below the stacking lip.
+    color("orange")
+    linear_extrude(size.z)
+    difference() {
+        rounded_square(grid_size_mm, BASE_TOP_RADIUS, center=true);
+        rounded_square(grid_size_mm-2*as_2d(d_wall), BASE_TOP_RADIUS, center=true);
     }
 }
 
@@ -247,19 +253,21 @@ function circle_fragment(radius, start_angle=0, sweep_by=360) =
 /**
  * @brief External wall profile, with a stacking lip.
  * @details Translated so a 90 degree rotation produces the expected outside radius.
+ *          Limited to prevent protrusion at low heights.
  * @param height_mm Height of the wall.  Excludes STACKING_LIP_HEIGHT, but **includes** STACKING_LIP_SUPPORT_HEIGHT.
  */
 module _profile_wall(height_mm) {
-    assert(is_num(height_mm)  && height_mm >=0 )
-    translate([BASE_TOP_RADIUS - STACKING_LIP_SIZE.x, 0, 0]){
-        translate([0, height_mm, 0])
-        _stacking_lip_filleted();
+    assert(is_num(height_mm)  && height_mm >=0 );
 
-        if(height_mm > 0) {
-            translate([STACKING_LIP_SIZE.x-d_wall, 0, 0])
-            square([d_wall, height_mm]);
-        }
-    }
+    filleted_line = radius_line_edge(STACKING_LIP, 3, STACKING_LIP_FILLET_RADIUS);
+
+    line = [
+        for(l=filleted_line) [
+            l.x + BASE_TOP_RADIUS - STACKING_LIP_SIZE.x,
+            max(l.y+height_mm, 0)
+        ]
+    ];
+    polygon(line);
 }
 
 module visualize_line(line, print=false) {
@@ -279,10 +287,7 @@ module visualize_line(line, print=false) {
     polygon(final_points);
 }
 
-$test_wall = true;
 if($test_wall) {
-    $fa = 1;
-    $fs = 0.1; // .01
     t_square=true;
     t_diamond=true;
 
@@ -302,6 +307,11 @@ if($test_wall) {
 
     translate([0, 10, 0])
     _stacking_lip_filleted();
+
+    translate([-10, 0, 0])
+    _profile_wall(0);
+    translate([-5, 0, 0])
+    _profile_wall(10);
 
     color("blue")
     translate([0, 0, 0])

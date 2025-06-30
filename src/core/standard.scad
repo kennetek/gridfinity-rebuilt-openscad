@@ -158,7 +158,7 @@ _stacking_lip_support_height_mm =
  * @Details Support is so the stacking lip is not floating in mid air when wall width is less than stacking lip depth.
  */
 STACKING_LIP = concat(STACKING_LIP_LINE, [
-    [STACKING_LIP_SIZE.x, -_stacking_lip_support_height_mm], // Down to support bottom
+    [STACKING_LIP_SIZE.x-TOLLERANCE, -_stacking_lip_support_height_mm], // Down to support bottom
     [0, -STACKING_LIP_SUPPORT_HEIGHT], // Up and in (to bottom inner support)
     //[0, 0] // Implicit back to start
 ]);

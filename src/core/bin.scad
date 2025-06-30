@@ -189,7 +189,6 @@ module bin_render_wall(bin) {
         "Not a Gridfinity bin."
     );
 
-    color("royalblue")
     translate([0, 0, BASE_HEIGHT])
     render_wall(bin_get_size_mm(bin));
 }
