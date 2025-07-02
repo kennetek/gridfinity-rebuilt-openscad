@@ -339,6 +339,54 @@ function bin_get_infill_size_mm(bin) =
     concat(size_2d-2*[d_wall,d_wall], fill_height_total);
 
 /**
+ * @brief Detailed information on bin's overall height.
+ * @details Designed for use with `pprint`.
+ * @returns A list of [key, value] pairs.
+ */
+function bin_get_height_breakdown(bin) =
+    assert(is_bin(bin),
+        "Not a Gridfinity bin."
+    )
+    let(base_grid = bin[1])
+    let(include_lip = bin[4])
+    let(bin_height = grid_get_total_dimensions(base_grid).z)
+    let(infill_height = bin_get_infill_size_mm(bin).z)
+    let(total_height = bin_height + BASE_HEIGHT + (include_lip ? stacking_lip_height() : 0))
+    let(free_space = bin_height - infill_height - (include_lip ? STACKING_LIP_SUPPORT_HEIGHT : 0))
+
+    let(heights = [
+        ["Total: ", total_height],
+        ["* BASE_HEIGHT", BASE_HEIGHT],
+        ["  -> BASE_PROFILE_HEIGHT", BASE_PROFILE_HEIGHT],
+        ["  -> BASE_BRIDGE_HEIGHT", BASE_BRIDGE_HEIGHT],
+        ["* Bin Height", bin_height],
+        ["  -> Infill", infill_height],
+        ["  -> Free space", abs(free_space) > 0.01 ? free_space : 0],
+        ["  -> Stacking Lip Support", STACKING_LIP_SUPPORT_HEIGHT],
+        ["* Stacking Lip Height (Actual)", stacking_lip_height()],
+        ["  -> Stacking Lip Height (Nominal)", STACKING_LIP_HEIGHT],
+        ["  -> Stacking Lip Chamfer", stacking_lip_height()-STACKING_LIP_HEIGHT],
+    ])
+
+    assert(heights[1][1] == heights[2][1] + heights[3][1],
+        "BASE_HEIGHT Calculation Error!")
+    assert(heights[8][1] == heights[9][1] + heights[10][1],
+        "Stacking Lip Height Calculation Error!")
+    assert((heights[5][1] + heights[6][1]
+            + (include_lip ? heights[7][1] : 0)
+        ) - heights[4][1] < 0.01,
+        str("Bin Height Calculation Error!\n",
+        "  Expected: ", heights[4][1], "==", heights[5][1],
+        "+", heights[6][1], "+", (include_lip ? heights[7][1] : 0),
+        "\n"))
+    assert(heights[0][1] == heights[1][1] + heights[4][1]
+        + (include_lip ? heights[8][1] : 0),
+        "Total Height Calculation Error!")
+    assert(heights[0][1] == bin_get_bounding_box(bin).z,
+        "Total Height Calculation Error!")
+    include_lip ? heights: as_list(heights, 7);
+
+/**
  * @brief If the object is a Gridfinity bin.
  * @param bin The object to check.
  */

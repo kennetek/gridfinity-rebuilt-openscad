@@ -120,6 +120,8 @@ echo(str(
     "Infill Dimensions: ", bin_get_infill_size_mm(bin1), "\n",
     "Final Size: ", bin_get_bounding_box(bin1), "\n",
 ));
+echo("Height breakdown:");
+pprint(bin_get_height_breakdown(bin1));
 
 bin_render(bin1) {
     bin_subdivide(bin1, [divx, divy]) {
