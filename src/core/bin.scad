@@ -25,7 +25,8 @@ use <../helpers/shapes.scad>
  * @details Creates the top portion of a bin, and sets some gloal variables.
  * @param grid_size Size in number of bases. [x, y]
  * @param height_mm Bin height in mm.
- *                  Excludes both STACKING_LIP_HEIGHT and BASE_HEIGHT.
+ *                  Excludes STACKING_LIP_HEIGHT.
+ *                  Includes BASE_HEIGHT.
  * @param fill_height_mm Height of the solid which fills a bin.  In mm.
           Set to 0 for automatic.
           Negative numbers are subtracted from the height.
@@ -49,7 +50,7 @@ function new_bin(
         base_thickness = BASE_HEIGHT
     ) =
     assert(is_valid_2d(grid_size) && is_positive(grid_size))
-    assert(is_num(height_mm) && height_mm >= 0)
+    assert(is_num(height_mm) && height_mm >= BASE_HEIGHT)
     assert(is_num(fill_height))
     assert(is_bool(include_lip))
     assert(is_hole_options(hole_options))
@@ -67,8 +68,8 @@ function new_bin(
         || fill_height <= height_mm - STACKING_LIP_SUPPORT_HEIGHT,
         str("Maximum fill_height for this bin is", height_mm - STACKING_LIP_SUPPORT_HEIGHT))
     let(fill_height_calculated = include_lip ?
-        height_mm - STACKING_LIP_SUPPORT_HEIGHT
-        : height_mm)
+        height_mm - BASE_HEIGHT - STACKING_LIP_SUPPORT_HEIGHT
+        : height_mm - BASE_HEIGHT)
     let(fill_height_real =
         fill_height > 0 ? fill_height
         : fill_height_calculated + fill_height
@@ -189,7 +190,8 @@ module bin_render_wall(bin) {
         "Not a Gridfinity bin."
     );
     let(base_grid = bin[1])
-    let(wall_height = grid_get_total_dimensions(base_grid))
+    let(wall_height = grid_get_total_dimensions(base_grid)
+        - [0, 0, BASE_HEIGHT])
 
     translate([0, 0, BASE_HEIGHT])
     render_wall(wall_height);
@@ -307,7 +309,7 @@ function bin_get_bases(bin) =
 
 /**
  * @brief Get the outer size of the bin.
- * @details Includes the stacking lip, if it is enabled.
+ * @details Includes base and stacking lip (if enabled).
  * @param bin A bin created by the `new_bin` function.
  * @returns A 3d vector.
  */
@@ -318,7 +320,7 @@ function bin_get_bounding_box(bin) =
     let(base_grid = bin[1])
     let(include_lip = bin[4])
     grid_get_total_dimensions(base_grid)
-        + [0, 0, BASE_HEIGHT + (include_lip ? stacking_lip_height() : 0)];
+        + [0, 0, include_lip ? stacking_lip_height() : 0];
 
 /**
  * @brief Get infill dimensions that do not overlap with the walls.
@@ -351,15 +353,16 @@ function bin_get_height_breakdown(bin) =
     let(include_lip = bin[4])
     let(bin_height = grid_get_total_dimensions(base_grid).z)
     let(infill_height = bin_get_infill_size_mm(bin).z)
-    let(total_height = bin_height + BASE_HEIGHT + (include_lip ? stacking_lip_height() : 0))
-    let(free_space = bin_height - infill_height - (include_lip ? STACKING_LIP_SUPPORT_HEIGHT : 0))
+    let(total_height = bin_height + (include_lip ? stacking_lip_height() : 0))
+    let(center_height = bin_height - BASE_HEIGHT)
+    let(free_space = center_height - infill_height - (include_lip ? STACKING_LIP_SUPPORT_HEIGHT : 0))
 
     let(heights = [
         ["Total: ", total_height],
         ["* BASE_HEIGHT", BASE_HEIGHT],
         ["  -> BASE_PROFILE_HEIGHT", BASE_PROFILE_HEIGHT],
         ["  -> BASE_BRIDGE_HEIGHT", BASE_BRIDGE_HEIGHT],
-        ["* Bin Height", bin_height],
+        ["* Bin Height", center_height],
         ["  -> Infill", infill_height],
         ["  -> Free space", abs(free_space) > 0.01 ? free_space : 0],
         ["  -> Stacking Lip Support", STACKING_LIP_SUPPORT_HEIGHT],

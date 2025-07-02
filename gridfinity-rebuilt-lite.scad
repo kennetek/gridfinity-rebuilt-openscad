@@ -74,7 +74,7 @@ hole_options = bundle_hole_options(refined_holes, magnet_holes, screw_holes, cru
 
 binL = new_bin(
     grid_size = [gridx, gridy],
-    height_mm = height(gridz, gridz_define, style_lip, enable_zsnap),
+    height_mm = height(gridz, gridz_define, enable_zsnap),
     include_lip = style_lip == 0,
     hole_options = hole_options,
     only_corners = only_corners || half_grid,

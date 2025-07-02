@@ -18,38 +18,17 @@ use <../helpers/list.scad>
 
 /**
  * @Summary Convert a number from Gridfinity values to mm.
- * @details Also can include lip when working with height values.
  * @param gridfinityUnit Gridfinity is normally on a base 7 system.
- * @param includeLipHeight Include the lip height as well.
- * @returns The final value in mm. Including base height.
+ * @returns The final value in mm. **Excluding** base height, and stacking lip height (if present).
  */
-function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
-    let(lip_height = includeLipHeight ? STACKING_LIP_HEIGHT : 0)
-    max(gridfinityUnit*7 + lip_height, BASE_HEIGHT);
+function fromGridfinityUnits(gridfinityUnit) =
+    gridfinityUnit * 7;
 
-/**
- * @Summary Height in mm including fixed heights.
- * @details Also can include lip when working with height values.
- * @param mmHeight Height without other values.
- * @param includeLipHeight Include the lip height as well.
- * @returns The final value in mm.
- */
-function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + BASE_HEIGHT + (includeLipHeight ? STACKING_LIP_HEIGHT : 0);
-
-/**
- * @brief Three Functions in One. For height calculations.
- * @param z Height value
- * @param gridz_define As explained in gridfinity-rebuilt-bins.scad
- * @param style_lip as explained in gridfinity-rebuilt-bins.scad
- * @returns Height in mm
- */
-function hf (z, gridz_define, style_lip) =
-        gridz_define==0 ? fromGridfinityUnits(z, style_lip==2) :
-        gridz_define==1 ? includingFixedHeights(z, style_lip==2) :
-        gridz_define==2 ? z + (style_lip==2 ? STACKING_LIP_HEIGHT : 0)  :
-        assert(false, "gridz_define must be 0, 1, or 2.")
-    ;
+_gridz_functions = [
+    function(h) fromGridfinityUnits(h),
+    function(h) h + BASE_HEIGHT,
+    function(h) h
+];
 
 /**
  * @brief Ensure height is a multiple of 7.
@@ -66,11 +45,17 @@ function z_snap(height_mm) =
  * @brief Calculates the proper height for bins. Three Functions in One.
  * @details This does **not** include the baseplate height.
  * @param z Height value
- * @param d gridz_define as explained in gridfinity-rebuilt-bins.scad
- * @param l style_lip as explained in gridfinity-rebuilt-bins.scad
+ * @param gridz_define as explained in gridfinity-rebuilt-bins.scad
  * @param enable_zsnap Automatically snap the bin size to the nearest 7mm increment.
- * @returns Height in mm
+ * @returns Height in mm.  **Excluding** stacking lip height (if present).  **Possibly Excluding** base height.
  */
-function height (z,d=0,l=0,enable_zsnap=true) =
-    let(total_height = enable_zsnap ? z_snap(hf(z,d,l)) : hf(z,d,l))
-    max(total_height - BASE_HEIGHT, 0);
+function height (z, gridz_define, enable_zsnap=true) =
+    assert(is_num(z) && z >= 0)
+    assert(is_num(gridz_define)
+        && gridz_define >= 0
+        && gridz_define <= 2)
+    assert(is_bool(enable_zsnap))
+
+    let(raw_mm = (_gridz_functions[gridz_define])(z))
+    let(total_height = enable_zsnap ? z_snap(raw_mm) : raw_mm)
+    max(total_height, BASE_HEIGHT);
