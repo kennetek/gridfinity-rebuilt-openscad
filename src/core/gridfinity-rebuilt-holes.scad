@@ -91,19 +91,18 @@ module make_hole_printable(inner_radius, outer_radius, outer_height, layers=2) {
     assert(outer_radius > 0, "outer_radius must be positive");
     assert(layers > 0);
 
-    tollerance = 0.01;  // Ensure everything is fully removed.
     height_adjustment = outer_height - (layers * LAYER_HEIGHT);
 
     // Needed, since the last layer should not be used for calculations,
     // unless there is a single layer.
     calculation_layers = max(layers-1, 1);
 
-    cube_height = LAYER_HEIGHT + 2*tollerance;
-    inner_diameter = 2*(inner_radius+tollerance);
-    outer_diameter = 2*(outer_radius+tollerance);
+    cube_height = LAYER_HEIGHT + 2*TOLLERANCE;
+    inner_diameter = 2*(inner_radius+TOLLERANCE);
+    outer_diameter = 2*(outer_radius+TOLLERANCE);
     per_layer_difference = (outer_diameter-inner_diameter) / calculation_layers;
 
-    initial_matrix = affine_translate([0, 0, cube_height/2-tollerance + height_adjustment]);
+    initial_matrix = affine_translate([0, 0, cube_height/2-TOLLERANCE + height_adjustment]);
 
     // Produces data in the form [affine_matrix, [cube_dimensions]]
     // If layers > 1, the last item produced has an invalid "affine_matrix.y", because it is beyond calculation_layers.
@@ -121,7 +120,7 @@ module make_hole_printable(inner_radius, outer_radius, outer_height, layers=2) {
 
     difference() {
         translate([0, 0, layers*cube_height/2 + height_adjustment])
-        cube([outer_diameter+tollerance, outer_diameter+tollerance, layers*cube_height], center = true);
+        cube([outer_diameter+TOLLERANCE, outer_diameter+TOLLERANCE, layers*cube_height], center = true);
 
         for (i = [1 : calculation_layers]){
             data = cutout_information[i];
