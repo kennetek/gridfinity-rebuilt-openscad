@@ -24,6 +24,17 @@ r_base = 7.5 / 2;
 TOLLERANCE = 0.01;
 
 // ****************************************
+// Utility Enum Values
+// ****************************************
+GRIDZ_7MM = 0;
+GRIDZ_INTERNAL = 1;
+GRIDZ_EXTERNAL = 2;
+
+LIP_STYLE_REGULAR = 0;
+LIP_STYLE_SUBTRACTIVE = 1;
+LIP_STYLE_SUBTRACTIVE_RETAIN_HEIGHT = 2;
+
+// ****************************************
 // Magnet / Screw Hole Constants
 // ****************************************
 LAYER_HEIGHT = 0.2;
