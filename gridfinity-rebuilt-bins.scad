@@ -28,6 +28,7 @@ use <src/core/gridfinity-rebuilt-utility.scad>
 use <src/core/gridfinity-rebuilt-holes.scad>
 use <src/core/bin.scad>
 use <src/core/cutouts.scad>
+use <src/helpers/generic-helpers.scad>
 use <src/helpers/grid.scad>
 use <src/helpers/grid_element.scad>
 
@@ -117,8 +118,7 @@ bin1 = new_bin(
 echo(str(
     "\n",
     "Infill Dimensions: ", bin_get_infill_size_mm(bin1), "\n",
-    "Final Size*: ", bin_get_size_mm(bin1), "\n",
-    "  *Excludes Base Height & Stacking Lip Height"
+    "Final Size: ", bin_get_bounding_box(bin1), "\n",
 ));
 
 bin_render(bin1) {

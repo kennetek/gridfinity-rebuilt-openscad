@@ -188,9 +188,11 @@ module bin_render_wall(bin) {
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     );
+    let(base_grid = bin[1])
+    let(wall_height = grid_get_total_dimensions(base_grid))
 
     translate([0, 0, BASE_HEIGHT])
-    render_wall(bin_get_size_mm(bin));
+    render_wall(wall_height);
 }
 
 /**
@@ -305,16 +307,18 @@ function bin_get_bases(bin) =
 
 /**
  * @brief Get the outer size of the bin.
- * @details Includes the stacking lip, if it is enabled, but excludes BASE_HEIGHT.
+ * @details Includes the stacking lip, if it is enabled.
  * @param bin A bin created by the `new_bin` function.
  * @returns A 3d vector.
  */
-function bin_get_size_mm(bin) =
+function bin_get_bounding_box(bin) =
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     )
     let(base_grid = bin[1])
-    grid_get_total_dimensions(base_grid);
+    let(include_lip = bin[4])
+    grid_get_total_dimensions(base_grid)
+        + [0, 0, BASE_HEIGHT + (include_lip ? stacking_lip_height() : 0)];
 
 /**
  * @brief Get infill dimensions that do not overlap with the walls.
@@ -326,11 +330,12 @@ function bin_get_infill_size_mm(bin) =
     assert(is_bin(bin),
         "Not a Gridfinity bin."
     )
+    let(base_grid = bin[1])
     let(base_thickness=bin[2])
     let(fill_height=bin[3])  //May be negative.
     let(fill_height_total=max(
         fill_height + BASE_HEIGHT - base_thickness, 0))
-    let(size_2d=as_2d(bin_get_size_mm(bin)))
+    let(size_2d=as_2d(grid_get_total_dimensions(base_grid)))
     concat(size_2d-2*[d_wall,d_wall], fill_height_total);
 
 /**
