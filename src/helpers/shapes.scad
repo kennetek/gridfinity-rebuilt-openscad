@@ -71,7 +71,8 @@ module rounded_cube(size, radius, center=false) {
 
     adjusted = size/2 - [radius, radius, radius];
     assert(min(adjusted) >= 0,
-        "All dimensions must be at least 2*radius.");
+        str("All dimensions must be at least 2*radius (",
+            2 * radius ,").\n", "  size: ", size, "\n"));
 
     translate(center ? [0, 0, 0] : size/2)
     if(radius == 0) {
