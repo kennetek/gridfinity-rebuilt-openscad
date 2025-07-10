@@ -5,7 +5,9 @@
  * @example ```
  *     bin1 = new_bin(...)
  *     bin_render(bin1) {
- *       equal_bins(bin1, [x_bins, y_bins])
+ *       bin_subdivide(bin1, [x_divisions, y_divisions]) {
+ *         ...
+ *       }
  *     }
  * ```
  */
