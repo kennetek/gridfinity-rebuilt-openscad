@@ -52,8 +52,8 @@ half_grid = false;
 
 /* [Height] */
 // How "gridz" is used to calculate height.  Some exclude 7mm/1U base, others exclude ~3.5mm (4.4mm nominal) stacking lip.
-gridz_define = 0; // [0:Units of 7mm increments - Zack's method - (Excludes Stacking Lip), 1:Internal mm - (Excludes Base & Stacking Lip), 2:External mm - (Excludes Stacking Lip)]
-// overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
+gridz_define = 0; // [0:7mm increments - Excludes Stacking Lip, 1:Internal mm - Excludes Base & Stacking Lip, 2:External mm - Excludes Stacking Lip, 3:External mm]
+// Overrides internal block height of bin (for solid containers). Leave zero for default height. Units: mm
 height_internal = 0;
 // snap gridz height to nearest 7mm increment
 enable_zsnap = false;
