@@ -149,6 +149,13 @@ bin_11 = new_bin([1, 1], fromGridfinityUnits(2));
 // 3x3 bin
 bin_33 = new_bin([3, 3], fromGridfinityUnits(6));
 
+// Centered custom sized compartment.
+translate([200, 200, 0])
+bin_render(bin_11) {
+    bin_translate(bin_11, [0.5, 0.5])
+    compartment_cutter([10, 20,cgs().z]);
+}
+
 //Vary radius per child
 translate([150, 200, 0])
 bin_render(bin_11) {
