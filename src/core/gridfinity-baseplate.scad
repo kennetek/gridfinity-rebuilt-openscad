@@ -6,6 +6,7 @@
  */
 
 use <../helpers/generic-helpers.scad>
+use <../helpers/shapes.scad>
 
 // ****************************************
 // Baseplate constants
@@ -150,7 +151,8 @@ module baseplate_cutter(size=BASEPLATE_DIMENSIONS, height=BASEPLATE_HEIGHT) {
  */
 module single_baseplate(size=BASEPLATE_DIMENSIONS, height=BASEPLATE_HEIGHT) {
     difference() {
-        rounded_square(concat(size, height),
+        linear_extrude(height)
+        rounded_square(size,
             radius = BASEPLATE_OUTER_RADIUS, center=true);
 
         baseplate_cutter(size, height);

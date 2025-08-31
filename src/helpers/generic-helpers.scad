@@ -3,79 +3,16 @@
  * @brief Generic Helper Functions. Not gridfinity specific.
  */
 
+use <grid.scad>
+
 function clp(x,a,b) = min(max(x,a),b);
 
 function is_even(number) = (number%2)==0;
-
-/**
- * @brief Create `square`, with rounded corners.
- * @param size Same as `square`.  See details for differences.
- * @param radius Radius of the corners. 0 is the same as just calling `square`
- * @param center Same as `square`.
- * @details "size" accepts both the standard number or a 2d vector the same as `square`.
- *          However, if passed a 3d vector, this will apply a `linear_extrude` to the resulting shape.
- */
-module rounded_square(size, radius, center = false) {
-    assert(is_num(size) ||
-        (is_list(size) && (
-            (len(size) == 2 && is_num(size.x) && is_num(size.y)) ||
-            (len(size) == 3 && is_num(size.x) && is_num(size.y) && is_num(size.z))
-        ))
-    );
-    assert(is_num(radius) && radius >= 0 && is_bool(center));
-
-    // Make sure something is produced.
-    if (is_num(size)) {
-        assert((size/2) > radius);
-    } else {
-        assert((size.x/2) > radius && (size.y/2 > radius));
-        if (len(size) == 3) {
-            assert(size.z > 0);
-        }
-    }
-
-    if (is_list(size) && len(size) == 3) {
-        linear_extrude(size.z)
-        _internal_rounded_square_2d(size, radius, center);
-    } else {
-        _internal_rounded_square_2d(size, radius, center);
-    }
-}
-
-/**
- * @brief Internal module. Do not use. May be changed/removed at any time.
- */
-module _internal_rounded_square_2d(size, radius, center) {
-    diameter = 2*radius;
-    if (is_list(size)) {
-        offset(radius)
-        square([size.x-diameter, size.y-diameter], center = center);
-    } else {
-        offset(radius)
-        square(size-diameter, center = center);
-    }
-}
-
-/**
- * @deprecated Use rounded_square(...)
- */
-module rounded_rectangle(length, width, height, rad) {
-    rounded_square([length, width, height], rad, center=true);
-}
 
 module copy_mirror(vec=[0,1,0]) {
     children();
     if (vec != [0,0,0])
     mirror(vec)
-    children();
-}
-
-module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
-    yy = sy <= 0 ? sx : sy;
-    translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
-    for (i = [1:ceil(x)])
-    for (j = [1:ceil(y)])
-    translate([(i-1)*sx,(j-1)*yy,0])
     children();
 }
 
@@ -97,26 +34,10 @@ unity_matrix = [
 ];
 
 /**
- * @brief Get the magnitude of a 2d or 3d vector
- * @param vector A 2d or 3d vectorm
- * @returns Magnitude of the vector.
- */
-function vector_magnitude(vector) =
-    sqrt(vector.x^2 + vector.y^2 + (len(vector) == 3 ? vector.z^2 : 0));
-
-/**
- * @brief Convert a 2d or 3d vector into a unit vector
+ * @brief Convert a vector into a unit vector.
  * @returns The unit vector.  Where total magnitude is 1.
  */
-function vector_as_unit(vector) = vector / vector_magnitude(vector);
-
-/**
- * @brief Convert a 2d vector into an angle.
- * @details Just a wrapper around atan2.
- * @param A 2d vectorm
- * @returns Angle of the vector.
- */
-function atanv(vector) = atan2(vector.y, vector.x);
+function vector_as_unit(vector) = vector / norm(vector);
 
 function _affine_rotate_x(angle_x) = [
     [1,  0, 0, 0],
@@ -139,7 +60,6 @@ function _affine_rotate_z(angle_z) = [
     [0, 0, 0, 1]
 ];
 
-
 /**
  * @brief Affine transformation matrix equivalent of `rotate`
  * @param angle_vector @see `rotate`
@@ -147,7 +67,9 @@ function _affine_rotate_z(angle_z) = [
  * @returns An affine transformation matrix for use with `multmatrix()`
  */
 function affine_rotate(angle_vector) =
-    _affine_rotate_z(angle_vector.z) * _affine_rotate_y(angle_vector.y) * _affine_rotate_x(angle_vector.x);
+    _affine_rotate_z(angle_vector.z) *
+    _affine_rotate_y(angle_vector.y) *
+    _affine_rotate_x(angle_vector.x);
 
 /**
  * @brief Affine transformation matrix equivalent of `translate`
@@ -177,12 +99,67 @@ function affine_scale(vector) = [
  * @brief Add something to each element in a list.
  * @param list The list whos elements will be modified.
  * @param to_add
- * @returns a list with `to_add` added to each element in the list.
+ * @returns A list with `to_add` added to each element in the list.
  */
 function foreach_add(list, to_add) =
     assert(is_list(list))
     assert(!is_undef(to_add))
     [for (item = list) item + to_add];
+
+/**
+ * @brief Scale each element in a vector by the corresponding element in another vector.
+ * @param vector1
+ * @param vector2
+ * @returns The equivalent of `[vector1.x * vector2.x, vector1.y * vector2.y]`
+ */
+function vector_scale(vector1, vector2) = assert(len(vector1) == len(vector2))
+    [for(i=[0:len(vector1)-1]) vector1[i] * vector2[i] ];
+
+
+/*
+ * @brief If the given vector is a valid 2d vector.
+ * @details Only validates the first two elements.
+ *          The list could have other things after those.
+ */
+function is_valid_2d(vector) =
+    is_list(vector)
+    && len(vector) >= 2
+    && is_num(vector[0])
+    && is_num(vector[1]);
+
+/*
+ * @brief If the given vector is a valid 3d vector.
+ * @details This just validates the first three elements.
+ *          The list could have other things after those.
+ */
+function is_valid_3d(vector) =
+    is_valid_2d(vector)
+    && len(vector) >= 3
+    && is_num(vector[2]);
+
+/*
+ * @brief If all the elements in a vector are greater than zero.
+ */
+function is_positive(vector) =
+    is_list(vector)
+    && min(vector) > 0;
+
+/**
+ * @breif Simple helper to print affine matrices in an easier to read manner.
+ * @details If a multidimensional matrix is provided, then each item is printed to a separate line.
+ * @param object Object to print.
+ */
+module pprint(object) {
+    if(is_list(object) && len(object) != len([for(i=object)each i])) {
+        echo("[");
+        for(i = object) {
+            echo(i);
+        };
+        echo("]");
+    } else {
+        echo(object);
+    }
+}
 
 /**
  * @brief Create a rectangle with rounded corners by sweeping a 2d object along a path.
@@ -232,14 +209,14 @@ module sweep_rounded(size) {
     walls = [
         for (i = [0 : len(path_vectors) - 1])
         affine_matrix * affine_translations[i]
-        * affine_rotate([0, atanv(path_vectors[i]), 0])
+        * affine_rotate([0, atan2(path_vectors[i].y, path_vectors[i].x), 0])
     ];
 
     union()
     {
         for (i = [0 : len(walls) - 1]){
             multmatrix(walls[i])
-            linear_extrude(vector_magnitude(path_vectors[i]))
+            linear_extrude(norm(path_vectors[i]))
             children();
 
             // Rounded Corners

@@ -1,27 +1,22 @@
 
 
-// lower base chamfer "radius"
-r_c1 = 0.8;
-// bottom thiccness of bin
-h_bot = 2.2;
+// minimum wall thickness
+d_wall = 0.95;
+
+// internal fillet radius
+r_f2 = 2.8;
+
+// width of divider between compartments
+d_div = 1.2;
 
 /**
  * @brief Size of a single gridfinity unit. [Length, Width] In millimeters.
  */
 GRID_DIMENSIONS_MM = [42, 42];
 
-/**
- * @deprecated Use GRID_DIMENSIONS_MM instead.
- */
-l_grid = GRID_DIMENSIONS_MM.x;
-
-// Outside rounded radius of bin
-// Per spec, matches radius of upper base section.
-r_base = 7.5 / 2;
-
 // Tollerance to make sure cuts don't leave a sliver behind,
 // and that items are properly connected to each other.
-TOLLERANCE = 0.01;
+TOLLERANCE = 0.02;
 
 // ****************************************
 // Magnet / Screw Hole Constants
@@ -63,26 +58,46 @@ BASEPLATE_SCREW_COUNTERBORE_RADIUS = 5.5/2;
 BASEPLATE_SCREW_COUNTERBORE_HEIGHT = 3;
 
 // ****************************************
+// Tab Constants
+// Arbitrarily chosen.
+// ****************************************
 
-// internal fillet radius
-r_f2 = 2.8;
+/**
+ * @brief Maximum width of a tab.
+ */
+TAB_WIDTH_NOMINAL = 42;
 
-// width of divider between compartments
-d_div = 1.2;
-// minimum wall thickness
-d_wall = 0.95;
-// tolerance fit factor
-d_clear = 0.25;
+ /**
+ * @brief How deep the tab protrudes into the bin.
+ * @details External code should use `TAB_SIZE.x` instead.
+ */
+_tab_depth = 15.85;
 
-// height of tab (yaxis, measured from inner wall)
-d_tabh = 15.85;
-// maximum width of tab
-d_tabw = 42;
-// angle of tab
-a_tab = 36;
+/**
+ * @brief Angle of the support holding up the tab
+ */
+ _tab_support_angle = 36;
 
-d_wall2 = r_base-r_c1-d_clear*sqrt(2);
-d_magic = -2*d_clear-2*d_wall+d_div;
+ /**
+ * @brief Additional support height, so the end isn't a sharp angle.
+ */
+ _tab_support_height = 1.2;
+
+_tab_height = tan(_tab_support_angle) * _tab_depth + _tab_support_height;
+TAB_POLYGON = [
+    [0, 0], // Start
+    [0, _tab_height], // Up
+    [_tab_depth, _tab_height], //Out
+    [_tab_depth, _tab_height - _tab_support_height] // Prevent a sharp angle
+    //Implicit back to start
+];
+
+/**
+ * @brief Size of the tab.
+ * @Details "x": How deep the tab protrudes into the bin.
+ *          "y": The height of the tab.
+ */
+TAB_SIZE = TAB_POLYGON[2];
 
 // ****************************************
 // Stacking Lip Constants
@@ -122,6 +137,12 @@ STACKING_LIP_LINE = [
  */
 STACKING_LIP_SIZE = STACKING_LIP_LINE[3];
 
+/**
+ * @brief Height of the stacking lip.
+ * @details Height does **not** include STACKING_LIP_SUPPORT_HEIGHT.
+ */
+STACKING_LIP_HEIGHT = STACKING_LIP_SIZE.y;
+
 _stacking_lip_support_angle = 45;
 
 /**
@@ -137,7 +158,7 @@ _stacking_lip_support_height_mm =
  * @Details Support is so the stacking lip is not floating in mid air when wall width is less than stacking lip depth.
  */
 STACKING_LIP = concat(STACKING_LIP_LINE, [
-    [STACKING_LIP_SIZE.x, -_stacking_lip_support_height_mm], // Down to support bottom
+    [STACKING_LIP_SIZE.x-TOLLERANCE, -_stacking_lip_support_height_mm], // Down to support bottom
     [0, -STACKING_LIP_SUPPORT_HEIGHT], // Up and in (to bottom inner support)
     //[0, 0] // Implicit back to start
 ]);
@@ -159,9 +180,14 @@ BASE_PROFILE = [
 ];
 
 /**
+ * @brief Maximum [x, y] values/size of the base.
+ */
+_base_profile_max_mm= BASE_PROFILE[3];
+
+/**
  * @Summary Corner radius of the top of the base.
  */
-BASE_TOP_RADIUS = r_base;
+BASE_TOP_RADIUS = 7.5 / 2;
 
 /**
  * @Summary Size of the top of the base. [Length, Width]
@@ -171,21 +197,36 @@ BASE_TOP_RADIUS = r_base;
 BASE_TOP_DIMENSIONS = [41.5, 41.5];
 
 /**
- * @Summary Maximum [x,y] values/size of the base.
+ * @Summary How much overhang is expected by the standard per base.
+ * @Details There should be a 0.5mm gap between each base.
+ *          This must be kept constant, even at half/quarter grid sizes.
+ *          Otherwise, they won't fit in normal grids.
  */
-BASE_PROFILE_MAX = BASE_PROFILE[3];
+BASE_GAP_MM = GRID_DIMENSIONS_MM - BASE_TOP_DIMENSIONS;
+
+/**
+ * @brief Height of the base profile.
+ * @details Does **not** include the structure tying the bases together.
+ */
+BASE_PROFILE_HEIGHT = _base_profile_max_mm.y;
 
 /**
  * @Summary Height of the base.
+ * @details Includes the structure tying the bases together.
  */
-BASE_HEIGHT = BASE_PROFILE_MAX.y;
+BASE_HEIGHT = 7;
+
+/**
+ * @Summary Height of the structure tying the bases together.
+ */
+BASE_BRIDGE_HEIGHT = BASE_HEIGHT - BASE_PROFILE_HEIGHT;
 
 /**
  * @Summary Corner radius of the bottom of the base.
  * @Details This is also how much BASE_PROFILE needs to be translated
  *          to use `sweep_rounded(...)`.
  */
-BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - BASE_PROFILE_MAX.x;
+BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - _base_profile_max_mm.x;
 
 /**
  * @Summary Dimensions of the bottom of the base. [Length, Width]
@@ -195,8 +236,8 @@ BASE_BOTTOM_RADIUS = BASE_TOP_RADIUS - BASE_PROFILE_MAX.x;
 function base_bottom_dimensions(top_dimensions = BASE_TOP_DIMENSIONS) =
     assert(is_list(top_dimensions) && len(top_dimensions) == 2
         && is_num(top_dimensions.x) && is_num(top_dimensions.y))
-    [top_dimensions.x - 2*BASE_PROFILE_MAX.x,
-    top_dimensions.y - 2*BASE_PROFILE_MAX.x];
+    top_dimensions
+    - 2*[_base_profile_max_mm.x, _base_profile_max_mm.x];
 
 // ***************
 // Gridfinity Refined Thumbscrew
@@ -230,3 +271,20 @@ bp_rcut_depth = 2;
 r_skel = 2;
 // minimum baseplate thickness (when skeletonized)
 h_skel = 1;
+
+
+// ****************************************
+// Deprecated Values
+// Will be removed / re-named in the future.
+// ****************************************
+
+// height of tab (yaxis, measured from inner wall)
+d_tabh = _tab_depth;
+
+// angle of tab
+a_tab = _tab_support_angle;
+
+/**
+ * @deprecated Use GRID_DIMENSIONS_MM instead.
+ */
+l_grid = GRID_DIMENSIONS_MM.x;
