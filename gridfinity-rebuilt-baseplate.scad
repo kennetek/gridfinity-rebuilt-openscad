@@ -60,6 +60,8 @@ style_hole = 0; // [0:none, 1:countersink, 2:counterbore]
 /* [Magnet Hole] */
 // Baseplate will have holes for 6mm Diameter x 2mm high magnets.
 enable_magnet = true;
+// Baseplate will have holes for 6x2 magnets on bottom to stick to steel surface.
+enable_bottom_magnet = true;
 // Magnet holes will have crush ribs to hold the magnet.
 crush_ribs = true;
 // Magnet holes will have a chamfer to ease insertion.
@@ -192,6 +194,28 @@ module gridfinityBaseplate(grid_size_bases, length, min_size_mm, sp, hole_option
                             } else if (sh == 2) {
                                 cutter_counterbore();
                             }
+                        }
+                    }
+                }
+                // bottom magnet holes
+                if (enable_bottom_magnet) {
+
+                    bm_hole_options = bundle_hole_options(refined_hole=false, magnet_hole=true, screw_hole=false, crush_ribs=crush_ribs, chamfer=chamfer_holes, supportless=true);
+
+                    early_padding = [for (i = [0:1]) padding_mm[i] * (1 - fit_percent_positive[i])];
+                    late_padding = [for (i = [0:1]) padding_mm[i] * fit_percent_positive[i]];
+
+                    bm_start_early = [for (i = [0:1]) (early_padding[i] >= BOTTOM_MAGNET_MIN_PAD) ? 1 : 0];
+                    bm_end_late = [for (i = [0:1]) (late_padding[i] >= BOTTOM_MAGNET_MIN_PAD) ? 1 : 0];
+                    bm_start_index = [for (i = [0:1]) bm_start_early[i] ? 0 : 1];
+                    bm_end_index = [for (i = [0:1]) grid_size[i] + bm_end_late[i]];
+                    bm_translate = [for (i = [0:1]) (bm_end_late[i] - bm_start_early[i]) * length/2];
+
+                    translate(bm_translate) {
+                        pattern_linear(bm_end_index.x - bm_start_index.x, bm_end_index.y - bm_start_index.y, length) {
+                            translate([0, 0, -TOLLERANCE])
+                                block_base_hole(bm_hole_options);
+                            cylinder(d=2.5, h=20);
                         }
                     }
                 }
